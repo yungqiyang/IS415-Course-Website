@@ -4,7 +4,20 @@ project:
 website:
   title: "IS415 Course Website"
   navbar:
-    left:
+    left: 
+    - text: "Hands-On Exercise"
+      menu:
+        - text: "Hands-On Exercise 1"
+          href: "Hands-On_Exercise/Hands-On_Exercise_01/Hands-On_Exercise_01.html"
+        - text: "Hands-On Exercise 2"
+          href: "Hands-On_Exercise/Hands-On_Exercise_02/Hands-On_Exercise_02.html"
+        - text: "Hands-On Exercise 3"
+          href: "Hands-On_Exercise/Hands-On_Exercise_03/Hands-On_Exercise_03.html"  
+    - text: "In-Class Exercise"
+      menu:
+        - text: "In-Class Exercise 2"
+          href: "In-Class_Exercise/In-Class_Exercise_02/In-Class_Exercise_02.html"
+    right:
       - href: index.qmd
         text: Home
       - about.qmd

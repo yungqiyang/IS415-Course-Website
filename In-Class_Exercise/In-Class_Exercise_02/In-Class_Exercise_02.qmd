@@ -1,0 +1,172 @@
+---
+title: "In-Class Exercise 2"
+author: "Yung Qi Yang"
+format: 
+  html:
+    code-fold: true
+    code-summary: "Reveal Code"
+    
+execute: 
+  eval: true
+  echo: true
+  warning: false
+date: "`r Sys.Date()`"
+
+toc: true
+toc-location: left
+---
+
+### Getting Started
+
+Loading the following R packages**:**
+
+-   arrow
+-   lubridate
+-   tidyverse
+-   tmap
+-   sf
+
+```{r}
+
+pacman::p_load(arrow, lubridate, tidyverse, tmap, sf)
+
+```
+
+### Importing Grab-Posisi Dataset
+
+```{r}
+#| eval: true
+#| echo: true
+
+df <- read_parquet("Data/GrabPosisi/part-00000-8bbff892-97d2-4011-9961-703e38972569.c000.snappy.parquet")
+
+glimpse(df)
+head(df)
+
+```
+
+"trj_id" indicates that the GrabPosisi file contains trajectory data, with every trip labelled.
+
+## Preparing the data for use
+
+```{r}
+#| eval: false
+
+df$pingtimestamp <- as_datetime(df$pingtimestamp)
+
+```
+
+```{r}
+#| eval: false
+#| echo: false
+
+write_rds(df, "Data/rds/df_part0.rds")
+
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+df <- read_rds(file = "Data/rds/df_part0.rds")
+df
+
+```
+
+## Extracting the origin locations of the trips
+
+```{r}
+
+origin_df <- df %>% 
+  group_by(trj_id) %>% 
+  arrange(pingtimestamp) %>% 
+  filter(row_number() == 1) %>% 
+  mutate(weekday = wday(pingtimestamp, label = TRUE, abbr = TRUE), start_hr = factor(hour(pingtimestamp)), day = factor(mday(pingtimestamp)))
+
+head(origin_df)
+
+```
+
+## Extracting the destination locations of the trips
+
+```{r}
+
+destination_df <- df %>% 
+  group_by(trj_id) %>% 
+  arrange(desc(pingtimestamp)) %>% 
+  filter(row_number() == 1) %>% 
+  mutate(weekday = wday(pingtimestamp, label = TRUE, abbr = TRUE), start_hr = factor(hour(pingtimestamp)), day = factor(mday(pingtimestamp)))
+
+head(destination_df)
+
+```
+
+```{r}
+#| eval: false
+
+write_rds(origin_df, "Data/rds/origin_df_part0.rds")
+write_rds(destination_df, "Data/rds/destination_df_part0.rds")
+
+```
+
+## Importing the prepared data
+
+```{r}
+#| eval: true
+#| echo: false
+
+origin_df <- read_rds("Data/rds/origin_df_part0.rds")
+destination_df <- read_rds("Data/rds/destination_df_part0.rds")
+
+```
+
+## Converting the aspatial data to geospatial data
+
+```{r}
+
+origin_sf <- 
+  st_as_sf(origin_df, coords = c("rawlng", "rawlat"), crs = 4326) %>%
+  st_transform(crs = 3414)
+
+```
+
+## Visualising the frequency distribution
+
+```{r}
+
+ggplot(data=origin_df, 
+       aes(x=weekday)) + 
+  geom_bar()
+
+```
+
+## Visualising the trip origins as points
+
+```{r}
+
+tmap_mode("plot")
+tm_shape(origin_sf) +
+  tm_dots()
+
+```
+
+## Importing the map layer
+
+```{r}
+
+mpsz2019 <- st_read("Data/DataGov/MasterPlan2019SubzoneBoundaryNoSeaKML.kml") %>%
+  st_transform(crs = 3414)
+
+```
+
+## Imposing the Grab trip data onto the map polygon
+
+```{r}
+
+tm_shape(mpsz2019) + 
+  tm_polygons() + 
+  tm_shape(origin_sf) +
+  tm_dots()
+
+```
