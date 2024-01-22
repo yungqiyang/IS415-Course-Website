@@ -1,5 +1,5 @@
 ---
-title: "In-Class Exercise 2"
+title: "In-Class Exercise 2: R for Geospatial Data Science"
 author: "Yung Qi Yang"
 format: 
   html:
