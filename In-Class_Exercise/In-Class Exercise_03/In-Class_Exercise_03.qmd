@@ -44,6 +44,7 @@ plot(coastal_sf)
 ```
 
 ### Converting the simple features objects into ppp objects
+
 ```{r}
 
 childcare_ppp <- as.ppp(childcare_sf)
@@ -52,6 +53,7 @@ summary(childcare_ppp)
 ```
 
 ### Handling duplicated data points
+
 #### Checking for duplicates
 
 ```{r}
@@ -107,4 +109,3 @@ plot(ck, main = "Choa Chu Kang")
 plot(jw, main = "Jurong West")
 
 ```
-
