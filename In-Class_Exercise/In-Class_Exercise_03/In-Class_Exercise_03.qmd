@@ -1,5 +1,5 @@
 ---
-title: "In-Class Exercise 3: Kernel Density Estimation"
+title: "In-Class Exercise 3: Network Kernel Density Estimation"
 author: "Yung Qi Yang"
 
 format: 
@@ -21,7 +21,8 @@ toc-location: left
 
 ```{r}
 
-pacman::p_load(maptools, sf, raster, spatstat, tmap, tidyverse)
+pacman::p_load(maptools, sf, raster, spatstat, tmap, tidyverse, spNetwork, classInt, viridis)
+
 
 ```
 
@@ -29,15 +30,15 @@ pacman::p_load(maptools, sf, raster, spatstat, tmap, tidyverse)
 
 ```{r}
 
-mpsz_sf <- st_read(dsn = "Data/Master Plan 2014", layer = "MP14_SUBZONE_WEB_PL") %>% 
+mpsz_sf <- st_read(dsn = "Data/Geospatial/Master Plan 2014", layer = "MP14_SUBZONE_WEB_PL") %>% 
   st_transform(crs = 3414)
 glimpse(mpsz_sf)
 
-childcare_sf <- st_read(dsn = "Data/Childcare/ChildCareServices.geojson") %>%
+childcare_sf <- st_read(dsn = "Data/Geospatial/Childcare/ChildCareServices.geojson") %>%
   st_transform(crs = 3414)
 glimpse(childcare_sf)
 
-coastal_sf <- read_rds("Data/rds/coastal-outline-2014.rds") %>% 
+coastal_sf <- read_rds("Data/Geospatial/rds/coastal-outline-2014.rds") %>% 
   st_transform(crs = 3413)
 plot(coastal_sf)
 
@@ -107,6 +108,80 @@ plot(pg, main = "Punggol")
 plot(tm, main = "Tampines")
 plot(ck, main = "Choa Chu Kang")
 plot(jw, main = "Jurong West")
+
+```
+
+### Conducting Network Constrained Kernel Density Estimation
+
+#### Importing the necessary datasets
+
+```{r}
+
+network_sf <- st_read(dsn = "Data/Geospatial/Punggol", layer = "Punggol_St")
+childcare_sf <- st_read(dsn = "Data/Geospatial/Punggol", layer = "Punggol_CC")
+
+```
+#### Plotting the network and geopoint features
+
+```{r}
+
+tmap_mode("view")
+
+tm_shape(childcare_sf) + 
+  tm_dots() +
+  tm_shape(network_sf) +
+  tm_lines()
+
+tmap_mode("plot")
+
+```
+
+#### Preparing the lixels
+
+```{r}
+
+lixels <- lixelize_lines(lines = network_sf, lx_length = 750, mindist = 375)
+
+```
+
+#### Generating the line centrepoints
+
+```{r}
+
+samples <- lines_center(lixels)
+
+```
+
+#### Performing the Network Kernel Density Estimation
+
+```{r}
+
+densities <- nkde(network_sf, events = childcare_sf, w = rep(1, nrow(childcare_sf)), samples = samples, kernel_name = "quartic", bw = 300, div = "bw", method = "simple", digits = 1, tol = 1, grid_shape = c(1, 1), max_depth = 8, agg = 5, sparse = TRUE, verbose = FALSE)
+
+```
+
+#### Re-scaling the densities
+
+```{r}
+
+lixels$density <- densities
+samples$density <- densities
+
+```
+
+#### Visualising the network-constrained kernel density plot
+
+```{r}
+
+tmap_mode("view")
+
+tm_shape(lixels) +
+  tm_lines(col = "density") +
+  
+tm_shape(childcare_sf) +
+  tm_dots()
+
+tmap_mode("plot")
 
 ```
 
