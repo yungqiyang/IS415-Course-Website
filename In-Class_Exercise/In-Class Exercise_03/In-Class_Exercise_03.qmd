@@ -31,22 +31,80 @@ pacman::p_load(maptools, sf, raster, spatstat, tmap, tidyverse)
 
 mpsz_sf <- st_read(dsn = "Data/Master Plan 2014", layer = "MP14_SUBZONE_WEB_PL") %>% 
   st_transform(crs = 3414)
-mpsz_sf
+glimpse(mpsz_sf)
 
 childcare_sf <- st_read(dsn = "Data/Childcare/ChildCareServices.geojson") %>%
   st_transform(crs = 3414)
-childcare_sf
+glimpse(childcare_sf)
 
 coastal_sf <- read_rds("Data/rds/coastal-outline-2014.rds") %>% 
   st_transform(crs = 3413)
-coastal_sf
+plot(coastal_sf)
 
 ```
 
-###
+### Converting the simple features objects into ppp objects
 ```{r}
 
+childcare_ppp <- as.ppp(childcare_sf)
+summary(childcare_ppp)
 
+```
+
+### Handling duplicated data points
+#### Checking for duplicates
+
+```{r}
+
+any(duplicated(childcare_ppp))
+
+```
+
+### Creating an owin object from the *simple features* coastal outline
+
+Using an owin layer ensures that the coastal outline layer is defined as the study layer, and prevents event geopoints from occurring outside the defined boundaries.
+
+```{r}
+
+coastal_owin <- as.owin(coastal_sf)
+
+```
+
+Input has to be a simple features object
+
+#### Investigating the owin layer
+
+```{r}
+
+summary(coastal_owin)
+plot(coastal_owin)
+
+```
+
+### Extracting the specific planning areas of interest from a simple features object
+
+Unlike sp objects, sf objects can be used in conjunction with the tidyverse libraries to conduct data wrangling upon their geospatial data tables
+
+```{r fig.width = 16, fig.height = 10}
+
+pg <- mpsz_sf %>% 
+  filter(PLN_AREA_N == "PUNGGOL")
+
+tm <- mpsz_sf %>% 
+  filter(PLN_AREA_N == "TAMPINES")
+
+ck <- mpsz_sf %>% 
+  filter(PLN_AREA_N == "CHOA CHU KANG")
+
+jw <- mpsz_sf %>% 
+  filter(PLN_AREA_N == "JURONG WEST")
+
+par(mfrow = c(2, 2))
+
+plot(pg, main = "Punggol")
+plot(tm, main = "Tampines")
+plot(ck, main = "Choa Chu Kang")
+plot(jw, main = "Jurong West")
 
 ```
 
