@@ -16,3 +16,37 @@ date: "`r Sys.Date()`"
 toc: true
 toc-location: left
 ---
+
+### Loading the required libraries
+
+```{r}
+
+pacman::p_load(maptools, sf, raster, spatstat, tmap, tidyverse)
+
+```
+
+### Importing the required spatial datasets
+
+```{r}
+
+mpsz_sf <- st_read(dsn = "Data/Master Plan 2014", layer = "MP14_SUBZONE_WEB_PL") %>% 
+  st_transform(crs = 3414)
+mpsz_sf
+
+childcare_sf <- st_read(dsn = "Data/Childcare/ChildCareServices.geojson") %>%
+  st_transform(crs = 3414)
+childcare_sf
+
+coastal_sf <- read_rds("Data/rds/coastal-outline-2014.rds") %>% 
+  st_transform(crs = 3413)
+coastal_sf
+
+```
+
+###
+```{r}
+
+
+
+```
+
