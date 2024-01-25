@@ -12,7 +12,9 @@ website:
         - text: "Hands-On Exercise 2"
           href: "Hands-On_Exercise/Hands-On_Exercise_02/Hands-On_Exercise_02.html"
         - text: "Hands-On Exercise 3"
-          href: "Hands-On_Exercise/Hands-On_Exercise_03/Hands-On_Exercise_03.html"  
+          href: "Hands-On_Exercise/Hands-On_Exercise_03/Hands-On_Exercise_03.html"
+        - text: "Hands-On Exercise 4"
+          href: "Hands-On_Exercise/Hands-On_Exercise_04/Hands-On_Exercise_04.html" 
     - text: "In-Class Exercise"
       menu:
         - text: "In-Class Exercise 2"
