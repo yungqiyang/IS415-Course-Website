@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ---
 title: "Hands-On Exercise 4: Spatial Weights and Applications"
 author: "Yung Qi Yang"
@@ -1001,9 +1000,3 @@ w_avg_gdppc <- qtm(hunan, "w_sum GDPPC")
 tmap_arrange(lag_gdppc, w_avg_gdppc, asp = 1, ncol = 2)
 
 ```
-
-=======
->>>>>>> f4d2af2f9e27a0f0aabeb561e19d680691dc0b50
-=======
->>>>>>> f4d2af2f9e27a0f0aabeb561e19d680691dc0b50
->>>>>>> 6efcf961056124d280b68adeb5fff5f28009e9ad
