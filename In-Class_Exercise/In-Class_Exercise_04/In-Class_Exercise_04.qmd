@@ -72,6 +72,18 @@ tmap_arrange(basemap, gdppc, asp = 1, ncol = 2)
 
 ```
 
+### Extracting the centroid projection coordinates for each polygon in the *hunan* dataset
+
+```{r}
+
+longitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[1]])
+
+latitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[2]])
+
+coords <- cbind(longitude, latitude)
+
+```
+
 ### Conducting an investigation of adjecency-based congruity neighbours in the **Hunan** geospatial dataset.
 
 #### Computing the distribution of congruity neighbours in the Hunan region using the **Queen** method.
@@ -103,6 +115,8 @@ wm_b <- diffnb(wm_r, wm_q)
 summary(wm_b)
 
 ```
+
+
 
 #### Plotting both **QUEEN**, **ROOK** and **BISHOP** adjacency-based contiguity neighbours maps together
 

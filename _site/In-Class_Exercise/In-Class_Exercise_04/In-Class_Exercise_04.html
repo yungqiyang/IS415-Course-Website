@@ -205,6 +205,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#loading-the-necessary-r-packages" id="toc-loading-the-necessary-r-packages" class="nav-link active" data-scroll-target="#loading-the-necessary-r-packages">Loading the necessary R-Packages</a></li>
   <li><a href="#importing-the-required-datasets-into-the-r-environment" id="toc-importing-the-required-datasets-into-the-r-environment" class="nav-link" data-scroll-target="#importing-the-required-datasets-into-the-r-environment">Importing the required datasets into the R-Environment</a></li>
   <li><a href="#visualising-the-hunan-region-and-its-regional-development-indicators" id="toc-visualising-the-hunan-region-and-its-regional-development-indicators" class="nav-link" data-scroll-target="#visualising-the-hunan-region-and-its-regional-development-indicators">Visualising the Hunan region and its Regional Development Indicators</a></li>
+  <li><a href="#extracting-the-centroid-projection-coordinates-for-each-polygon-in-the-hunan-dataset" id="toc-extracting-the-centroid-projection-coordinates-for-each-polygon-in-the-hunan-dataset" class="nav-link" data-scroll-target="#extracting-the-centroid-projection-coordinates-for-each-polygon-in-the-hunan-dataset">Extracting the centroid projection coordinates for each polygon in the <em>hunan</em> dataset</a></li>
   <li><a href="#conducting-an-investigation-of-adjecency-based-congruity-neighbours-in-the-hunan-geospatial-dataset." id="toc-conducting-an-investigation-of-adjecency-based-congruity-neighbours-in-the-hunan-geospatial-dataset." class="nav-link" data-scroll-target="#conducting-an-investigation-of-adjecency-based-congruity-neighbours-in-the-hunan-geospatial-dataset.">Conducting an investigation of adjecency-based congruity neighbours in the <strong>Hunan</strong> geospatial dataset.</a></li>
   <li><a href="#conducting-an-investigation-of-distance-based-congruity-neighbours-in-the-hunan-geospatial-dataset." id="toc-conducting-an-investigation-of-distance-based-congruity-neighbours-in-the-hunan-geospatial-dataset." class="nav-link" data-scroll-target="#conducting-an-investigation-of-distance-based-congruity-neighbours-in-the-hunan-geospatial-dataset.">Conducting an investigation of distance-based congruity neighbours in the <strong>Hunan</strong> geospatial dataset.</a></li>
   <li><a href="#computing-geographically-weighted-summary-statistics-for-the-hunan-geospatial-data" id="toc-computing-geographically-weighted-summary-statistics-for-the-hunan-geospatial-data" class="nav-link" data-scroll-target="#computing-geographically-weighted-summary-statistics-for-the-hunan-geospatial-data">Computing Geographically Weighted Summary Statistics for the <em>hunan</em> geospatial data</a></li>
@@ -372,6 +373,19 @@ $ ROREmp      &lt;dbl&gt; 0.8929619, 0.8782065, 0.8041262, 0.7460163, 0.9052651,
 </div>
 </div>
 </section>
+<section id="extracting-the-centroid-projection-coordinates-for-each-polygon-in-the-hunan-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="extracting-the-centroid-projection-coordinates-for-each-polygon-in-the-hunan-dataset">Extracting the centroid projection coordinates for each polygon in the <em>hunan</em> dataset</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>longitude <span class="ot">&lt;-</span> <span class="fu">map_dbl</span>(hunan<span class="sc">$</span>geometry, <span class="sc">~</span><span class="fu">st_centroid</span>(.x)[[<span class="dv">1</span>]])</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>latitude <span class="ot">&lt;-</span> <span class="fu">map_dbl</span>(hunan<span class="sc">$</span>geometry, <span class="sc">~</span><span class="fu">st_centroid</span>(.x)[[<span class="dv">2</span>]])</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>coords <span class="ot">&lt;-</span> <span class="fu">cbind</span>(longitude, latitude)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
 <section id="conducting-an-investigation-of-adjecency-based-congruity-neighbours-in-the-hunan-geospatial-dataset." class="level3">
 <h3 class="anchored" data-anchor-id="conducting-an-investigation-of-adjecency-based-congruity-neighbours-in-the-hunan-geospatial-dataset.">Conducting an investigation of adjecency-based congruity neighbours in the <strong>Hunan</strong> geospatial dataset.</h3>
 <section id="computing-the-distribution-of-congruity-neighbours-in-the-hunan-region-using-the-queen-method." class="level4">
@@ -379,9 +393,9 @@ $ ROREmp      &lt;dbl&gt; 0.8929619, 0.8782065, 0.8041262, 0.7460163, 0.9052651,
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(hunan, <span class="at">queen =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(hunan, <span class="at">queen =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Neighbour list object:
@@ -405,9 +419,9 @@ Link number distribution:
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>wm_r <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(hunan, <span class="at">queen =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_r)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>wm_r <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(hunan, <span class="at">queen =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_r)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Neighbour list object:
@@ -431,9 +445,9 @@ Link number distribution:
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wm_b <span class="ot">&lt;-</span> <span class="fu">diffnb</span>(wm_r, wm_q)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>wm_b <span class="ot">&lt;-</span> <span class="fu">diffnb</span>(wm_r, wm_q)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Neighbour list object:
@@ -463,53 +477,24 @@ Link number distribution:
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">length</span>(hunan<span class="sc">$</span>geometry))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Queen Contiguity"</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_q, coords, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col=</span> <span class="st">"red"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Rook Contiguity"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_r, coords, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Bishop Contiguity"</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_b, coords, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 88</code></pre>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-<details class="code-fold">
-<summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">length</span>(wm_q))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 88</code></pre>
 </div>
-<details class="code-fold">
-<summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">length</span>(wm_r))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 88</code></pre>
-</div>
-<details class="code-fold">
-<summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">length</span>(wm_b))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 88</code></pre>
-</div>
-<details class="code-fold">
-<summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">length</span>(coords))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 98</code></pre>
-</div>
-<details class="code-fold">
-<summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co"># par(mfrow = c(1, 3))</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(hunan$geometry, border = "lightgrey", main = "Queen Contiguity")</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col= "red")</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(hunan$geometry, border = "lightgrey", main = "Rook Contiguity")</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(hunan$geometry, border = "lightgrey", main = "Bishop Contiguity")</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(wm_b, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 </section>
 </section>
@@ -523,14 +508,14 @@ Link number distribution:
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>k1 <span class="ot">&lt;-</span> <span class="fu">knn2nb</span>(<span class="fu">knearneigh</span>(coords))</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>k1dists <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">nbdists</span>(k1, coords, <span class="at">longlat =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(k1dists)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>k1 <span class="ot">&lt;-</span> <span class="fu">knn2nb</span>(<span class="fu">knearneigh</span>(coords))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>k1dists <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">nbdists</span>(k1, coords, <span class="at">longlat =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(k1dists)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  13.86   28.12   34.99   36.19   44.54   67.50 </code></pre>
+  24.79   32.57   38.01   39.07   44.52   61.79 </code></pre>
 </div>
 </div>
 </section>
@@ -539,76 +524,112 @@ Link number distribution:
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>wm_d62 <span class="ot">&lt;-</span> <span class="fu">dnearneigh</span>(coords, <span class="dv">0</span>, <span class="dv">62</span>, <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>wm_d62</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>wm_d62 <span class="ot">&lt;-</span> <span class="fu">dnearneigh</span>(coords, <span class="dv">0</span>, <span class="dv">62</span>, <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>wm_d62</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Neighbour list object:
-Number of regions: 49 
-Number of nonzero links: 226 
-Percentage nonzero weights: 9.412745 
-Average number of links: 4.612245 
-2 regions with no links:
-1 21
-4 disjoint connected subgraphs</code></pre>
+Number of regions: 88 
+Number of nonzero links: 324 
+Percentage nonzero weights: 4.183884 
+Average number of links: 3.681818 </code></pre>
 </div>
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(wm_d62)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(wm_d62)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>List of 49
- $ : int 0
- $ : int 4
- $ : int [1:2] 4 5
- $ : int [1:4] 2 3 7 8
- $ : int [1:4] 3 8 11 15
- $ : int 9
- $ : int [1:5] 4 8 12 13 14
- $ : int [1:6] 4 5 7 11 12 13
- $ : int [1:2] 6 22
- $ : int 17
- $ : int [1:9] 5 8 12 13 14 15 16 18 19
- $ : int [1:9] 7 8 11 13 14 15 16 18 19
- $ : int [1:8] 7 8 11 12 14 16 18 19
- $ : int [1:8] 7 11 12 13 16 18 19 24
- $ : int [1:7] 5 11 12 16 18 25 26
- $ : int [1:9] 11 12 13 14 15 18 19 24 25
- $ : int [1:3] 10 20 23
- $ : int [1:9] 11 12 13 14 15 16 19 24 25
- $ : int [1:7] 11 12 13 14 16 18 24
- $ : int [1:4] 17 23 27 33
- $ : int 0
- $ : int [1:4] 9 26 27 33
- $ : int [1:3] 17 20 32
- $ : int [1:6] 14 16 18 19 25 30
- $ : int [1:8] 15 16 18 24 26 28 29 30
- $ : int [1:6] 15 22 25 27 28 29
- $ : int [1:6] 20 22 26 28 33 35
- $ : int [1:9] 25 26 27 29 33 35 37 38 43
- $ : int [1:6] 25 26 28 30 37 38
- $ : int [1:4] 24 25 29 37
- $ : int [1:2] 34 36
- $ : int [1:3] 23 40 41
- $ : int [1:6] 20 22 27 28 35 44
- $ : int [1:2] 31 42
- $ : int [1:6] 27 28 33 38 43 44
- $ : int [1:4] 31 39 42 46
- $ : int [1:7] 28 29 30 38 43 45 48
- $ : int [1:7] 28 29 35 37 43 44 48
- $ : int [1:2] 36 46
- $ : int [1:2] 32 41
- $ : int [1:3] 32 40 47
- $ : int [1:2] 34 36
- $ : int [1:8] 28 35 37 38 44 45 48 49
- $ : int [1:6] 33 35 38 43 48 49
- $ : int [1:3] 37 43 48
- $ : int [1:2] 36 39
- $ : int 41
- $ : int [1:6] 37 38 43 44 45 49
- $ : int [1:3] 43 44 48
+<pre><code>List of 88
+ $ : int [1:5] 3 4 5 57 64
+ $ : int [1:4] 57 58 78 85
+ $ : int [1:4] 1 4 5 57
+ $ : int [1:3] 1 3 5
+ $ : int [1:4] 1 3 4 85
+ $ : int 69
+ $ : int [1:2] 67 84
+ $ : int [1:4] 9 46 47 78
+ $ : int [1:4] 8 46 68 84
+ $ : int [1:4] 16 22 70 72
+ $ : int [1:3] 14 17 72
+ $ : int [1:5] 13 60 61 63 83
+ $ : int [1:4] 12 15 60 83
+ $ : int [1:2] 11 17
+ $ : int 13
+ $ : int [1:4] 10 17 22 83
+ $ : int [1:3] 11 14 16
+ $ : int [1:3] 20 22 63
+ $ : int [1:5] 20 21 73 74 82
+ $ : int [1:5] 18 19 21 22 82
+ $ : int [1:6] 19 20 35 74 82 86
+ $ : int [1:4] 10 16 18 20
+ $ : int [1:3] 41 77 82
+ $ : int [1:4] 25 28 31 54
+ $ : int [1:4] 24 28 33 81
+ $ : int [1:4] 27 33 42 81
+ $ : int [1:2] 26 29
+ $ : int [1:6] 24 25 33 49 52 54
+ $ : int [1:2] 27 37
+ $ : int 33
+ $ : int [1:2] 24 36
+ $ : int 50
+ $ : int [1:5] 25 26 28 30 81
+ $ : int [1:3] 36 45 80
+ $ : int [1:6] 21 41 46 47 80 82
+ $ : int [1:5] 31 34 45 56 80
+ $ : int [1:2] 29 42
+ $ : int [1:3] 44 77 79
+ $ : int [1:4] 40 42 43 81
+ $ : int [1:3] 39 45 79
+ $ : int [1:5] 23 35 45 79 82
+ $ : int [1:5] 26 37 39 43 81
+ $ : int [1:3] 39 42 44
+ $ : int [1:2] 38 43
+ $ : int [1:6] 34 36 40 41 79 80
+ $ : int [1:5] 8 9 35 47 86
+ $ : int [1:5] 8 35 46 80 86
+ $ : int [1:5] 50 51 52 53 55
+ $ : int [1:4] 28 51 52 54
+ $ : int [1:6] 32 48 51 52 54 55
+ $ : int [1:4] 48 49 50 52
+ $ : int [1:6] 28 48 49 50 51 54
+ $ : int [1:2] 48 55
+ $ : int [1:5] 24 28 49 50 52
+ $ : int [1:4] 48 50 53 75
+ $ : int 36
+ $ : int [1:5] 1 2 3 58 64
+ $ : int [1:5] 2 57 64 66 68
+ $ : int [1:3] 60 87 88
+ $ : int [1:4] 12 13 59 61
+ $ : int [1:5] 12 60 62 63 87
+ $ : int [1:4] 61 63 77 87
+ $ : int [1:5] 12 18 61 62 83
+ $ : int [1:4] 1 57 58 76
+ $ : int 76
+ $ : int [1:5] 58 67 68 76 84
+ $ : int [1:2] 7 66
+ $ : int [1:4] 9 58 66 84
+ $ : int [1:2] 6 75
+ $ : int [1:3] 10 72 73
+ $ : int [1:2] 73 74
+ $ : int [1:3] 10 11 70
+ $ : int [1:4] 19 70 71 74
+ $ : int [1:5] 19 21 71 73 86
+ $ : int [1:2] 55 69
+ $ : int [1:3] 64 65 66
+ $ : int [1:3] 23 38 62
+ $ : int [1:2] 2 8
+ $ : int [1:4] 38 40 41 45
+ $ : int [1:5] 34 35 36 45 47
+ $ : int [1:5] 25 26 33 39 42
+ $ : int [1:6] 19 20 21 23 35 41
+ $ : int [1:4] 12 13 16 63
+ $ : int [1:4] 7 9 66 68
+ $ : int [1:2] 2 5
+ $ : int [1:4] 21 46 47 74
+ $ : int [1:4] 59 61 62 88
+ $ : int [1:2] 59 87
  - attr(*, "class")= chr "nb"
- - attr(*, "region.id")= chr [1:49] "1" "2" "3" "4" ...
+ - attr(*, "region.id")= chr [1:88] "1" "2" "3" "4" ...
  - attr(*, "call")= language dnearneigh(x = coords, d1 = 0, d2 = 62, longlat = TRUE)
  - attr(*, "dnn")= num [1:2] 0 62
  - attr(*, "bounds")= chr [1:2] "GE" "LE"
@@ -622,27 +643,117 @@ Average number of links: 4.612245
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">length</span>(hunan<span class="sc">$</span>County))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(hunan<span class="sc">$</span>County, <span class="fu">card</span>(wm_d62))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 88</code></pre>
+<pre><code>               
+                1 2 3 4 5 6
+  Anhua         1 0 0 0 0 0
+  Anren         0 0 0 1 0 0
+  Anxiang       0 0 0 0 1 0
+  Baojing       0 0 0 0 1 0
+  Chaling       0 0 1 0 0 0
+  Changning     0 0 1 0 0 0
+  Changsha      0 0 0 1 0 0
+  Chengbu       0 1 0 0 0 0
+  Chenxi        0 0 0 1 0 0
+  Cili          0 1 0 0 0 0
+  Dao           0 0 0 1 0 0
+  Dongan        0 0 1 0 0 0
+  Dongkou       0 0 0 1 0 0
+  Fenghuang     0 0 0 1 0 0
+  Guidong       0 0 1 0 0 0
+  Guiyang       0 0 0 1 0 0
+  Guzhang       0 0 0 0 0 1
+  Hanshou       0 0 0 1 0 0
+  Hengdong      0 0 0 0 1 0
+  Hengnan       0 0 0 0 1 0
+  Hengshan      0 0 0 0 0 1
+  Hengyang      0 0 0 0 0 1
+  Hongjiang     0 0 0 0 1 0
+  Huarong       0 0 0 1 0 0
+  Huayuan       0 0 0 1 0 0
+  Huitong       0 0 0 1 0 0
+  Jiahe         0 0 0 0 1 0
+  Jianghua      0 0 1 0 0 0
+  Jiangyong     0 1 0 0 0 0
+  Jingzhou      0 1 0 0 0 0
+  Jinshi        0 0 0 1 0 0
+  Jishou        0 0 0 0 0 1
+  Lanshan       0 0 0 1 0 0
+  Leiyang       0 0 0 1 0 0
+  Lengshuijiang 0 0 1 0 0 0
+  Li            0 0 1 0 0 0
+  Lianyuan      0 0 0 0 1 0
+  Liling        0 1 0 0 0 0
+  Linli         0 0 0 1 0 0
+  Linwu         0 0 0 1 0 0
+  Linxiang      1 0 0 0 0 0
+  Liuyang       0 1 0 0 0 0
+  Longhui       0 0 1 0 0 0
+  Longshan      0 1 0 0 0 0
+  Luxi          0 0 0 0 1 0
+  Mayang        0 0 0 0 0 1
+  Miluo         0 0 0 0 1 0
+  Nan           0 0 0 0 1 0
+  Ningxiang     0 0 0 1 0 0
+  Ningyuan      0 0 0 0 1 0
+  Pingjiang     0 1 0 0 0 0
+  Qidong        0 0 1 0 0 0
+  Qiyang        0 0 1 0 0 0
+  Rucheng       0 1 0 0 0 0
+  Sangzhi       0 1 0 0 0 0
+  Shaodong      0 0 0 0 1 0
+  Shaoshan      0 0 0 0 1 0
+  Shaoyang      0 0 0 1 0 0
+  Shimen        1 0 0 0 0 0
+  Shuangfeng    0 0 0 0 0 1
+  Shuangpai     0 0 0 1 0 0
+  Suining       0 0 0 0 1 0
+  Taojiang      0 1 0 0 0 0
+  Taoyuan       0 1 0 0 0 0
+  Tongdao       0 1 0 0 0 0
+  Wangcheng     0 0 0 1 0 0
+  Wugang        0 0 1 0 0 0
+  Xiangtan      0 0 0 1 0 0
+  Xiangxiang    0 0 0 0 1 0
+  Xiangyin      0 0 0 1 0 0
+  Xinhua        0 0 0 0 1 0
+  Xinhuang      1 0 0 0 0 0
+  Xinning       0 1 0 0 0 0
+  Xinshao       0 0 0 0 0 1
+  Xintian       0 0 0 0 1 0
+  Xupu          0 1 0 0 0 0
+  Yanling       0 0 1 0 0 0
+  Yizhang       1 0 0 0 0 0
+  Yongshun      0 0 0 1 0 0
+  Yongxing      0 0 0 1 0 0
+  You           0 0 0 1 0 0
+  Yuanjiang     0 0 0 0 1 0
+  Yuanling      1 0 0 0 0 0
+  Yueyang       0 0 1 0 0 0
+  Zhijiang      0 0 0 0 1 0
+  Zhongfang     0 0 0 1 0 0
+  Zhuzhou       0 0 0 0 1 0
+  Zixing        0 0 1 0 0 0</code></pre>
 </div>
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">length</span>(wm_d62))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>n_comp <span class="ot">&lt;-</span> <span class="fu">n.comp.nb</span>(wm_d62)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>n_comp<span class="sc">$</span>nc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 49</code></pre>
+<pre><code>[1] 1</code></pre>
 </div>
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># table(hunan$County, card(wm_d62))</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co"># n_comp &lt;- n.comp.nb(wm_d62)</span></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="co"># n_comp$nc</span></span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="co"># table(n_comp$comp.id)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(n_comp<span class="sc">$</span>comp.id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ 1 
+88 </code></pre>
+</div>
 </div>
 </section>
 <section id="plotting-the-fixed-distance-weight-matrix" class="level4">
@@ -651,14 +762,14 @@ Average number of links: 4.612245
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Fixed-Distance Nearest Neighbour within 62km"</span>)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_d62, coords, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(k1, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">length =</span> <span class="fl">0.08</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Fixed-Distance Nearest Neighbour within 62km"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_d62, coords, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(k1, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">length =</span> <span class="fl">0.08</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -667,18 +778,18 @@ Average number of links: 4.612245
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"1st nearest neighbours"</span>)</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(k1, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">length =</span> <span class="fl">0.08</span>)</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Distance link"</span>)</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_d62, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"1st nearest neighbours"</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(k1, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">length =</span> <span class="fl">0.08</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Distance link"</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_d62, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -689,14 +800,14 @@ Average number of links: 4.612245
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>knn6 <span class="ot">&lt;-</span> <span class="fu">knn2nb</span>(<span class="fu">knearneigh</span>(coords, <span class="at">k =</span> <span class="dv">6</span>))</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>knn6</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>knn6 <span class="ot">&lt;-</span> <span class="fu">knn2nb</span>(<span class="fu">knearneigh</span>(coords, <span class="at">k =</span> <span class="dv">6</span>))</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>knn6</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Neighbour list object:
-Number of regions: 49 
-Number of nonzero links: 294 
-Percentage nonzero weights: 12.2449 
+Number of regions: 88 
+Number of nonzero links: 528 
+Percentage nonzero weights: 6.818182 
 Average number of links: 6 
 Non-symmetric neighbours list</code></pre>
 </div>
@@ -707,60 +818,99 @@ Non-symmetric neighbours list</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(knn6)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(knn6)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>List of 49
- $ : int [1:6] 2 3 4 5 6 8
- $ : int [1:6] 1 3 4 5 7 8
- $ : int [1:6] 1 2 4 5 6 8
- $ : int [1:6] 2 3 5 7 8 13
- $ : int [1:6] 3 4 8 11 12 15
- $ : int [1:6] 3 5 9 10 15 22
- $ : int [1:6] 4 8 11 12 13 14
- $ : int [1:6] 4 5 7 11 12 13
- $ : int [1:6] 5 6 10 15 22 26
- $ : int [1:6] 6 9 17 20 22 23
- $ : int [1:6] 8 12 13 14 15 16
- $ : int [1:6] 11 13 14 16 18 19
- $ : int [1:6] 7 8 11 12 14 19
- $ : int [1:6] 11 12 13 16 18 19
- $ : int [1:6] 11 12 16 18 25 26
- $ : int [1:6] 11 12 15 18 19 25
- $ : int [1:6] 10 20 22 23 27 32
- $ : int [1:6] 11 12 14 16 19 24
- $ : int [1:6] 12 13 14 16 18 24
- $ : int [1:6] 17 22 23 27 32 33
- $ : int [1:6] 14 18 19 24 30 34
- $ : int [1:6] 9 20 26 27 28 33
- $ : int [1:6] 10 17 20 32 40 41
- $ : int [1:6] 14 16 18 19 25 30
- $ : int [1:6] 15 16 18 26 29 30
- $ : int [1:6] 15 22 25 27 28 29
- $ : int [1:6] 20 22 26 28 33 35
- $ : int [1:6] 26 27 29 33 35 38
- $ : int [1:6] 25 26 28 30 37 38
- $ : int [1:6] 24 25 28 29 37 38
- $ : int [1:6] 21 34 36 39 42 46
- $ : int [1:6] 17 20 23 40 41 47
- $ : int [1:6] 20 22 27 28 35 44
- $ : int [1:6] 21 31 36 39 42 46
- $ : int [1:6] 27 28 33 38 43 44
- $ : int [1:6] 21 31 34 39 42 46
- $ : int [1:6] 28 29 30 38 43 45
- $ : int [1:6] 28 29 35 37 43 48
- $ : int [1:6] 21 31 34 36 42 46
- $ : int [1:6] 20 23 32 33 41 47
- $ : int [1:6] 17 20 23 32 40 47
- $ : int [1:6] 21 31 34 36 39 46
- $ : int [1:6] 37 38 44 45 48 49
- $ : int [1:6] 33 35 38 43 48 49
- $ : int [1:6] 37 38 43 44 48 49
- $ : int [1:6] 21 31 34 36 39 42
- $ : int [1:6] 23 32 35 40 41 44
- $ : int [1:6] 37 38 43 44 45 49
- $ : int [1:6] 35 38 43 44 45 48
- - attr(*, "region.id")= chr [1:49] "1" "2" "3" "4" ...
+<pre><code>List of 88
+ $ : int [1:6] 2 3 4 5 57 64
+ $ : int [1:6] 1 3 57 58 78 85
+ $ : int [1:6] 1 2 4 5 57 85
+ $ : int [1:6] 1 3 5 6 69 85
+ $ : int [1:6] 1 3 4 6 69 85
+ $ : int [1:6] 3 4 5 69 75 85
+ $ : int [1:6] 9 66 67 71 74 84
+ $ : int [1:6] 9 46 47 78 80 86
+ $ : int [1:6] 8 46 66 68 84 86
+ $ : int [1:6] 16 19 22 70 72 73
+ $ : int [1:6] 10 14 16 17 70 72
+ $ : int [1:6] 13 15 60 61 63 83
+ $ : int [1:6] 12 15 60 61 63 83
+ $ : int [1:6] 11 15 16 17 72 83
+ $ : int [1:6] 12 13 14 17 60 83
+ $ : int [1:6] 10 11 17 22 72 83
+ $ : int [1:6] 10 11 14 16 72 83
+ $ : int [1:6] 20 22 23 63 77 83
+ $ : int [1:6] 10 20 21 73 74 82
+ $ : int [1:6] 18 19 21 22 23 82
+ $ : int [1:6] 19 20 35 74 82 86
+ $ : int [1:6] 10 16 18 19 20 83
+ $ : int [1:6] 18 20 41 77 79 82
+ $ : int [1:6] 25 28 31 52 54 81
+ $ : int [1:6] 24 28 31 33 54 81
+ $ : int [1:6] 25 27 29 33 42 81
+ $ : int [1:6] 26 29 30 37 42 81
+ $ : int [1:6] 24 25 33 49 52 54
+ $ : int [1:6] 26 27 37 42 43 81
+ $ : int [1:6] 26 27 28 33 49 81
+ $ : int [1:6] 24 25 36 39 40 54
+ $ : int [1:6] 24 31 50 54 55 56
+ $ : int [1:6] 25 26 28 30 49 81
+ $ : int [1:6] 36 40 41 45 56 80
+ $ : int [1:6] 21 41 46 47 80 82
+ $ : int [1:6] 31 34 40 45 56 80
+ $ : int [1:6] 26 27 29 42 43 44
+ $ : int [1:6] 23 43 44 62 77 79
+ $ : int [1:6] 25 40 42 43 44 81
+ $ : int [1:6] 31 36 39 43 45 79
+ $ : int [1:6] 23 35 45 79 80 82
+ $ : int [1:6] 26 27 37 39 43 81
+ $ : int [1:6] 37 39 40 42 44 79
+ $ : int [1:6] 37 38 39 42 43 79
+ $ : int [1:6] 34 36 40 41 79 80
+ $ : int [1:6] 8 9 35 47 78 86
+ $ : int [1:6] 8 21 35 46 80 86
+ $ : int [1:6] 49 50 51 52 53 55
+ $ : int [1:6] 28 33 48 51 52 54
+ $ : int [1:6] 32 48 51 52 54 55
+ $ : int [1:6] 28 48 49 50 52 54
+ $ : int [1:6] 28 48 49 50 51 54
+ $ : int [1:6] 48 50 51 52 55 75
+ $ : int [1:6] 24 28 49 50 51 52
+ $ : int [1:6] 32 48 50 52 53 75
+ $ : int [1:6] 32 34 36 78 80 85
+ $ : int [1:6] 1 2 3 58 64 68
+ $ : int [1:6] 2 57 64 66 68 78
+ $ : int [1:6] 12 13 60 61 87 88
+ $ : int [1:6] 12 13 59 61 63 87
+ $ : int [1:6] 12 13 60 62 63 87
+ $ : int [1:6] 12 38 61 63 77 87
+ $ : int [1:6] 12 18 60 61 62 83
+ $ : int [1:6] 1 3 57 58 68 76
+ $ : int [1:6] 58 64 66 67 68 76
+ $ : int [1:6] 9 58 67 68 76 84
+ $ : int [1:6] 7 65 66 68 76 84
+ $ : int [1:6] 9 57 58 66 78 84
+ $ : int [1:6] 4 5 6 32 75 85
+ $ : int [1:6] 10 16 19 22 72 73
+ $ : int [1:6] 7 19 73 74 84 86
+ $ : int [1:6] 10 11 14 16 17 70
+ $ : int [1:6] 10 19 21 70 71 74
+ $ : int [1:6] 19 21 71 73 84 86
+ $ : int [1:6] 6 32 50 53 55 69
+ $ : int [1:6] 58 64 65 66 67 68
+ $ : int [1:6] 18 23 38 61 62 63
+ $ : int [1:6] 2 8 9 46 58 68
+ $ : int [1:6] 38 40 41 43 44 45
+ $ : int [1:6] 34 35 36 41 45 47
+ $ : int [1:6] 25 26 28 33 39 42
+ $ : int [1:6] 19 20 21 23 35 41
+ $ : int [1:6] 12 13 15 16 22 63
+ $ : int [1:6] 7 9 66 68 71 74
+ $ : int [1:6] 2 3 4 5 56 69
+ $ : int [1:6] 8 9 21 46 47 74
+ $ : int [1:6] 59 60 61 62 63 88
+ $ : int [1:6] 59 60 61 62 63 87
+ - attr(*, "region.id")= chr [1:88] "1" "2" "3" "4" ...
  - attr(*, "call")= language knearneigh(x = coords, k = 6)
  - attr(*, "sym")= logi FALSE
  - attr(*, "type")= chr "knn"
@@ -774,13 +924,13 @@ Non-symmetric neighbours list</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Adaptive Distance k-Nearest Neighbours (k = 6)"</span>)</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(knn6, coords, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Adaptive Distance k-Nearest Neighbours (k = 6)"</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(knn6, coords, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -793,17 +943,17 @@ Non-symmetric neighbours list</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>hunan_sp <span class="ot">&lt;-</span> hunan <span class="sc">%&gt;%</span> </span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_Spatial</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>hunan_sp <span class="ot">&lt;-</span> hunan <span class="sc">%&gt;%</span> </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_Spatial</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Generating the summary statistics under a fixed-distance matrix using the <strong>GWmodel</strong> R-Package</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>gwstat_f <span class="ot">&lt;-</span> <span class="fu">gwss</span>(<span class="at">data =</span> hunan_sp, <span class="at">vars =</span> <span class="st">"GDPPC"</span>, <span class="at">bw =</span> <span class="dv">62</span>, <span class="at">kernel =</span> <span class="st">"bisquare"</span>, <span class="at">adaptive =</span> <span class="cn">FALSE</span>, <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>gwstat_f</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>gwstat_f <span class="ot">&lt;-</span> <span class="fu">gwss</span>(<span class="at">data =</span> hunan_sp, <span class="at">vars =</span> <span class="st">"GDPPC"</span>, <span class="at">bw =</span> <span class="dv">62</span>, <span class="at">kernel =</span> <span class="st">"bisquare"</span>, <span class="at">adaptive =</span> <span class="cn">FALSE</span>, <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>gwstat_f</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   ***********************************************************************
@@ -849,9 +999,9 @@ GDPPC_LCV
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>gwstat_a <span class="ot">&lt;-</span> <span class="fu">gwss</span>(<span class="at">data =</span> hunan_sp, <span class="at">vars =</span> <span class="st">"GDPPC"</span>, <span class="at">bw =</span> <span class="dv">6</span>, <span class="at">kernel =</span> <span class="st">"bisquare"</span>, <span class="at">adaptive =</span> <span class="cn">TRUE</span>, <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>gwstat_a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>gwstat_a <span class="ot">&lt;-</span> <span class="fu">gwss</span>(<span class="at">data =</span> hunan_sp, <span class="at">vars =</span> <span class="st">"GDPPC"</span>, <span class="at">bw =</span> <span class="dv">6</span>, <span class="at">kernel =</span> <span class="st">"bisquare"</span>, <span class="at">adaptive =</span> <span class="cn">TRUE</span>, <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>gwstat_a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   ***********************************************************************
