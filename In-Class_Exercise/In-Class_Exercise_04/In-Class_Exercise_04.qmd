@@ -108,16 +108,16 @@ summary(wm_b)
 
 ```{r}
 
-# par(mfrow = c(1, 3))
-# 
-# plot(hunan$geometry, border = "lightgrey", main = "Queen Contiguity")
-# plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col= "red")
-# 
-# plot(hunan$geometry, border = "lightgrey", main = "Rook Contiguity")
-# plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
-# 
-# plot(hunan$geometry, border = "lightgrey", main = "Bishop Contiguity")
-# plot(wm_b, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
+par(mfrow = c(1, 3))
+
+plot(hunan$geometry, border = "lightgrey", main = "Queen Contiguity")
+plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col= "red")
+
+plot(hunan$geometry, border = "lightgrey", main = "Rook Contiguity")
+plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
+
+plot(hunan$geometry, border = "lightgrey", main = "Bishop Contiguity")
+plot(wm_b, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 
 ```
 
@@ -151,12 +151,12 @@ str(wm_d62)
 
 ```{r}
 
-# table(hunan$County, card(wm_d62))
-# 
-# n_comp <- n.comp.nb(wm_d62)
-# n_comp$nc
-# 
-# table(n_comp$comp.id)
+table(hunan$County, card(wm_d62))
+
+n_comp <- n.comp.nb(wm_d62)
+n_comp$nc
+
+table(n_comp$comp.id)
 
 ```
 
