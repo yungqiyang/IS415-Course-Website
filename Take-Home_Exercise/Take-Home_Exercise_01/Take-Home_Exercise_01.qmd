@@ -1,0 +1,57 @@
+---
+title: "Take-Home Exercise 1: Application of Spatial Point Patterns Analysis to discover the geographical distribution of Grab's hailing services in Singapore"
+author: "Yung Qi Yang"
+
+format: 
+  html:
+    code-fold: true
+    code-summary: "Reveal Code"
+    
+execute: 
+  eval: true
+  echo: true
+  warning: false
+date: "`r Sys.Date()`"
+
+toc: true
+toc-location: left
+
+progress: true
+---
+
+### Loading the necessary R-packages
+
+```{r}
+
+pacman::p_load(sf, tidyverse, arrow)
+
+```
+
+### Importing the datasets of interest
+
+#### Grab-Posisi Data:
+
+```{r}
+#|eval: false
+
+grab_df <- read_parquet("Data/Geospatial/GrabPosisi/part-00000-8bbff892-97d2-4011-9961-703e38972569.c000.snappy.parquet")
+
+for (i in 1:9) {
+  grab_df <- grab_df %>%
+    rbind(read_parquet(paste0("Data/Geospatial/GrabPosisi/part-0000", as.character(i), "-8bbff892-97d2-4011-9961-703e38972569.c000.snappy.parquet")))
+}
+
+glimpse(grab_df)
+
+write_parquet(grab_df, "Data/Geospatial/GrabPosisi/Grab_Posisi.parquet")
+
+```
+
+#### LTA Data:
+
+```{r}
+
+
+
+```
+

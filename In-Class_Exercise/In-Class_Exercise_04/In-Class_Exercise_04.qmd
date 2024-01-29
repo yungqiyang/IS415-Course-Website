@@ -18,3 +18,125 @@ toc-location: left
 
 progress: true
 ---
+
+### Loading the necessary R-Packages
+
+```{r}
+
+pacman::p_load(sf, spdep, tmap, tidyverse, knitr, GWmodel)
+
+```
+
+### Importing the required datasets into the R-Environment
+
+#### *Hunan* ***Geospatial*** Data
+
+```{r}
+
+hunan <- st_read("Data/Geospatial/Hunan/", layer = "Hunan")
+glimpse(hunan)
+
+```
+
+#### *Hunan* ***Aspatial*** Data
+
+```{r}
+
+hunan2012 <- read_csv("Data/Aspatial/Hunan_2012.csv")
+glimpse(hunan2012)
+
+```
+
+#### Conducting a left join to merge the geospatial and aspatial data concerning *Hunan*.
+
+Join is conducted upon the "County" fields present in both datasets. Only the data fields of interest in the resulting dataset is then selected.
+
+```{r}
+
+hunan <- left_join(hunan, hunan2012) %>% 
+  select(1:4, 7, 15)
+
+```
+
+### Visualising the Hunan region and its Regional Development Indicators
+
+```{r}
+
+basemap <- tm_shape(hunan) +
+  tm_polygons() +
+  tm_text("NAME_3", size = 0.5)
+
+gdppc <- qtm(hunan, "GDPPC")
+
+tmap_arrange(basemap, gdppc, asp = 1, ncol = 2)
+
+```
+
+### Conducting an investigation of adjecency-based congruity neighbours in the **Hunan** geospatial dataset.
+
+#### Computing the distribution of congruity neighbours in the Hunan region using the **Queen** method.
+
+```{r}
+
+wm_q <- poly2nb(hunan, queen = TRUE)
+
+summary(wm_q)
+
+```
+
+#### Computing the distribution of congruity neighbours in the Hunan region using the **ROOK** method.
+
+```{r}
+
+wm_r <- poly2nb(hunan, queen = FALSE)
+
+summary(wm_r)
+
+```
+
+#### Computing the distribution of congruity neighbours in the Hunan region using the **BISHOP** method.
+
+```{r}
+
+wm_b <- diffnb(wm_r, wm_q)
+
+summary(wm_b)
+
+```
+
+### Conducting an investigation into the distance-based congruity neighbours in the **Hunan** geospatial dataset.
+
+#### Extracting the centroid geospatial projections
+
+```{r}
+
+longitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[1]])
+
+latitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[2]])
+
+coords <- cbind(longitude, latitude)
+
+```
+
+#### 
+
+```{r}
+
+k1 <- knn2nb(knearneigh(coords))
+k1dists <- unlist(nbdists(k1, coords, longlat = TRUE))
+
+summary(k1dists)
+
+```
+
+####
+
+```{r}
+
+wm_d62 <- dnearneigh(coords, 0, 62, longlat = TRUE)
+wm_d62
+
+str(wm_d62)
+
+```
+
