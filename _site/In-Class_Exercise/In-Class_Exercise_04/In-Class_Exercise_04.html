@@ -7,8 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Yung Qi Yang">
+<meta name="dcterms.date" content="2024-01-29">
 
-<title>IS415 Course Website - In-Class Exercise 4:</title>
+<title>IS415 Course Website - In-Class Exercise 4: Geospatial Weight Summary Statistics</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -163,7 +198,18 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#loading-the-necessary-r-packages" id="toc-loading-the-necessary-r-packages" class="nav-link active" data-scroll-target="#loading-the-necessary-r-packages">Loading the necessary R-Packages</a></li>
+  <li><a href="#importing-the-required-datasets-into-the-r-environment" id="toc-importing-the-required-datasets-into-the-r-environment" class="nav-link" data-scroll-target="#importing-the-required-datasets-into-the-r-environment">Importing the required datasets into the R-Environment</a></li>
+  <li><a href="#visualising-the-hunan-region-and-its-regional-development-indicators" id="toc-visualising-the-hunan-region-and-its-regional-development-indicators" class="nav-link" data-scroll-target="#visualising-the-hunan-region-and-its-regional-development-indicators">Visualising the Hunan region and its Regional Development Indicators</a></li>
+  <li><a href="#conducting-an-investigation-of-adjecency-based-congruity-neighbours-in-the-hunan-geospatial-dataset." id="toc-conducting-an-investigation-of-adjecency-based-congruity-neighbours-in-the-hunan-geospatial-dataset." class="nav-link" data-scroll-target="#conducting-an-investigation-of-adjecency-based-congruity-neighbours-in-the-hunan-geospatial-dataset.">Conducting an investigation of adjecency-based congruity neighbours in the <strong>Hunan</strong> geospatial dataset.</a></li>
+  <li><a href="#conducting-an-investigation-of-distance-based-congruity-neighbours-in-the-hunan-geospatial-dataset." id="toc-conducting-an-investigation-of-distance-based-congruity-neighbours-in-the-hunan-geospatial-dataset." class="nav-link" data-scroll-target="#conducting-an-investigation-of-distance-based-congruity-neighbours-in-the-hunan-geospatial-dataset.">Conducting an investigation of distance-based congruity neighbours in the <strong>Hunan</strong> geospatial dataset.</a></li>
+  <li><a href="#computing-geographically-weighted-summary-statistics-for-the-hunan-geospatial-data" id="toc-computing-geographically-weighted-summary-statistics-for-the-hunan-geospatial-data" class="nav-link" data-scroll-target="#computing-geographically-weighted-summary-statistics-for-the-hunan-geospatial-data">Computing Geographically Weighted Summary Statistics for the <em>hunan</em> geospatial data</a></li>
+  </ul>
+</nav>
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
@@ -174,7 +220,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">In-Class Exercise 4:</h1>
+<h1 class="title">In-Class Exercise 4: Geospatial Weight Summary Statistics</h1>
 </div>
 
 
@@ -191,7 +237,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Invalid Date</p>
+      <p class="date">January 29, 2024</p>
     </div>
   </div>
   
@@ -203,8 +249,603 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="loading-the-necessary-r-packages" class="level3">
+<h3 class="anchored" data-anchor-id="loading-the-necessary-r-packages">Loading the necessary R-Packages</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, spdep, tmap, tidyverse, knitr, GWmodel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="importing-the-required-datasets-into-the-r-environment" class="level3">
+<h3 class="anchored" data-anchor-id="importing-the-required-datasets-into-the-r-environment">Importing the required datasets into the R-Environment</h3>
+<section id="hunan-geospatial-data" class="level4">
+<h4 class="anchored" data-anchor-id="hunan-geospatial-data"><em>Hunan</em> <strong><em>Geospatial</em></strong> Data</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>hunan <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"Data/Geospatial/Hunan/"</span>, <span class="at">layer =</span> <span class="st">"Hunan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `Hunan' from data source 
+  `C:\Users\yungq\Desktop\SMU Modules\Y4S1\Geospatial Analysis and Applications\IS415 Course Website\In-Class_Exercise\In-Class_Exercise_04\Data\Geospatial\Hunan' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 88 features and 7 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(hunan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 88
+Columns: 8
+$ NAME_2     &lt;chr&gt; "Changde", "Changde", "Changde", "Changde", "Changde", "Cha…
+$ ID_3       &lt;int&gt; 21098, 21100, 21101, 21102, 21103, 21104, 21109, 21110, 211…
+$ NAME_3     &lt;chr&gt; "Anxiang", "Hanshou", "Jinshi", "Li", "Linli", "Shimen", "L…
+$ ENGTYPE_3  &lt;chr&gt; "County", "County", "County City", "County", "County", "Cou…
+$ Shape_Leng &lt;dbl&gt; 1.869074, 2.360691, 1.425620, 3.474325, 2.289506, 4.171918,…
+$ Shape_Area &lt;dbl&gt; 0.10056190, 0.19978745, 0.05302413, 0.18908121, 0.11450357,…
+$ County     &lt;chr&gt; "Anxiang", "Hanshou", "Jinshi", "Li", "Linli", "Shimen", "L…
+$ geometry   &lt;POLYGON [°]&gt; POLYGON ((112.0625 29.75523..., POLYGON ((112.2288 …</code></pre>
+</div>
+</div>
+</section>
+<section id="hunan-aspatial-data" class="level4">
+<h4 class="anchored" data-anchor-id="hunan-aspatial-data"><em>Hunan</em> <strong><em>Aspatial</em></strong> Data</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>hunan2012 <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"Data/Aspatial/Hunan_2012.csv"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(hunan2012)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 88
+Columns: 29
+$ County      &lt;chr&gt; "Anhua", "Anren", "Anxiang", "Baojing", "Chaling", "Changn…
+$ City        &lt;chr&gt; "Yiyang", "Chenzhou", "Changde", "Hunan West", "Zhuzhou", …
+$ avg_wage    &lt;dbl&gt; 30544, 28058, 31935, 30843, 31251, 28518, 54540, 28597, 33…
+$ deposite    &lt;dbl&gt; 10967.0, 4598.9, 5517.2, 2250.0, 8241.4, 10860.0, 24332.0,…
+$ FAI         &lt;dbl&gt; 6831.7, 6386.1, 3541.0, 1005.4, 6508.4, 7920.0, 33624.0, 1…
+$ Gov_Rev     &lt;dbl&gt; 456.72, 220.57, 243.64, 192.59, 620.19, 769.86, 5350.00, 1…
+$ Gov_Exp     &lt;dbl&gt; 2703.0, 1454.7, 1779.5, 1379.1, 1947.0, 2631.6, 7885.5, 11…
+$ GDP         &lt;dbl&gt; 13225.0, 4941.2, 12482.0, 4087.9, 11585.0, 19886.0, 88009.…
+$ GDPPC       &lt;dbl&gt; 14567, 12761, 23667, 14563, 20078, 24418, 88656, 10132, 17…
+$ GIO         &lt;dbl&gt; 9276.90, 4189.20, 5108.90, 3623.50, 9157.70, 37392.00, 513…
+$ Loan        &lt;dbl&gt; 3954.90, 2555.30, 2806.90, 1253.70, 4287.40, 4242.80, 4053…
+$ NIPCR       &lt;dbl&gt; 3528.3, 3271.8, 7693.7, 4191.3, 3887.7, 9528.0, 17070.0, 3…
+$ Bed         &lt;dbl&gt; 2718, 970, 1931, 927, 1449, 3605, 3310, 582, 2170, 2179, 1…
+$ Emp         &lt;dbl&gt; 494.310, 290.820, 336.390, 195.170, 330.290, 548.610, 670.…
+$ EmpR        &lt;dbl&gt; 441.4, 255.4, 270.5, 145.6, 299.0, 415.1, 452.0, 127.6, 21…
+$ EmpRT       &lt;dbl&gt; 338.0, 99.4, 205.9, 116.4, 154.0, 273.7, 219.4, 94.4, 174.…
+$ Pri_Stu     &lt;dbl&gt; 54.175, 33.171, 19.584, 19.249, 33.906, 81.831, 59.151, 18…
+$ Sec_Stu     &lt;dbl&gt; 32.830, 17.505, 17.819, 11.831, 20.548, 44.485, 39.685, 7.…
+$ Household   &lt;dbl&gt; 290.4, 104.6, 148.1, 73.2, 148.7, 211.2, 300.3, 76.1, 139.…
+$ Household_R &lt;dbl&gt; 234.5, 121.9, 135.4, 69.9, 139.4, 211.7, 248.4, 59.6, 110.…
+$ NOIP        &lt;dbl&gt; 101, 34, 53, 18, 106, 115, 214, 17, 55, 70, 44, 84, 74, 17…
+$ Pop_R       &lt;dbl&gt; 670.3, 243.2, 346.0, 184.1, 301.6, 448.2, 475.1, 189.6, 31…
+$ RSCG        &lt;dbl&gt; 5760.60, 2386.40, 3957.90, 768.04, 4009.50, 5220.40, 22604…
+$ Pop_T       &lt;dbl&gt; 910.8, 388.7, 528.3, 281.3, 578.4, 816.3, 998.6, 256.7, 45…
+$ Agri        &lt;dbl&gt; 4942.253, 2357.764, 4524.410, 1118.561, 3793.550, 6430.782…
+$ Service     &lt;dbl&gt; 5414.5, 3814.1, 14100.0, 541.8, 5444.0, 13074.6, 17726.6, …
+$ Disp_Inc    &lt;dbl&gt; 12373, 16072, 16610, 13455, 20461, 20868, 183252, 12379, 1…
+$ RORP        &lt;dbl&gt; 0.7359464, 0.6256753, 0.6549309, 0.6544614, 0.5214385, 0.5…
+$ ROREmp      &lt;dbl&gt; 0.8929619, 0.8782065, 0.8041262, 0.7460163, 0.9052651, 0.7…</code></pre>
+</div>
+</div>
+</section>
+<section id="conducting-a-left-join-to-merge-the-geospatial-and-aspatial-data-concerning-hunan." class="level4">
+<h4 class="anchored" data-anchor-id="conducting-a-left-join-to-merge-the-geospatial-and-aspatial-data-concerning-hunan.">Conducting a left join to merge the geospatial and aspatial data concerning <em>Hunan</em>.</h4>
+<p>Join is conducted upon the “County” fields present in both datasets. Only the data fields of interest in the resulting dataset is then selected.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>hunan <span class="ot">&lt;-</span> <span class="fu">left_join</span>(hunan, hunan2012) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">7</span>, <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="visualising-the-hunan-region-and-its-regional-development-indicators" class="level3">
+<h3 class="anchored" data-anchor-id="visualising-the-hunan-region-and-its-regional-development-indicators">Visualising the Hunan region and its Regional Development Indicators</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>basemap <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(hunan) <span class="sc">+</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_text</span>(<span class="st">"NAME_3"</span>, <span class="at">size =</span> <span class="fl">0.5</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>gdppc <span class="ot">&lt;-</span> <span class="fu">qtm</span>(hunan, <span class="st">"GDPPC"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_arrange</span>(basemap, gdppc, <span class="at">asp =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conducting-an-investigation-of-adjecency-based-congruity-neighbours-in-the-hunan-geospatial-dataset." class="level3">
+<h3 class="anchored" data-anchor-id="conducting-an-investigation-of-adjecency-based-congruity-neighbours-in-the-hunan-geospatial-dataset.">Conducting an investigation of adjecency-based congruity neighbours in the <strong>Hunan</strong> geospatial dataset.</h3>
+<section id="computing-the-distribution-of-congruity-neighbours-in-the-hunan-region-using-the-queen-method." class="level4">
+<h4 class="anchored" data-anchor-id="computing-the-distribution-of-congruity-neighbours-in-the-hunan-region-using-the-queen-method.">Computing the distribution of congruity neighbours in the Hunan region using the <strong>Queen</strong> method.</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(hunan, <span class="at">queen =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Neighbour list object:
+Number of regions: 88 
+Number of nonzero links: 448 
+Percentage nonzero weights: 5.785124 
+Average number of links: 5.090909 
+Link number distribution:
+
+ 1  2  3  4  5  6  7  8  9 11 
+ 2  2 12 16 24 14 11  4  2  1 
+2 least connected regions:
+30 65 with 1 link
+1 most connected region:
+85 with 11 links</code></pre>
+</div>
+</div>
+</section>
+<section id="computing-the-distribution-of-congruity-neighbours-in-the-hunan-region-using-the-rook-method." class="level4">
+<h4 class="anchored" data-anchor-id="computing-the-distribution-of-congruity-neighbours-in-the-hunan-region-using-the-rook-method.">Computing the distribution of congruity neighbours in the Hunan region using the <strong>ROOK</strong> method.</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>wm_r <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(hunan, <span class="at">queen =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_r)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Neighbour list object:
+Number of regions: 88 
+Number of nonzero links: 440 
+Percentage nonzero weights: 5.681818 
+Average number of links: 5 
+Link number distribution:
+
+ 1  2  3  4  5  6  7  8  9 10 
+ 2  2 12 20 21 14 11  3  2  1 
+2 least connected regions:
+30 65 with 1 link
+1 most connected region:
+85 with 10 links</code></pre>
+</div>
+</div>
+</section>
+<section id="computing-the-distribution-of-congruity-neighbours-in-the-hunan-region-using-the-bishop-method." class="level4">
+<h4 class="anchored" data-anchor-id="computing-the-distribution-of-congruity-neighbours-in-the-hunan-region-using-the-bishop-method.">Computing the distribution of congruity neighbours in the Hunan region using the <strong>BISHOP</strong> method.</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wm_b <span class="ot">&lt;-</span> <span class="fu">diffnb</span>(wm_r, wm_q)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Neighbour list object:
+Number of regions: 88 
+Number of nonzero links: 8 
+Percentage nonzero weights: 0.1033058 
+Average number of links: 0.09090909 
+80 regions with no links:
+3 4 5 6 7 8 9 11 12 13 14 15 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55
+56 58 59 60 61 62 63 64 65 66 67 68 69 70 71 73 74 75 76 77 78 79 80 81
+82 83 84 86 87 88
+84 disjoint connected subgraphs
+Link number distribution:
+
+ 0  1 
+80  8 
+8 least connected regions:
+1 2 10 16 17 57 72 85 with 1 link
+8 most connected regions:
+1 2 10 16 17 57 72 85 with 1 link</code></pre>
+</div>
+</div>
+</section>
+<section id="plotting-both-queen-rook-and-bishop-adjacency-based-contiguity-neighbours-maps-together" class="level4">
+<h4 class="anchored" data-anchor-id="plotting-both-queen-rook-and-bishop-adjacency-based-contiguity-neighbours-maps-together">Plotting both <strong>QUEEN</strong>, <strong>ROOK</strong> and <strong>BISHOP</strong> adjacency-based contiguity neighbours maps together</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># par(mfrow = c(1, 3))</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(hunan$geometry, border = "lightgrey", main = "Queen Contiguity")</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col= "red")</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(hunan$geometry, border = "lightgrey", main = "Rook Contiguity")</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(hunan$geometry, border = "lightgrey", main = "Bishop Contiguity")</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(wm_b, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="conducting-an-investigation-of-distance-based-congruity-neighbours-in-the-hunan-geospatial-dataset." class="level3">
+<h3 class="anchored" data-anchor-id="conducting-an-investigation-of-distance-based-congruity-neighbours-in-the-hunan-geospatial-dataset.">Conducting an investigation of distance-based congruity neighbours in the <strong>Hunan</strong> geospatial dataset.</h3>
+<section id="computing-the-distribution-of-congruity-neighbours-in-the-hunan-region-using-the-fixed-distance-bandwidth-method." class="level4">
+<h4 class="anchored" data-anchor-id="computing-the-distribution-of-congruity-neighbours-in-the-hunan-region-using-the-fixed-distance-bandwidth-method.">Computing the distribution of congruity neighbours in the Hunan region using the fixed-distance bandwidth method.</h4>
+</section>
+<section id="determining-the-cut-off-distance" class="level4">
+<h4 class="anchored" data-anchor-id="determining-the-cut-off-distance">Determining the cut-off distance</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>k1 <span class="ot">&lt;-</span> <span class="fu">knn2nb</span>(<span class="fu">knearneigh</span>(coords))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>k1dists <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">nbdists</span>(k1, coords, <span class="at">longlat =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(k1dists)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  13.86   28.12   34.99   36.19   44.54   67.50 </code></pre>
+</div>
+</div>
+</section>
+<section id="computing-the-fixed-distance-weight-matrix" class="level4">
+<h4 class="anchored" data-anchor-id="computing-the-fixed-distance-weight-matrix">Computing the fixed distance weight matrix</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>wm_d62 <span class="ot">&lt;-</span> <span class="fu">dnearneigh</span>(coords, <span class="dv">0</span>, <span class="dv">62</span>, <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>wm_d62</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Neighbour list object:
+Number of regions: 49 
+Number of nonzero links: 226 
+Percentage nonzero weights: 9.412745 
+Average number of links: 4.612245 
+2 regions with no links:
+1 21
+4 disjoint connected subgraphs</code></pre>
+</div>
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(wm_d62)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of 49
+ $ : int 0
+ $ : int 4
+ $ : int [1:2] 4 5
+ $ : int [1:4] 2 3 7 8
+ $ : int [1:4] 3 8 11 15
+ $ : int 9
+ $ : int [1:5] 4 8 12 13 14
+ $ : int [1:6] 4 5 7 11 12 13
+ $ : int [1:2] 6 22
+ $ : int 17
+ $ : int [1:9] 5 8 12 13 14 15 16 18 19
+ $ : int [1:9] 7 8 11 13 14 15 16 18 19
+ $ : int [1:8] 7 8 11 12 14 16 18 19
+ $ : int [1:8] 7 11 12 13 16 18 19 24
+ $ : int [1:7] 5 11 12 16 18 25 26
+ $ : int [1:9] 11 12 13 14 15 18 19 24 25
+ $ : int [1:3] 10 20 23
+ $ : int [1:9] 11 12 13 14 15 16 19 24 25
+ $ : int [1:7] 11 12 13 14 16 18 24
+ $ : int [1:4] 17 23 27 33
+ $ : int 0
+ $ : int [1:4] 9 26 27 33
+ $ : int [1:3] 17 20 32
+ $ : int [1:6] 14 16 18 19 25 30
+ $ : int [1:8] 15 16 18 24 26 28 29 30
+ $ : int [1:6] 15 22 25 27 28 29
+ $ : int [1:6] 20 22 26 28 33 35
+ $ : int [1:9] 25 26 27 29 33 35 37 38 43
+ $ : int [1:6] 25 26 28 30 37 38
+ $ : int [1:4] 24 25 29 37
+ $ : int [1:2] 34 36
+ $ : int [1:3] 23 40 41
+ $ : int [1:6] 20 22 27 28 35 44
+ $ : int [1:2] 31 42
+ $ : int [1:6] 27 28 33 38 43 44
+ $ : int [1:4] 31 39 42 46
+ $ : int [1:7] 28 29 30 38 43 45 48
+ $ : int [1:7] 28 29 35 37 43 44 48
+ $ : int [1:2] 36 46
+ $ : int [1:2] 32 41
+ $ : int [1:3] 32 40 47
+ $ : int [1:2] 34 36
+ $ : int [1:8] 28 35 37 38 44 45 48 49
+ $ : int [1:6] 33 35 38 43 48 49
+ $ : int [1:3] 37 43 48
+ $ : int [1:2] 36 39
+ $ : int 41
+ $ : int [1:6] 37 38 43 44 45 49
+ $ : int [1:3] 43 44 48
+ - attr(*, "class")= chr "nb"
+ - attr(*, "region.id")= chr [1:49] "1" "2" "3" "4" ...
+ - attr(*, "call")= language dnearneigh(x = coords, d1 = 0, d2 = 62, longlat = TRUE)
+ - attr(*, "dnn")= num [1:2] 0 62
+ - attr(*, "bounds")= chr [1:2] "GE" "LE"
+ - attr(*, "nbtype")= chr "distance"
+ - attr(*, "sym")= logi TRUE</code></pre>
+</div>
+</div>
+</section>
+<section id="displaying-the-weight-matrix-structure" class="level4">
+<h4 class="anchored" data-anchor-id="displaying-the-weight-matrix-structure">Displaying the weight matrix structure</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># table(hunan$County, card(wm_d62))</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># n_comp &lt;- n.comp.nb(wm_d62)</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># n_comp$nc</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="co"># table(n_comp$comp.id)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="plotting-the-fixed-distance-weight-matrix" class="level4">
+<h4 class="anchored" data-anchor-id="plotting-the-fixed-distance-weight-matrix">Plotting the fixed distance weight matrix</h4>
+<p>Distance weight matrix is plotted as layers upon the same plot object:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Fixed-Distance Nearest Neighbour within 62km"</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_d62, coords, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(k1, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">length =</span> <span class="fl">0.08</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Distance weight matrix is plotted as separate layers here:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"1st nearest neighbours"</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(k1, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">length =</span> <span class="fl">0.08</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Distance link"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_d62, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="computing-the-adaptive-distance-weight-matrix" class="level4">
+<h4 class="anchored" data-anchor-id="computing-the-adaptive-distance-weight-matrix">Computing the adaptive distance weight matrix</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>knn6 <span class="ot">&lt;-</span> <span class="fu">knn2nb</span>(<span class="fu">knearneigh</span>(coords, <span class="at">k =</span> <span class="dv">6</span>))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>knn6</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Neighbour list object:
+Number of regions: 49 
+Number of nonzero links: 294 
+Percentage nonzero weights: 12.2449 
+Average number of links: 6 
+Non-symmetric neighbours list</code></pre>
+</div>
+</div>
+</section>
+<section id="displaying-the-weight-matrix-structure-1" class="level4">
+<h4 class="anchored" data-anchor-id="displaying-the-weight-matrix-structure-1">Displaying the weight matrix structure</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(knn6)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of 49
+ $ : int [1:6] 2 3 4 5 6 8
+ $ : int [1:6] 1 3 4 5 7 8
+ $ : int [1:6] 1 2 4 5 6 8
+ $ : int [1:6] 2 3 5 7 8 13
+ $ : int [1:6] 3 4 8 11 12 15
+ $ : int [1:6] 3 5 9 10 15 22
+ $ : int [1:6] 4 8 11 12 13 14
+ $ : int [1:6] 4 5 7 11 12 13
+ $ : int [1:6] 5 6 10 15 22 26
+ $ : int [1:6] 6 9 17 20 22 23
+ $ : int [1:6] 8 12 13 14 15 16
+ $ : int [1:6] 11 13 14 16 18 19
+ $ : int [1:6] 7 8 11 12 14 19
+ $ : int [1:6] 11 12 13 16 18 19
+ $ : int [1:6] 11 12 16 18 25 26
+ $ : int [1:6] 11 12 15 18 19 25
+ $ : int [1:6] 10 20 22 23 27 32
+ $ : int [1:6] 11 12 14 16 19 24
+ $ : int [1:6] 12 13 14 16 18 24
+ $ : int [1:6] 17 22 23 27 32 33
+ $ : int [1:6] 14 18 19 24 30 34
+ $ : int [1:6] 9 20 26 27 28 33
+ $ : int [1:6] 10 17 20 32 40 41
+ $ : int [1:6] 14 16 18 19 25 30
+ $ : int [1:6] 15 16 18 26 29 30
+ $ : int [1:6] 15 22 25 27 28 29
+ $ : int [1:6] 20 22 26 28 33 35
+ $ : int [1:6] 26 27 29 33 35 38
+ $ : int [1:6] 25 26 28 30 37 38
+ $ : int [1:6] 24 25 28 29 37 38
+ $ : int [1:6] 21 34 36 39 42 46
+ $ : int [1:6] 17 20 23 40 41 47
+ $ : int [1:6] 20 22 27 28 35 44
+ $ : int [1:6] 21 31 36 39 42 46
+ $ : int [1:6] 27 28 33 38 43 44
+ $ : int [1:6] 21 31 34 39 42 46
+ $ : int [1:6] 28 29 30 38 43 45
+ $ : int [1:6] 28 29 35 37 43 48
+ $ : int [1:6] 21 31 34 36 42 46
+ $ : int [1:6] 20 23 32 33 41 47
+ $ : int [1:6] 17 20 23 32 40 47
+ $ : int [1:6] 21 31 34 36 39 46
+ $ : int [1:6] 37 38 44 45 48 49
+ $ : int [1:6] 33 35 38 43 48 49
+ $ : int [1:6] 37 38 43 44 48 49
+ $ : int [1:6] 21 31 34 36 39 42
+ $ : int [1:6] 23 32 35 40 41 44
+ $ : int [1:6] 37 38 43 44 45 49
+ $ : int [1:6] 35 38 43 44 45 48
+ - attr(*, "region.id")= chr [1:49] "1" "2" "3" "4" ...
+ - attr(*, "call")= language knearneigh(x = coords, k = 6)
+ - attr(*, "sym")= logi FALSE
+ - attr(*, "type")= chr "knn"
+ - attr(*, "knn-k")= num 6
+ - attr(*, "class")= chr "nb"</code></pre>
+</div>
+</div>
+</section>
+<section id="plotting-the-adaptive-distance-weight-matrix" class="level4">
+<h4 class="anchored" data-anchor-id="plotting-the-adaptive-distance-weight-matrix">Plotting the adaptive distance weight matrix</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>, <span class="at">main =</span> <span class="st">"Adaptive Distance k-Nearest Neighbours (k = 6)"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(knn6, coords, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="In-Class_Exercise_04_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="computing-geographically-weighted-summary-statistics-for-the-hunan-geospatial-data" class="level3">
+<h3 class="anchored" data-anchor-id="computing-geographically-weighted-summary-statistics-for-the-hunan-geospatial-data">Computing Geographically Weighted Summary Statistics for the <em>hunan</em> geospatial data</h3>
+<p>Converting the <em>hunan</em> simple features object into a Spatial Polygon object class</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>hunan_sp <span class="ot">&lt;-</span> hunan <span class="sc">%&gt;%</span> </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_Spatial</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Generating the summary statistics under a fixed-distance matrix using the <strong>GWmodel</strong> R-Package</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>gwstat_f <span class="ot">&lt;-</span> <span class="fu">gwss</span>(<span class="at">data =</span> hunan_sp, <span class="at">vars =</span> <span class="st">"GDPPC"</span>, <span class="at">bw =</span> <span class="dv">62</span>, <span class="at">kernel =</span> <span class="st">"bisquare"</span>, <span class="at">adaptive =</span> <span class="cn">FALSE</span>, <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>gwstat_f</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ***********************************************************************
+   *                       Package   GWmodel                             *
+   ***********************************************************************
+
+   ***********************Calibration information*************************
+
+   Local summary statistics calculated for variables:
+    GDPPC
+   Number of summary points: 88
+   Kernel function: bisquare 
+   Summary points: the same locations as observations are used.
+   Fixed bandwidth: 62 
+   Distance metric: Great Circle distance metric is used.
+
+   ************************Local Summary Statistics:**********************
+   Summary information for Local means:
+GDPPC_LM 
+     Min.   1st Qu.    Median   3rd Qu.      Max. 
+ 9739.228 17655.049 20983.363 27641.978 80612.808 
+   Summary information for local standard deviation :
+GDPPC_LSD 
+      Min.    1st Qu.     Median    3rd Qu.       Max. 
+  107.7869  2537.9436  4728.3588  7661.3736 24429.6983 
+   Summary information for local variance :
+GDPPC_LVar 
+        Min.      1st Qu.       Median      3rd Qu.         Max. 
+    11618.03   6441172.23  22358574.39  58697396.39 596810159.50 
+   Summary information for Local skewness:
+GDPPC_LSKe 
+      Min.    1st Qu.     Median    3rd Qu.       Max. 
+-8.7404920 -0.5634492  0.8419326  1.5182205 35.0138962 
+   Summary information for localized coefficient of variation:
+GDPPC_LCV 
+       Min.     1st Qu.      Median     3rd Qu.        Max. 
+0.009855784 0.129251305 0.200449352 0.325322576 1.048392406 
+
+   ************************************************************************</code></pre>
+</div>
+</div>
+<p>Generating the summary statistics under an adaptive-distance matrix using the <strong>GWmodel</strong> R-Package</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>gwstat_a <span class="ot">&lt;-</span> <span class="fu">gwss</span>(<span class="at">data =</span> hunan_sp, <span class="at">vars =</span> <span class="st">"GDPPC"</span>, <span class="at">bw =</span> <span class="dv">6</span>, <span class="at">kernel =</span> <span class="st">"bisquare"</span>, <span class="at">adaptive =</span> <span class="cn">TRUE</span>, <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>gwstat_a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ***********************************************************************
+   *                       Package   GWmodel                             *
+   ***********************************************************************
+
+   ***********************Calibration information*************************
+
+   Local summary statistics calculated for variables:
+    GDPPC
+   Number of summary points: 88
+   Kernel function: bisquare 
+   Summary points: the same locations as observations are used.
+   Adaptive bandwidth: 6 (number of nearest neighbours)
+   Distance metric: Great Circle distance metric is used.
+
+   ************************Local Summary Statistics:**********************
+   Summary information for Local means:
+GDPPC_LM 
+    Min.  1st Qu.   Median  3rd Qu.     Max. 
+10313.11 17616.21 21981.39 28547.05 73545.30 
+   Summary information for local standard deviation :
+GDPPC_LSD 
+      Min.    1st Qu.     Median    3rd Qu.       Max. 
+  926.3095  3319.0782  5041.7997  7602.3637 24377.4421 
+   Summary information for local variance :
+GDPPC_LVar 
+       Min.     1st Qu.      Median     3rd Qu.        Max. 
+   858049.3  11030994.6  25419746.0  57798649.1 594259684.0 
+   Summary information for Local skewness:
+GDPPC_LSKe 
+       Min.     1st Qu.      Median     3rd Qu.        Max. 
+-3.74328455 -0.06903772  0.74202796  1.20539540  5.98374890 
+   Summary information for localized coefficient of variation:
+GDPPC_LCV 
+      Min.    1st Qu.     Median    3rd Qu.       Max. 
+0.04955751 0.15100369 0.22079470 0.33316203 0.95567593 
+
+   ************************************************************************</code></pre>
+</div>
+</div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -72,6 +72,7 @@ wm_q <- poly2nb(hunan, queen = TRUE)
 summary(wm_q)
 
 ```
+
 To see the neighbors for the first polygon in the spatial polygon object:
 
 ```{r}
@@ -154,6 +155,7 @@ plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col= "red")
 ```{r}
 
 plot(hunan$geometry, border = "lightgrey")
+
 plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 
 ```
@@ -242,6 +244,7 @@ knn6 <- knn2nb(knearneigh(coords, k = 6))
 knn6
 
 ```
+
 #### Displaying the weight matrix structure
 
 ```{r}
@@ -269,6 +272,7 @@ ids <- lapply(dist, function(x) 1/(x))
 ids
 
 ```
+
 #### Computing a row-standardised weights matrix
 
 Using the style = "W" option for simplicity
@@ -343,7 +347,8 @@ tmap_arrange(gdppc, lag_gdppc, asp = 1, ncol = 2)
 
 ```
 
-#### Calculating Spatial Lags as a sum of neighboring values 
+#### Calculating Spatial Lags as a sum of neighboring values
+
 Assigning binary weights:
 
 ```{r}

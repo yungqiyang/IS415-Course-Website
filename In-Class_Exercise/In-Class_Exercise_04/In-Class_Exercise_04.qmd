@@ -1,5 +1,5 @@
 ---
-title: "In-Class Exercise 4:"
+title: "In-Class Exercise 4: Geospatial Weight Summary Statistics"
 author: "Yung Qi Yang"
 
 format: 
@@ -104,21 +104,28 @@ summary(wm_b)
 
 ```
 
-### Conducting an investigation into the distance-based congruity neighbours in the **Hunan** geospatial dataset.
-
-#### Extracting the centroid geospatial projections
+#### Plotting both **QUEEN**, **ROOK** and **BISHOP** adjacency-based contiguity neighbours maps together
 
 ```{r}
 
-longitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[1]])
-
-latitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[2]])
-
-coords <- cbind(longitude, latitude)
+# par(mfrow = c(1, 3))
+# 
+# plot(hunan$geometry, border = "lightgrey", main = "Queen Contiguity")
+# plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col= "red")
+# 
+# plot(hunan$geometry, border = "lightgrey", main = "Rook Contiguity")
+# plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
+# 
+# plot(hunan$geometry, border = "lightgrey", main = "Bishop Contiguity")
+# plot(wm_b, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 
 ```
 
-#### 
+### Conducting an investigation of distance-based congruity neighbours in the **Hunan** geospatial dataset.
+
+#### Computing the distribution of congruity neighbours in the Hunan region using the fixed-distance bandwidth method.
+
+#### Determining the cut-off distance
 
 ```{r}
 
@@ -129,7 +136,7 @@ summary(k1dists)
 
 ```
 
-####
+#### Computing the fixed distance weight matrix
 
 ```{r}
 
@@ -140,18 +147,32 @@ str(wm_d62)
 
 ```
 
+#### Displaying the weight matrix structure
+
 ```{r}
 
-table(hunan$County, card(wm_d62))
-
-n_comp <- n.comp.nb(wm_d62)
-n_comp$nc
-
-table(n_comp$comp.id)
+# table(hunan$County, card(wm_d62))
+# 
+# n_comp <- n.comp.nb(wm_d62)
+# n_comp$nc
+# 
+# table(n_comp$comp.id)
 
 ```
 
-###
+#### Plotting the fixed distance weight matrix
+
+Distance weight matrix is plotted as layers upon the same plot object:
+
+```{r}
+
+plot(hunan$geometry, border = "lightgrey", main = "Fixed-Distance Nearest Neighbour within 62km")
+plot(wm_d62, coords, add = TRUE)
+plot(k1, coords, add = TRUE, col = "red", length = 0.08)
+
+```
+
+Distance weight matrix is plotted as separate layers here:
 
 ```{r}
 
@@ -165,7 +186,7 @@ plot(wm_d62, coords, add = TRUE, pch = 19, cex = 0.6)
 
 ```
 
-###
+#### Computing the adaptive distance weight matrix
 
 ```{r}
 
@@ -174,3 +195,50 @@ knn6
 
 ```
 
+#### Displaying the weight matrix structure
+
+```{r}
+
+str(knn6)
+
+```
+
+#### Plotting the adaptive distance weight matrix
+
+```{r}
+
+plot(hunan$geometry, border = "lightgrey", main = "Adaptive Distance k-Nearest Neighbours (k = 6)")
+plot(knn6, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
+
+```
+
+### Computing Geographically Weighted Summary Statistics for the *hunan* geospatial data
+
+Converting the *hunan* simple features object into a Spatial Polygon object class
+
+```{r}
+
+hunan_sp <- hunan %>% 
+  as_Spatial()
+
+```
+
+Generating the summary statistics under a fixed-distance matrix using the **GWmodel** R-Package
+
+```{r}
+
+gwstat_f <- gwss(data = hunan_sp, vars = "GDPPC", bw = 62, kernel = "bisquare", adaptive = FALSE, longlat = TRUE)
+
+gwstat_f
+
+```
+
+Generating the summary statistics under an adaptive-distance matrix using the **GWmodel** R-Package
+
+```{r}
+
+gwstat_a <- gwss(data = hunan_sp, vars = "GDPPC", bw = 6, kernel = "bisquare", adaptive = TRUE, longlat = TRUE)
+
+gwstat_a
+
+```
