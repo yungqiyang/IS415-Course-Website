@@ -140,3 +140,37 @@ str(wm_d62)
 
 ```
 
+```{r}
+
+table(hunan$County, card(wm_d62))
+
+n_comp <- n.comp.nb(wm_d62)
+n_comp$nc
+
+table(n_comp$comp.id)
+
+```
+
+###
+
+```{r}
+
+par(mfrow = c(1,2))
+
+plot(hunan$geometry, border = "lightgrey", main = "1st nearest neighbours")
+plot(k1, coords, add = TRUE, col = "red", length = 0.08)
+
+plot(hunan$geometry, border = "lightgrey", main = "Distance link")
+plot(wm_d62, coords, add = TRUE, pch = 19, cex = 0.6)
+
+```
+
+###
+
+```{r}
+
+knn6 <- knn2nb(knearneigh(coords, k = 6))
+knn6
+
+```
+

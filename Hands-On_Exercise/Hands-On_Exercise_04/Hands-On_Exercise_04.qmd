@@ -306,9 +306,6 @@ GDPPC.lag
 
 ```
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 Retrieving the GDPPC of the 5 counties:
 
 ```{r}
