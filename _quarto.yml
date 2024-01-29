@@ -22,7 +22,7 @@ website:
         - text: "In-Class Exercise 3"
           href: "In-Class_Exercise/In-Class_Exercise_03/In-Class_Exercise_03.html"
         - text: "In-Class Exercise 4"
-          href: "In-Class_Exercise/In-Class_Exercise_03/In-Class_Exercise_04.html"
+          href: "In-Class_Exercise/In-Class_Exercise_04/In-Class_Exercise_04.html"
     - text: "Take-Home Exercise"
       menu:
         - text: "Take-Home Exercise 1"
