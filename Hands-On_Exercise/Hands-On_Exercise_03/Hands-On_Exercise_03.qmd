@@ -316,7 +316,7 @@ kde_childcareSG_bw_raster
 
 ```
 
-### Visualing the raster object
+### Visualising the raster object
 
 ```{r}
 

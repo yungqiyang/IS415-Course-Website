@@ -121,6 +121,7 @@ network_sf <- st_read(dsn = "Data/Geospatial/Punggol", layer = "Punggol_St")
 childcare_sf <- st_read(dsn = "Data/Geospatial/Punggol", layer = "Punggol_CC")
 
 ```
+
 #### Plotting the network and geopoint features
 
 ```{r}
@@ -184,4 +185,3 @@ tm_shape(childcare_sf) +
 tmap_mode("plot")
 
 ```
-
