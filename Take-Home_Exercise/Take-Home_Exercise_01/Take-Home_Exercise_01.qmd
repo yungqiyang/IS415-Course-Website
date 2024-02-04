@@ -238,6 +238,8 @@ Considering the size of the datasets and the complexity of the road network, it 
 
 central_sg <- mpsz2019[mpsz2019$REGION_N == "CENTRAL REGION", ]
 
+central_sg <- central_sg[central_sg$PLN_AREA_N %in% c("SINGAPORE RIVER", "DOWNTOWN CORE", "STRAITS VIEW", "OUTRAM", "MARINA SOUTH"), ]
+
 summary(central_sg)
 
 ```
@@ -367,9 +369,9 @@ Diggle method is favoured here because the pre-emptive visualisation showed us t
 
 par(mfrow=c(1, 2), cex.main = 0.5)
 
-kde_central_grab_weekend_diggle_bw.km <- density(central_grab_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+kde_central_grab_weekend_diggle_bw.km <- density(central_grab_weekend_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
 
-kde_central_grab_weekday_diggle_bw.km <- density(central_grab_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+kde_central_grab_weekday_diggle_bw.km <- density(central_grab_weekday_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
 
 plot(kde_central_grab_weekend_diggle_bw.km, main = "Scaled Kernel Density Estimate of Grab Trip Origins in Central SG on Weekends (Diggle)")
 
@@ -383,9 +385,9 @@ plot(kde_central_grab_weekday_diggle_bw.km, main = "Scaled Kernel Density Estima
 
 par(mfrow=c(1, 2), cex.main = 0.4)
 
-kde_central_grab_weekend_ppp_adaptive <- adaptive.density(central_grab_ppp.km, method="kernel")
+kde_central_grab_weekend_ppp_adaptive <- adaptive.density(central_grab_weekend_ppp.km, method="kernel")
 
-kde_central_grab_weekday_ppp_adaptive <- adaptive.density(central_grab_ppp.km, method="kernel")
+kde_central_grab_weekday_ppp_adaptive <- adaptive.density(central_grab_weekday_ppp.km, method="kernel")
 
 plot(kde_central_grab_weekend_ppp_adaptive, main = "Kernel Density Estimate of Grab Trip Origins in central SG on weekends (adaptive bandwidth)")
 
@@ -420,7 +422,7 @@ From the p-values of the Clark-Evan's test, we have to conclude that the distrib
 ```{r}
 #| eval: false
 
-central_roads <- st_intersection(roads, central_sg)
+central_roads <- st_intersection(central_roads, central_sg)
 
 central_roads <- st_cast(central_roads, "LINESTRING")
 
@@ -432,6 +434,8 @@ Saving the produced road network for future use ...
 ```{r}
 
 central_roads <- read_rds("Data/Geospatial/RDS/central_road_network.rds")
+
+central_roads <- st_simplify(central_roads, preserveTopology = TRUE)
 
 ```
 
@@ -479,11 +483,11 @@ samples <- read_rds("Data/Geospatial/RDS/central_road_centrepoints.rds")
 
 ```{r}
 
-densities <- nkde(central_roads, 
-                  events = central_grab_weekday_sf,
-                  w = rep(1,nrow(central_grab_weekday_sf)),
+weekday_densities <- nkde(central_roads, 
+                  events = central_grab_weekend_sf,
+                  w = rep(1,nrow(central_grab_weekend_sf)),
                   samples = samples,
-                  kernel_name = "quartic",
+                  kernel_name = "gaussian",
                   bw = 300, 
                   div= "bw", 
                   method = "simple", 
@@ -495,8 +499,8 @@ densities <- nkde(central_roads,
                   sparse = TRUE,
                   verbose = FALSE)
 
-samples$density <- densities * 1000
-lixels$density <- densities * 1000
+samples$density <- weekday_densities * 1000
+lixels$density <- weekday_densities * 1000
 
 ```
 
@@ -506,9 +510,7 @@ lixels$density <- densities * 1000
 
 tmap_mode('view')
 tm_shape(lixels) +
-  tm_lines(col="density") +
-  tm_shape(central_grab_weekday_sf) +
-  tm_dots() + 
+  tm_lines(col="density", lwd = 2) +
   tm_basemap("OpenStreetMap")
 
 ```
@@ -517,11 +519,11 @@ tm_shape(lixels) +
 
 ```{r}
 
-densities <- nkde(central_roads, 
+weekend_densities <- nkde(central_roads, 
                   events = central_grab_weekend_sf,
                   w = rep(1,nrow(central_grab_weekend_sf)),
                   samples = samples,
-                  kernel_name = "quartic",
+                  kernel_name = "gaussian",
                   bw = 300, 
                   div= "bw", 
                   method = "simple", 
@@ -533,8 +535,8 @@ densities <- nkde(central_roads,
                   sparse = TRUE,
                   verbose = FALSE)
 
-samples$density <- densities * 1000
-lixels$density <- densities * 1000
+samples$density <- weekend_densities * 1000
+lixels$density <- weekend_densities * 1000
 
 ```
 
@@ -544,9 +546,7 @@ lixels$density <- densities * 1000
 
 tmap_mode('view')
 tm_shape(lixels) +
-  tm_lines(col="density") +
-  tm_shape(central_grab_weekend_sf) +
-  tm_dots() + 
+  tm_lines(col="density", lwd = 2) +
   tm_basemap("OpenStreetMap")
 
 ```
