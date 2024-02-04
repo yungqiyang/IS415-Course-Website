@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.539">
+<meta name="generator" content="quarto-1.4.549">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Yung Qi Yang">
-<meta name="dcterms.date" content="2024-01-29">
+<meta name="dcterms.date" content="2024-02-04">
 
 <title>IS415 Course Website - Take-Home Exercise 1: Application of Spatial Point Patterns Analysis to discover the geographical distribution of Grab’s hailing services in Singapore</title>
 <style>
@@ -145,6 +145,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../../Hands-On_Exercise/Hands-On_Exercise_04/Hands-On_Exercise_04.html">
  <span class="dropdown-text">Hands-On Exercise 4</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-On_Exercise/Hands-On_Exercise_05/Hands-On_Exercise_05.html">
+ <span class="dropdown-text">Hands-On Exercise 5</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -161,7 +165,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">In-Class Exercise 3</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../In-Class_Exercise/In-Class_Exercise_03/In-Class_Exercise_04.html">
+    <a class="dropdown-item" href="../../In-Class_Exercise/In-Class_Exercise_04/In-Class_Exercise_04.html">
  <span class="dropdown-text">In-Class Exercise 4</span></a>
   </li>  
     </ul>
@@ -233,7 +237,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 29, 2024</p>
+      <p class="date">February 4, 2024</p>
     </div>
   </div>
   
@@ -250,7 +254,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, tidyverse, arrow)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, tidyverse, arrow, lubridate, tmap)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -290,6 +294,129 @@ $ accuracy      &lt;dbl&gt; 3.900, 4.000, 3.900, 4.000, 3.900, 3.900, 3.000, 3.6
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_parquet</span>(grab_df, <span class="st">"Data/Geospatial/GrabPosisi/Grab_Posisi.parquet"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<section id="grab-posisi-data-1" class="level5">
+<h5 class="anchored" data-anchor-id="grab-posisi-data-1">Grab-Posisi Data</h5>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#|eval: false</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>grab_origin_df <span class="ot">&lt;-</span> grab_df <span class="sc">%&gt;%</span> </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(trj_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(pingtimestamp) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">weekday =</span> <span class="fu">wday</span>(pingtimestamp, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">abbr =</span> <span class="cn">TRUE</span>), <span class="at">start_hr =</span> <span class="fu">factor</span>(<span class="fu">hour</span>(pingtimestamp)), <span class="at">day =</span> <span class="fu">factor</span>(<span class="fu">mday</span>(pingtimestamp)))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(grab_origin_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 28,000
+Columns: 12
+Groups: trj_id [28,000]
+$ trj_id        &lt;chr&gt; "70895", "21926", "47498", "18103", "41322", "64813", "8…
+$ driving_mode  &lt;chr&gt; "car", "car", "car", "car", "car", "car", "car", "car", …
+$ osname        &lt;chr&gt; "android", "android", "ios", "android", "android", "ios"…
+$ pingtimestamp &lt;int&gt; 1554682166, 1554682188, 1554682190, 1554682195, 15546821…
+$ rawlat        &lt;dbl&gt; 1.380114, 1.291268, 1.375195, 1.450080, 1.280679, 1.3090…
+$ rawlng        &lt;dbl&gt; 103.7698, 103.8626, 103.7363, 103.8215, 103.8306, 103.86…
+$ speed         &lt;dbl&gt; 9.9546840, 11.0183750, 18.5645161, 0.4040553, 17.9400000…
+$ bearing       &lt;int&gt; 111, 75, 307, 159, 232, 106, 213, 179, 211, 107, 308, 29…
+$ accuracy      &lt;dbl&gt; 4.000, 4.000, 8.000, 3.000, 3.900, 10.000, 10.000, 4.000…
+$ weekday       &lt;ord&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+$ start_hr      &lt;fct&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+$ day           &lt;fct&gt; 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,…</code></pre>
+</div>
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(grab_origin_df, <span class="st">"Data/Geospatial/RDS/Grab_Origins_Posisi.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#|eval: false</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>grab_dest_df <span class="ot">&lt;-</span> grab_df <span class="sc">%&gt;%</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(trj_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(pingtimestamp)) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">weekday =</span> <span class="fu">wday</span>(pingtimestamp, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">abbr =</span> <span class="cn">TRUE</span>), <span class="at">start_hr =</span> <span class="fu">factor</span>(<span class="fu">hour</span>(pingtimestamp)), <span class="at">day =</span> <span class="fu">factor</span>(<span class="fu">mday</span>(pingtimestamp)))</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(grab_dest_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 28,000
+Columns: 12
+Groups: trj_id [28,000]
+$ trj_id        &lt;chr&gt; "81574", "54687", "17190", "13793", "39014", "41170", "6…
+$ driving_mode  &lt;chr&gt; "car", "car", "car", "car", "car", "car", "car", "car", …
+$ osname        &lt;chr&gt; "ios", "android", "android", "android", "ios", "ios", "i…
+$ pingtimestamp &lt;int&gt; 1555891009, 1555891006, 1555890996, 1555890990, 15558909…
+$ rawlat        &lt;dbl&gt; 1.337683, 1.440122, 1.337227, 1.322065, 1.328897, 1.3155…
+$ rawlng        &lt;dbl&gt; 103.9788, 103.7867, 103.7789, 103.8417, 103.7084, 103.94…
+$ speed         &lt;dbl&gt; 15.34998417, 8.15000000, 12.41395500, 6.46964450, 3.5922…
+$ bearing       &lt;int&gt; 103, 299, 202, 170, 169, 71, 239, 51, 118, 244, 347, 23,…
+$ accuracy      &lt;dbl&gt; 8.000, 4.551, 4.000, 3.900, 4.000, 5.000, 8.000, 10.000,…
+$ weekday       &lt;ord&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+$ start_hr      &lt;fct&gt; 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, …
+$ day           &lt;fct&gt; 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, …</code></pre>
+</div>
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(grab_dest_df, <span class="st">"Data/Geospatial/RDS/Grab_Dest_Posisi.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#|eval: false</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>grab_df <span class="ot">&lt;-</span> <span class="fu">read_parquet</span>(<span class="st">"Data/Geospatial/GrabPosisi/Grab_Posisi.parquet"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(grab_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 30,329,685
+Columns: 9
+$ trj_id        &lt;chr&gt; "70014", "73573", "75567", "1410", "4354", "32630", "646…
+$ driving_mode  &lt;chr&gt; "car", "car", "car", "car", "car", "car", "car", "car", …
+$ osname        &lt;chr&gt; "android", "android", "android", "android", "android", "…
+$ pingtimestamp &lt;int&gt; 1554943236, 1555582623, 1555141026, 1555731693, 15555844…
+$ rawlat        &lt;dbl&gt; 1.342326, 1.321781, 1.327088, 1.262482, 1.283799, 1.3003…
+$ rawlng        &lt;dbl&gt; 103.8890, 103.8564, 103.8613, 103.8238, 103.8072, 103.90…
+$ speed         &lt;dbl&gt; 18.910000, 17.719076, 14.021548, 13.026521, 14.812943, 2…
+$ bearing       &lt;int&gt; 248, 44, 34, 181, 93, 73, 82, 321, 324, 31, 203, 50, 252…
+$ accuracy      &lt;dbl&gt; 3.900, 4.000, 3.900, 4.000, 3.900, 3.900, 3.000, 3.649, …</code></pre>
+</div>
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(grab_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>    trj_id          driving_mode          osname          pingtimestamp      
+ Length:30329685    Length:30329685    Length:30329685    Min.   :1.555e+09  
+ Class :character   Class :character   Class :character   1st Qu.:1.555e+09  
+ Mode  :character   Mode  :character   Mode  :character   Median :1.555e+09  
+                                                          Mean   :1.555e+09  
+                                                          3rd Qu.:1.556e+09  
+                                                          Max.   :1.556e+09  
+     rawlat          rawlng          speed          bearing     
+ Min.   :1.242   Min.   :103.6   Min.   :-1.00   Min.   :  0.0  
+ 1st Qu.:1.322   1st Qu.:103.8   1st Qu.:11.69   1st Qu.: 93.0  
+ Median :1.340   Median :103.8   Median :17.89   Median :172.0  
+ Mean   :1.348   Mean   :103.8   Mean   :16.32   Mean   :178.8  
+ 3rd Qu.:1.378   3rd Qu.:103.9   3rd Qu.:21.86   3rd Qu.:269.0  
+ Max.   :1.466   Max.   :104.0   Max.   :93.00   Max.   :359.0  
+    accuracy       
+ Min.   :1.00e+00  
+ 1st Qu.:4.00e+00  
+ Median :6.00e+00  
+ Mean   :7.22e+00  
+ 3rd Qu.:1.00e+01  
+ Max.   :1.49e+05  </code></pre>
+</div>
+</div>
+</section>
 </section>
 <section id="lta-data" class="level4">
 <h4 class="anchored" data-anchor-id="lta-data">LTA Data:</h4>
@@ -460,7 +587,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
-      return note.innerHTML;
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
     }
   }
   for (var i=0; i<xrefs.length; i++) {

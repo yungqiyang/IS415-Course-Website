@@ -116,8 +116,6 @@ summary(wm_b)
 
 ```
 
-
-
 #### Plotting both **QUEEN**, **ROOK** and **BISHOP** adjacency-based contiguity neighbours maps together
 
 ```{r}

@@ -23,7 +23,7 @@ progress: true
 
 ```{r}
 
-pacman::p_load(sf, tidyverse, arrow)
+pacman::p_load(sf, tidyverse, arrow, lubridate, tmap)
 
 ```
 
@@ -32,7 +32,7 @@ pacman::p_load(sf, tidyverse, arrow)
 #### Grab-Posisi Data:
 
 ```{r}
-#|eval: false
+#| eval: false
 
 grab_df <- read_parquet("Data/Geospatial/GrabPosisi/part-00000-8bbff892-97d2-4011-9961-703e38972569.c000.snappy.parquet")
 
@@ -46,6 +46,50 @@ glimpse(grab_df)
 write_parquet(grab_df, "Data/Geospatial/GrabPosisi/Grab_Posisi.parquet")
 
 ```
+##### Grab-Posisi Data 
+
+
+```{r}
+#| eval: false
+
+grab_origin_df <- grab_df %>% 
+  group_by(trj_id) %>% 
+  arrange(pingtimestamp) %>% 
+  filter(row_number() == 1) %>% 
+  mutate(weekday = wday(pingtimestamp, label = TRUE, abbr = TRUE), start_hr = factor(hour(pingtimestamp)), day = factor(mday(pingtimestamp)))
+
+glimpse(grab_origin_df)
+
+write_rds(grab_origin_df, "Data/Geospatial/RDS/Grab_Origins_Posisi.rds")
+
+```
+
+```{r}
+#| eval: false
+
+grab_dest_df <- grab_df %>% 
+  group_by(trj_id) %>% 
+  arrange(desc(pingtimestamp)) %>% 
+  filter(row_number() == 1) %>% 
+  mutate(weekday = wday(pingtimestamp, label = TRUE, abbr = TRUE), start_hr = factor(hour(pingtimestamp)), day = factor(mday(pingtimestamp)))
+
+glimpse(grab_dest_df)
+
+write_rds(grab_dest_df, "Data/Geospatial/RDS/Grab_Dest_Posisi.rds")
+
+```
+
+
+```{r}
+#| eval: false
+
+grab_df <- read_parquet("Data/Geospatial/GrabPosisi/Grab_Posisi.parquet")
+
+glimpse(grab_df)
+summary(grab_df)
+
+```
+
 
 #### LTA Data:
 
@@ -54,4 +98,3 @@ write_parquet(grab_df, "Data/Geospatial/GrabPosisi/Grab_Posisi.parquet")
 
 
 ```
-
