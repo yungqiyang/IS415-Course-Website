@@ -212,6 +212,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#loading-the-necessary-r-packages" id="toc-loading-the-necessary-r-packages" class="nav-link active" data-scroll-target="#loading-the-necessary-r-packages">Loading the necessary R-packages</a></li>
   <li><a href="#importing-the-datasets-of-interest" id="toc-importing-the-datasets-of-interest" class="nav-link" data-scroll-target="#importing-the-datasets-of-interest">Importing the datasets of interest</a></li>
+  <li><a href="#visualising-the-grab-posisi-origins-data-in-interactive-view" id="toc-visualising-the-grab-posisi-origins-data-in-interactive-view" class="nav-link" data-scroll-target="#visualising-the-grab-posisi-origins-data-in-interactive-view">Visualising the Grab-Posisi origins data in interactive view</a></li>
   <li><a href="#extracting-the-central-region-polygons" id="toc-extracting-the-central-region-polygons" class="nav-link" data-scroll-target="#extracting-the-central-region-polygons">Extracting the “Central Region” polygons</a></li>
   <li><a href="#filtering-down-the-grab-call-origins-data-to-match-out-study-area" id="toc-filtering-down-the-grab-call-origins-data-to-match-out-study-area" class="nav-link" data-scroll-target="#filtering-down-the-grab-call-origins-data-to-match-out-study-area">Filtering down the Grab call origins data to match out study area</a></li>
   <li><a href="#visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore." id="toc-visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore." class="nav-link" data-scroll-target="#visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore.">Visualising the origins of Grab trips over the weekends and weekdays in the Central Region of Singapore.</a></li>
@@ -263,7 +264,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, tidyverse, arrow, lubridate, tmap, maptools, spatstat, spNetwork)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, tidyverse, arrow, lubridate, tmap, maptools, spatstat, spNetwork, htmlwidgets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -532,19 +533,37 @@ Window: rectangle = [3628.24, 49845.23] x [25198.14, 49689.64] units
 Window area = 1131920000 square units</code></pre>
 </div>
 </div>
-<!-- ### Visualising the Grab-Posisi origins data in interactive view -->
-<!-- ```{r} -->
-<!-- tmap_mode("view") -->
-<!-- grab_origin_sf %>% -->
-<!--   tm_shape() + -->
-<!--   tm_dots(alpha = 0.4, size = 0.03) -->
-<!-- tmap_mode("plot") -->
-<!-- ``` -->
+</section>
+</section>
+<section id="visualising-the-grab-posisi-origins-data-in-interactive-view" class="level3">
+<h3 class="anchored" data-anchor-id="visualising-the-grab-posisi-origins-data-in-interactive-view">Visualising the Grab-Posisi origins data in interactive view</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"view"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>grab_origins_interactive <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(grab_origin_sf) <span class="sc">+</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">size =</span> <span class="fl">0.03</span>, <span class="at">col =</span> <span class="st">"green"</span>) <span class="sc">+</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Grab-Posisi Origin points across Singapore"</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(grab_origins_interactive, <span class="st">"Screenshots/grab_origins_interactive.html"</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">iframe</span><span class="ot"> src</span><span class="op">=</span><span class="st">"Screenshots/grab_origins_interactive.html"</span><span class="ot"> width</span><span class="op">=</span><span class="st">"800"</span><span class="ot"> height</span><span class="op">=</span><span class="st">"600"</span><span class="dt">&gt;&lt;/</span><span class="kw">iframe</span><span class="dt">&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 <p>If we zoom in, it appears that there are little to no overlaps in the point coordinates in the data. To confirm,</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(grab_origin_ppp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(grab_origin_ppp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] FALSE</code></pre>
@@ -555,19 +574,18 @@ Window area = 1131920000 square units</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>grab_origin_sg_plot <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(coastal_outline) <span class="sc">+</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"lightyellow"</span>, <span class="at">border.col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Origins of Grab Trips in Singapore (within Mainland only)"</span>) <span class="sc">+</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(grab_origin_sf) <span class="sc">+</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">col =</span> <span class="st">"darkgreen"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>)</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(grab_origin_sg_plot, <span class="st">"Screenshots/Grab_Origins_SG.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>grab_origin_sg_plot <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(coastal_outline) <span class="sc">+</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"lightyellow"</span>, <span class="at">border.col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Origins of Grab Trips in Singapore (within Mainland only)"</span>) <span class="sc">+</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(grab_origin_sf) <span class="sc">+</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">col =</span> <span class="st">"darkgreen"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(grab_origin_sg_plot, <span class="st">"Screenshots/Grab_Origins_SG.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p><img src="Screenshots/Grab_Origins_SG.png" class="img-fluid"></p>
 <p>It is clear that the central region of Singapore handles more calls than other parts of the country. This of course makes sense as the central region is where the central business district lies, and considering the difference in cost of Grab vs.&nbsp;other forms of public transport, it should be expected that most customers of Grab fall within the CBD area.</p>
 <p>Considering the size of the datasets and the complexity of the road network, it makes sense to try to limit the area of study so our machines can handle the computation reasonably. Considering the spread of the data, the central region is chosen as it focus area.</p>
-</section>
 </section>
 <section id="extracting-the-central-region-polygons" class="level3">
 <h3 class="anchored" data-anchor-id="extracting-the-central-region-polygons">Extracting the “Central Region” polygons</h3>
@@ -575,11 +593,11 @@ Window area = 1131920000 square units</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>central_sg <span class="ot">&lt;-</span> mpsz2019[mpsz2019<span class="sc">$</span>REGION_N <span class="sc">==</span> <span class="st">"CENTRAL REGION"</span>, ]</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>central_sg <span class="ot">&lt;-</span> central_sg[central_sg<span class="sc">$</span>PLN_AREA_N <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"SINGAPORE RIVER"</span>, <span class="st">"DOWNTOWN CORE"</span>, <span class="st">"STRAITS VIEW"</span>, <span class="st">"OUTRAM"</span>, <span class="st">"MARINA SOUTH"</span>), ]</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_sg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>central_sg <span class="ot">&lt;-</span> mpsz2019[mpsz2019<span class="sc">$</span>REGION_N <span class="sc">==</span> <span class="st">"CENTRAL REGION"</span>, ]</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>central_sg <span class="ot">&lt;-</span> central_sg[central_sg<span class="sc">$</span>PLN_AREA_N <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"SINGAPORE RIVER"</span>, <span class="st">"DOWNTOWN CORE"</span>, <span class="st">"STRAITS VIEW"</span>, <span class="st">"OUTRAM"</span>, <span class="st">"MARINA SOUTH"</span>), ]</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_sg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>  SUBZONE_N          SUBZONE_C          PLN_AREA_N         PLN_AREA_C       
@@ -595,32 +613,32 @@ Window area = 1131920000 square units</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>central_region_plot <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(mpsz2019) <span class="sc">+</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"lightyellow"</span>, <span class="at">border.col =</span> <span class="st">"navy"</span>) <span class="sc">+</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Central Region of Singapore"</span>) <span class="sc">+</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(central_sg) <span class="sc">+</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"orange"</span>, <span class="at">border.col =</span> <span class="st">"red"</span>)</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(central_region_plot, <span class="st">"Screenshots/central_region_SG.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>central_region_plot <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(mpsz2019) <span class="sc">+</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"lightyellow"</span>, <span class="at">border.col =</span> <span class="st">"navy"</span>) <span class="sc">+</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Central Region of Singapore"</span>) <span class="sc">+</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(central_sg) <span class="sc">+</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"orange"</span>, <span class="at">border.col =</span> <span class="st">"red"</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(central_region_plot, <span class="st">"Screenshots/central_region_SG.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p><img src="Screenshots/central_region_SG.png" class="img-fluid"></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>central_sg <span class="ot">&lt;-</span> <span class="fu">st_union</span>(central_sg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>central_sg <span class="ot">&lt;-</span> <span class="fu">st_union</span>(central_sg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>central_region_SG_outline <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(mpsz2019) <span class="sc">+</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"lightyellow"</span>, <span class="at">border.col =</span> <span class="st">"navy"</span>) <span class="sc">+</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Central Region of Singapore"</span>) <span class="sc">+</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(central_sg) <span class="sc">+</span></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"orange"</span>, <span class="at">border.col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(central_region_SG_outline, <span class="st">"Screenshots/central_region_SG_outline.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>central_region_SG_outline <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(mpsz2019) <span class="sc">+</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"lightyellow"</span>, <span class="at">border.col =</span> <span class="st">"navy"</span>) <span class="sc">+</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Central Region of Singapore"</span>) <span class="sc">+</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(central_sg) <span class="sc">+</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"orange"</span>, <span class="at">border.col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(central_region_SG_outline, <span class="st">"Screenshots/central_region_SG_outline.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p><img src="Screenshots/central_region_SG_outline.png" class="img-fluid"></p>
@@ -631,13 +649,13 @@ Window area = 1131920000 square units</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>grab_weekend <span class="ot">&lt;-</span> grab_origin_sf[grab_origin_sf<span class="sc">$</span>weekday <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Sun"</span>, <span class="st">"Sat"</span>), ]</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>grab_weekday <span class="ot">&lt;-</span> grab_origin_sf[<span class="sc">!</span>grab_origin_sf<span class="sc">$</span>weekday <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Sun"</span>, <span class="st">"Sat"</span>), ]</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>central_grab_weekend_sf <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(grab_weekend, central_sg)</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>central_grab_weekday_sf <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(grab_weekday, central_sg)</span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekend_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>grab_weekend <span class="ot">&lt;-</span> grab_origin_sf[grab_origin_sf<span class="sc">$</span>weekday <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Sun"</span>, <span class="st">"Sat"</span>), ]</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>grab_weekday <span class="ot">&lt;-</span> grab_origin_sf[<span class="sc">!</span>grab_origin_sf<span class="sc">$</span>weekday <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Sun"</span>, <span class="st">"Sat"</span>), ]</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>central_grab_weekend_sf <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(grab_weekend, central_sg)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>central_grab_weekday_sf <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(grab_weekday, central_sg)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekend_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>    trj_id          driving_mode          osname         
@@ -667,7 +685,7 @@ Window area = 1131920000 square units</code></pre>
 </div>
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekday_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekday_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>    trj_id          driving_mode          osname         
@@ -702,21 +720,22 @@ Window area = 1131920000 square units</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>grab_central_weekday_plot <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(central_sg) <span class="sc">+</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"lightyellow"</span>, <span class="at">border.col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Origins of Weekday Grab Trips in Singapore (within Central Region only)"</span>, <span class="at">main.title.size =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(central_grab_weekday_sf) <span class="sc">+</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">col =</span> <span class="st">"darkgreen"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>)</span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>grab_central_weekend_plot <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(central_sg) <span class="sc">+</span></span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"lightyellow"</span>, <span class="at">border.col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Origins of Weekend Grab Trips in Singapore (within Central Region only)"</span>, <span class="at">main.title.size =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(central_grab_weekend_sf) <span class="sc">+</span></span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">col =</span> <span class="st">"darkgreen"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>)</span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(grab_central_weekday_plot, <span class="st">"Screenshots/grab_central_weekday_plot.png"</span>)</span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(grab_central_weekend_plot, <span class="st">"Screenshots/grab_central_weekend_plot.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>grab_central_weekday_plot <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(central_sg) <span class="sc">+</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"lightyellow"</span>, <span class="at">border.col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Origins of Weekday Grab Trips in Singapore (within Central Region only)"</span>, <span class="at">main.title.size =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(central_grab_weekday_sf) <span class="sc">+</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">col =</span> <span class="st">"darkgreen"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>grab_central_weekend_plot <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(central_sg) <span class="sc">+</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"lightyellow"</span>, <span class="at">border.col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Origins of Weekend Grab Trips in Singapore (within Central Region only)"</span>, <span class="at">main.title.size =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>  tm_sh</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(central_grab_weekend_sf) <span class="sc">+</span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">col =</span> <span class="st">"darkgreen"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(grab_central_weekday_plot, <span class="st">"Screenshots/grab_central_weekday_plot.png"</span>)</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_save</span>(grab_central_weekend_plot, <span class="st">"Screenshots/grab_central_weekend_plot.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p><img src="Take-Home_Exercise_01_files/figure-html/grab_central_weekday_plot.png" class="img-fluid"></p>
@@ -730,10 +749,10 @@ Window area = 1131920000 square units</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekend_spatial <span class="ot">&lt;-</span> central_grab_weekend_sf <span class="sc">%&gt;%</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_Spatial</span>()</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekend_spatial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekend_spatial <span class="ot">&lt;-</span> central_grab_weekend_sf <span class="sc">%&gt;%</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_Spatial</span>()</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekend_spatial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Object of class SpatialPointsDataFrame
@@ -775,10 +794,10 @@ Data attributes:
 </div>
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekend_sp <span class="ot">&lt;-</span> central_grab_weekend_spatial <span class="sc">%&gt;%</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">"SpatialPoints"</span>)</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekend_sp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekend_sp <span class="ot">&lt;-</span> central_grab_weekend_spatial <span class="sc">%&gt;%</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">"SpatialPoints"</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekend_sp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Object of class SpatialPoints
@@ -795,10 +814,10 @@ Number of points: 307</code></pre>
 </div>
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekend_ppp <span class="ot">&lt;-</span> central_grab_weekend_sp <span class="sc">%&gt;%</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">"ppp"</span>)</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekend_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekend_ppp <span class="ot">&lt;-</span> central_grab_weekend_sp <span class="sc">%&gt;%</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">"ppp"</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekend_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Planar point pattern:  307 points
@@ -818,10 +837,10 @@ Window area = 15639500 square units</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekday_spatial <span class="ot">&lt;-</span> central_grab_weekday_sf <span class="sc">%&gt;%</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_Spatial</span>()</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekday_spatial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekday_spatial <span class="ot">&lt;-</span> central_grab_weekday_sf <span class="sc">%&gt;%</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_Spatial</span>()</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekday_spatial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Object of class SpatialPointsDataFrame
@@ -863,10 +882,10 @@ Data attributes:
 </div>
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekday_sp <span class="ot">&lt;-</span> central_grab_weekday_spatial <span class="sc">%&gt;%</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">"SpatialPoints"</span>)</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekday_sp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekday_sp <span class="ot">&lt;-</span> central_grab_weekday_spatial <span class="sc">%&gt;%</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">"SpatialPoints"</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekday_sp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Object of class SpatialPoints
@@ -883,10 +902,10 @@ Number of points: 1213</code></pre>
 </div>
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekday_ppp <span class="ot">&lt;-</span> central_grab_weekday_sp <span class="sc">%&gt;%</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">"ppp"</span>)</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekday_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekday_ppp <span class="ot">&lt;-</span> central_grab_weekday_sp <span class="sc">%&gt;%</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">"ppp"</span>)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekday_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Planar point pattern:  1213 points
@@ -907,11 +926,11 @@ Window area = 14808500 square units</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekend_ppp.km <span class="ot">&lt;-</span> <span class="fu">rescale</span>(central_grab_weekend_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>central_grab_weekday_ppp.km <span class="ot">&lt;-</span> <span class="fu">rescale</span>(central_grab_weekday_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekend_ppp.km)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>central_grab_weekend_ppp.km <span class="ot">&lt;-</span> <span class="fu">rescale</span>(central_grab_weekend_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>central_grab_weekday_ppp.km <span class="ot">&lt;-</span> <span class="fu">rescale</span>(central_grab_weekday_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekend_ppp.km)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Planar point pattern:  307 points
@@ -926,7 +945,7 @@ Unit of length: 1 km</code></pre>
 </div>
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekday_ppp.km)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(central_grab_weekday_ppp.km)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Planar point pattern:  1213 points
