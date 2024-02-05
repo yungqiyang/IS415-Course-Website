@@ -56,7 +56,7 @@ grab_df$pingtimestamp <- as_datetime(grab_df$pingtimestamp)
 
 ```
 
-![](Screenshots/Grab_Posisi_Data_Glimpse.png)
+![](Take-Home_Exercise_01_files/figure-html/Grab_Posisi_Data_Glimpse.png)
 
 Grab-Posisi is stored here in case there is a need for it in its entirety.
 
@@ -83,7 +83,7 @@ write_rds(grab_origin_df, "Data/Geospatial/RDS/Grab_Origins_Posisi.rds")
 
 ```
 
-![](Screenshots/Grab_Origins_Data_Glimpse.png)
+![](Take-Home_Exercise_01_files/figure-html/Grab_Origins_Data_Glimpse.png)
 
 ```{r}
 
@@ -128,7 +128,7 @@ tmap_save(tm = mpsz2019_plot, "Screenshots/mpsz2019.png")
 
 ```
 
-![](Screenshots\mpsz2019.png)
+![](Take-Home_Exercise_01_files/figure-html/mpsz2019.png)
 
 
 From the plot, we can see that the Master-Plan Subzone Data includes the outer islands of Singapore.
@@ -149,7 +149,7 @@ tmap_save(tm = mpsz_w_roads2019_plot, "Screenshots/mpsz_w_roads2019.png")
 
 ```
 
-![](Screenshots/mpsz_w_roads2019.png)
+![](Take-Home_Exercise_01_files/figure-html/mpsz_w_roads2019.png)
 
 Here we can observe that there are road networks present outside the mainland in the dataset. Thus, we need to remove them if mainland Singapore is the scope of the study. First though, we should investigate the Grab-Posisi Data further.
 
@@ -226,7 +226,7 @@ tmap_save(grab_origin_sg_plot, "Screenshots/Grab_Origins_SG.png")
 
 ```
 
-![](Screenshots/Grab_Origins_SG.png)
+![](Take-Home_Exercise_01_files/figure-html/Grab_Origins_SG.png)
 
 It is clear that the central region of Singapore handles more calls than other parts of the country. This of course makes sense as the central region is where the central business district lies, and considering the difference in cost of Grab vs. other forms of public transport, it should be expected that most customers of Grab fall within the CBD area.
 
@@ -258,7 +258,7 @@ central_region_plot <- tm_shape(mpsz2019) +
 tmap_save(central_region_plot, "Screenshots/central_region_SG.png")
 
 ```
-![](Screenshots/central_region_SG.png)
+![](Take-Home_Exercise_01_files/figure-html/central_region_SG.png)
 
 
 ```{r}
@@ -279,7 +279,7 @@ central_region_SG_outline <- tm_shape(mpsz2019) +
 tmap_save(central_region_SG_outline, "Screenshots/central_region_SG_outline.png")
 
 ```
-![](Screenshots/central_region_SG_outline.png)
+![](Take-Home_Exercise_01_files/figure-html/central_region_SG_outline.png)
 
 ### Filtering down the Grab call origins data to match out study area
 
@@ -321,9 +321,9 @@ tmap_save(grab_central_weekend_plot, "Screenshots/grab_central_weekend_plot.png"
 
 
 ```
-![](Screenshots/grab_central_weekday_plot.png)
+![](Take-Home_Exercise_01_files/figure-html/grab_central_weekday_plot.png)
 
-![](Screenshots/grab_central_weekend_plot.png)
+![](Take-Home_Exercise_01_files/figure-html/grab_central_weekend_plot.png)
 
 It appears that on the weekends, calls not only originate from the central region far less often, but also become more sparsely spread out. This makes sense as the central region encompasses subzones outside the CBD, so as the weekend comes, even though calls may fall off in the CBD, these subzones will remain steady. Thus, contributing to the more even distribution observed.
 
@@ -478,7 +478,7 @@ tmap_save(central_road_network_plot, "Screenshots/central_road_network.png")
 
 ```
 
-![](Screenshots/central_road_network.png)
+![](Take-Home_Exercise_01_files/figure-html/central_road_network.png)
 
 ### Preparing the lixel objects and generating the line centre points
 
