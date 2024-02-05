@@ -1,4 +1,0 @@
----
-title: "Take-Home_Exercise_02"
-author: "Yung Qi Yang"
----

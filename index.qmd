@@ -4,7 +4,3 @@ author: Yung Qi Yang
 ---
 
 Hello everybody, my name is Qi Yang and this is my progress through **IS415 - Geospatial Analytics and Applications**!
-
-```{r}
-1 + 1
-```
