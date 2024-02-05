@@ -430,6 +430,25 @@ $ GDPPC  &lt;dbl&gt; 3469, 24612, 14659, 11687, 13406, 8546, 10944, 8040, 7383, 
 </section>
 <section id="performing-the-global-morans-i-test" class="level3">
 <h3 class="anchored" data-anchor-id="performing-the-global-morans-i-test">Performing the Global Moran’s I test</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">global_moran_test</span>(wm_q<span class="sc">$</span>GDPPC, wm_q<span class="sc">$</span>nb, wm_q<span class="sc">$</span>wt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Moran I test under randomisation
+
+data:  x  
+weights: listw    
+
+Moran I statistic standard deviate = 4.7351, p-value = 1.095e-06
+alternative hypothesis: greater
+sample estimates:
+Moran I statistic       Expectation          Variance 
+      0.300749970      -0.011494253       0.004348351 </code></pre>
+</div>
+</div>
 
 
 </section>
