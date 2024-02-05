@@ -100,11 +100,3 @@ glimpse(moranI)
 
 ```
 
-### Performing the Global Moran's I test
-
-```{r}
-
-
-
-```
-
