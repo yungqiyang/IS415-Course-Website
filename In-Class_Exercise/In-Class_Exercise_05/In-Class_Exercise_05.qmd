@@ -1,5 +1,5 @@
 ---
-title: "In-Class Exercise 5: Measuring Spatial Correlation on the Global and Local Levels"
+title: "In-Class Exercise 5: Global and Local Measures of Spatial Autocorrelation using sfDep methods"
 author: "Yung Qi Yang"
 
 format: 
@@ -19,4 +19,50 @@ toc-location: left
 progress: true
 ---
 
-### 
+### Loading the required R-Packages
+
+```{r}
+
+pacman::p_load(sf, sfdep, sfdep, tidyverse)
+
+```
+
+### Importing the required datasets into the R-Environment
+
+```{r}
+
+hunan <- st_read("Data/Geospatial/Hunan", layer = "Hunan")
+
+summary(hunan)
+
+hunan2012 <- read_csv("Data/Aspatial/Hunan_2012.csv")
+
+glimpse(hunan2012)
+
+hunanGDPPC <- read_csv("Data/Aspatial/Hunan_GDPPC.csv")
+
+glimpse(hunanGDPPC)
+
+```
+
+#### Appending the Hunan Aspatial data to the Hunan Geospatial *sf* object
+
+```{r}
+#| eval: false
+
+hunan <- left_join(hunan, hunan2012) %>% 
+  select(1:4, 7, 15)
+
+write_rds(hunan, "Data/Geospatial/RDS/Hunan.rds")
+
+```
+
+#### Reading the combined Hunan spatial data
+
+```{r}
+
+hunan <- read_rds("Data/Geospatial/RDS/Hunan.rds")
+
+```
+
+

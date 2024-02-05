@@ -7,8 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Yung Qi Yang">
+<meta name="dcterms.date" content="2024-02-05">
 
-<title>IS415 Course Website - In-Class Exercise 5: Measuring Spatial Correlation on the Global and Local Levels</title>
+<title>IS415 Course Website - In-Class Exercise 5: Global and Local Spatial Autocorrelation using sfDep methods</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -175,7 +210,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#section" id="toc-section" class="nav-link active" data-scroll-target="#section"></a></li>
+  <li><a href="#loading-the-required-r-packages" id="toc-loading-the-required-r-packages" class="nav-link active" data-scroll-target="#loading-the-required-r-packages">Loading the required R-Packages</a></li>
+  <li><a href="#importing-the-required-datasets-into-the-r-environment" id="toc-importing-the-required-datasets-into-the-r-environment" class="nav-link" data-scroll-target="#importing-the-required-datasets-into-the-r-environment">Importing the required datasets into the R-Environment</a></li>
   </ul>
 </nav>
 </nav>
@@ -188,7 +224,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">In-Class Exercise 5: Measuring Spatial Correlation on the Global and Local Levels</h1>
+<h1 class="title">In-Class Exercise 5: Global and Local Spatial Autocorrelation using sfDep methods</h1>
 </div>
 
 
@@ -205,7 +241,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Invalid Date</p>
+      <p class="date">February 5, 2024</p>
     </div>
   </div>
   
@@ -217,8 +253,17 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="section" class="level3">
-<h3 class="anchored" data-anchor-id="section"></h3>
+<section id="loading-the-required-r-packages" class="level3">
+<h3 class="anchored" data-anchor-id="loading-the-required-r-packages">Loading the required R-Packages</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Reveal Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sfdep, tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="importing-the-required-datasets-into-the-r-environment" class="level3">
+<h3 class="anchored" data-anchor-id="importing-the-required-datasets-into-the-r-environment">Importing the required datasets into the R-Environment</h3>
 
 
 </section>
