@@ -11,8 +11,6 @@ execute:
   eval: true
   echo: true
   warning: false
-  freeze: auto
-  cache: true
   
 date: "`r Sys.Date()`"
 
@@ -118,6 +116,8 @@ summary(roads)
 
 ```
 
+![](Screenshots/OSM_Road_Network.png)
+
 Plotting the Master-Plan Subzone geospatial data for visualisation
 
 ```{r}
@@ -194,24 +194,23 @@ summary(grab_origin_ppp)
 ```{r}
 #| eval: false
 
-tmap_mode("view")
-
 grab_origins_interactive <- tm_shape(grab_origin_sf) +
   tm_dots(alpha = 0.4, size = 0.03, col = "green") +
   tm_layout(main.title = "Grab-Posisi Origin points across Singapore")
 
-tmap_save(grab_origins_interactive, "Screenshots/grab_origins_interactive.html")
+grab_origins_interactive = tmap_leaflet(grab_origins_interactive)
 
-tmap_mode("plot")
-
-```
-
-```{html}
-<div>
-    <iframe src="Screenshots/grab_origins_interactive.html" width="800" height="600"></iframe>
-</div>
+saveWidget(widget = grab_origins_interactive, file = "Screenshots/grab_origins_interactive.html")
 
 ```
+
+<!--html_preserve-->
+
+<iframe src="Screenshots/grab_origins_interactive.html" width="600" height="400">
+
+</iframe>
+
+<!--html_preserve-->
 
 If we zoom in, it appears that there are little to no overlaps in the point coordinates in the data. To confirm,
 
@@ -250,9 +249,7 @@ Only specific polygons within the "Central Region" is chosen to further narrow d
 
 ```{r}
 
-central_sg <- mpsz2019[mpsz2019$REGION_N == "CENTRAL REGION", ]
-
-central_sg <- central_sg[central_sg$PLN_AREA_N %in% c("SINGAPORE RIVER", "DOWNTOWN CORE", "STRAITS VIEW", "OUTRAM", "MARINA SOUTH"), ]
+central_sg <- mpsz2019[mpsz2019$PLN_AREA_N %in% c("DOWNTOWN CORE", "MARINA EAST", "MARINA SOUTH", "MUSEUM", "NEWTON", "ORCHARD", "OUTRAM", "RIVER VALLEY", "ROCHOR", "SINGAPORE RIVER", "STRAITS VIEW"), ]
 
 summary(central_sg)
 
@@ -320,14 +317,13 @@ grab_central_weekday_plot <- tm_shape(central_sg) +
   tm_polygons(col = "lightyellow", border.col = "blue", lwd = 1.5) +
   tm_layout(main.title = "Origins of Weekday Grab Trips in Singapore (within Central Region only)", main.title.size = 0.7) +
   tm_shape(central_grab_weekday_sf) +
-  tm_dots(col = "darkgreen", alpha = 0.5)
+  tm_dots(col = "darkgreen", alpha = 0.3, size = 0.5)
 
 grab_central_weekend_plot <- tm_shape(central_sg) +
   tm_polygons(col = "lightyellow", border.col = "blue", lwd = 1.5) +
   tm_layout(main.title = "Origins of Weekend Grab Trips in Singapore (within Central Region only)", main.title.size = 0.7) +
-  tm_sh
   tm_shape(central_grab_weekend_sf) +
-  tm_dots(col = "darkgreen", alpha = 0.5)
+  tm_dots(col = "darkgreen", alpha = 0.3, size = 0.5)
 
 tmap_save(grab_central_weekday_plot, "Screenshots/grab_central_weekday_plot.png")
 
@@ -336,9 +332,9 @@ tmap_save(grab_central_weekend_plot, "Screenshots/grab_central_weekend_plot.png"
 
 ```
 
-![](Take-Home_Exercise_01_files/figure-html/grab_central_weekday_plot.png)
+![](Screenshots/grab_central_weekday_plot.png)
 
-![](Take-Home_Exercise_01_files/figure-html/grab_central_weekend_plot.png)
+![](Screenshots/grab_central_weekend_plot.png)
 
 It appears that on the weekends, calls not only originate from the central region far less often, but also become more sparsely spread out. This makes sense as the central region encompasses subzones outside the CBD, so as the weekend comes, even though calls may fall off in the CBD, these subzones will remain steady. Thus, contributing to the more even distribution observed.
 
@@ -400,246 +396,237 @@ summary(central_grab_weekday_ppp.km)
 
 ```
 
-<!-- ### Using the ***Diggle*** method to conduct the Kernel Density Estimations -->
+### Using the ***Diggle*** method to conduct the Kernel Density Estimations
 
-<!-- Diggle method is favoured here because the pre-emptive visualisation showed us that the call origins are clustered in multiple regions on weekdays and highly dispersed on weekends. -->
+Diggle method is favoured here because the pre-emptive visualisation showed us that the call origins are clustered in multiple regions on weekdays and highly dispersed on weekends.
 
-<!-- ```{r} -->
+```{r}
 
-<!-- par(mfrow=c(1, 2), cex.main = 0.5) -->
+par(mfrow=c(1, 2), cex.main = 0.5)
 
-<!-- kde_central_grab_weekend_diggle_bw.km <- density(central_grab_weekend_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian") -->
+kde_central_grab_weekend_diggle_bw.km <- density(central_grab_weekend_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
 
-<!-- kde_central_grab_weekday_diggle_bw.km <- density(central_grab_weekday_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian") -->
+kde_central_grab_weekday_diggle_bw.km <- density(central_grab_weekday_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
 
-<!-- plot(kde_central_grab_weekend_diggle_bw.km, main = "Scaled Kernel Density Estimate of Grab Trip Origins in Central SG on Weekends (Diggle)") -->
+plot(kde_central_grab_weekend_diggle_bw.km, main = "Scaled Kernel Density Estimate of Grab Trip Origins in Central SG on Weekends (Diggle)")
 
-<!-- plot(kde_central_grab_weekday_diggle_bw.km, main = "Scaled Kernel Density Estimate of Grab Trip Origins in Central SG on Weekdays (Diggle)") -->
+plot(kde_central_grab_weekday_diggle_bw.km, main = "Scaled Kernel Density Estimate of Grab Trip Origins in Central SG on Weekdays (Diggle)")
 
-<!-- ``` -->
+```
 
-<!-- ### Using the ***Adaptive Bandwidth*** method to conduct the Kernel Density Estimations -->
+### Using the ***Adaptive Bandwidth*** method to conduct the Kernel Density Estimations
 
-<!-- ```{r} -->
+```{r}
 
-<!-- par(mfrow=c(1, 2), cex.main = 0.4) -->
+par(mfrow=c(1, 2), cex.main = 0.4)
 
-<!-- kde_central_grab_weekend_ppp_adaptive <- adaptive.density(central_grab_weekend_ppp.km, method="kernel") -->
+kde_central_grab_weekend_ppp_adaptive <- adaptive.density(central_grab_weekend_ppp.km, method="kernel")
 
-<!-- kde_central_grab_weekday_ppp_adaptive <- adaptive.density(central_grab_weekday_ppp.km, method="kernel") -->
+kde_central_grab_weekday_ppp_adaptive <- adaptive.density(central_grab_weekday_ppp.km, method="kernel")
 
-<!-- plot(kde_central_grab_weekend_ppp_adaptive, main = "Kernel Density Estimate of Grab Trip Origins in central SG on weekends (adaptive bandwidth)") -->
+plot(kde_central_grab_weekend_ppp_adaptive, main = "Kernel Density Estimate of Grab Trip Origins in central SG on weekends (adaptive bandwidth)")
 
-<!-- plot(kde_central_grab_weekday_ppp_adaptive, main = "Kernel Density Estimate of Grab Trip Origins in central SG on weekdays (adaptive bandwidth)") -->
+plot(kde_central_grab_weekday_ppp_adaptive, main = "Kernel Density Estimate of Grab Trip Origins in central SG on weekdays (adaptive bandwidth)")
 
-<!-- ``` -->
+```
 
-<!-- The KDE plots here become especially useful as it shows how the previous simple plot of the Grab trip origins can be misleading. Here, the KDE estimates tells us that the distribution of the trip origins still happen to be heavily skewed towards what should be the CBD area of Singapore regardless of the part of the week. Whereas, previous plots, probably as a result of lower volume would have us believe that there is the difference in spread. -->
+The KDE plots here become especially useful as it shows how the previous simple plot of the Grab trip origins can be misleading. Here, the KDE estimates tells us that the distribution of the trip origins still happen to be heavily skewed towards what should be the CBD area of Singapore regardless of the part of the week. Whereas, previous plots, probably as a result of lower volume would have us believe that there is the difference in spread.
 
-<!-- ### Conducting the Clark-Evans test for Spatial Point Pattern -->
+### Conducting the Clark-Evans test for Spatial Point Pattern
 
-<!-- ```{r} -->
+```{r}
 
-<!-- clarkevans.test(central_grab_weekday_ppp.km, -->
+clarkevans.test(central_grab_weekday_ppp.km, correction="none", clipregion="central_sg_owin", alternative=c("clustered"), nsim=99)
 
-<!--                 correction="none", -->
+clarkevans.test(central_grab_weekend_ppp.km, correction="none", clipregion="central_sg_owin", alternative=c("clustered"), nsim=99)
 
-<!--                 clipregion="central_sg_owin", -->
+```
 
-<!--                 alternative=c("clustered"), -->
+From the p-values of the Clark-Evan's test, we have to conclude that the distributions of the Grab trip origins are clustered in the central planning region of Singapore. A conclusion supported by out KDE plots.
 
-<!--                 nsim=99) -->
+### Limiting the Road Network Data to Central Singapore
 
-<!-- clarkevans.test(central_grab_weekend_ppp.km, -->
+```{r}
+#| eval: false
 
-<!--                 correction="none", -->
+central_roads <- st_intersection(roads, central_sg)
 
-<!--                 clipregion="central_sg_owin", -->
+central_roads <- st_cast(central_roads, "LINESTRING")
 
-<!--                 alternative=c("clustered"), -->
+write_rds(central_roads, "Data/Geospatial/RDS/central_road_network.rds")
 
-<!--                 nsim=99) -->
+```
 
-<!-- ``` -->
+Saving the produced road network for future use ...
 
-<!-- From the p-values of the Clark-Evan's test, we have to conclude that the distributions of the Grab trip origins are clustered in the central planning region of Singapore. A conclusion supported by out KDE plots. -->
+```{r}
 
-<!-- ### Limiting the Road Network Data to Central Singapore -->
+central_roads <- read_rds("Data/Geospatial/RDS/central_road_network.rds")
 
-<!-- ```{r} -->
+central_roads <- st_simplify(central_roads, preserveTopology = TRUE)
 
-<!-- #| eval: false -->
+```
 
-<!-- central_roads <- st_intersection(central_roads, central_sg) -->
+```{r}
+#| eval: false
 
-<!-- central_roads <- st_cast(central_roads, "LINESTRING") -->
+central_road_network_plot <- tm_shape(central_sg) +
+  tm_polygons(col = "lightyellow") +
+  tm_layout(main.title = "Road Network in Central Singapore") +
+  tm_shape(central_roads) +
+  tm_lines(col = "brown")
 
-<!-- write_rds(central_roads, "Data/Geospatial/RDS/central_road_network.rds") -->
+tmap_save(central_road_network_plot, "Screenshots/central_road_network.png")
 
-<!-- ``` -->
+```
 
-<!-- Saving the produced road network for future use ... -->
+![](Screenshots/central_road_network.png)
 
-<!-- ```{r} -->
+### Preparing the lixel objects and generating the line centre points
 
-<!-- central_roads <- read_rds("Data/Geospatial/RDS/central_road_network.rds") -->
+```{r}
+#| eval: false
 
-<!-- central_roads <- st_simplify(central_roads, preserveTopology = TRUE) -->
+lixels <- lixelize_lines(central_roads, 700, mindist = 350)
 
-<!-- ``` -->
+samples <- lines_center(lixels)
 
-<!-- ```{r} -->
+write_rds(lixels, "Data/Geospatial/RDS/central_road_lixels.rds")
 
-<!-- #| eval: false -->
+write_rds(samples, "Data/Geospatial/RDS/central_road_centrepoints.rds")
 
-<!-- central_road_network_plot <- tm_shape(central_sg) + -->
+```
 
-<!--   tm_polygons(col = "lightyellow") + -->
+Saving the produced lixel and centrepoint objects for future use ...
 
-<!--   tm_layout(main.title = "Road Network in Central Singapore") + -->
+```{r}
 
-<!--   tm_shape(central_roads) +  -->
+lixels <- read_rds("Data/Geospatial/RDS/central_road_lixels.rds")
 
-<!--   tm_lines(col = "brown") -->
+samples <- read_rds("Data/Geospatial/RDS/central_road_centrepoints.rds")
 
-<!-- tmap_save(central_road_network_plot, "Screenshots/central_road_network.png") -->
+```
 
-<!-- ``` -->
+### Performing the Network Constrained Kernel Density Estimation
 
-<!-- ![](Take-Home_Exercise_01_files/figure-html/central_road_network.png) -->
+#### Weekday Data:
 
-<!-- ### Preparing the lixel objects and generating the line centre points -->
+```{r}
+#| eval: false
 
-<!-- ```{r} -->
+weekday_densities <- nkde(central_roads, 
+                          events = central_grab_weekday_sf,  
+                          w = rep(1,nrow(central_grab_weekday_sf)), 
+                          samples = samples, 
+                          kernel_name = "gaussian", 
+                          bw = 300, 
+                          div= "bw", 
+                          method = "simple", 
+                          digits = 1, 
+                          tol = 1, 
+                          grid_shape = c(1,1), 
+                          max_depth = 8, 
+                          agg = 5, 
+                          sparse = TRUE, 
+                          verbose = TRUE)
 
-<!-- #| eval: false -->
+write_rds(weekday_densities, "Data/Geospatial/RDS/Grab_weekday_nkde.rds")
 
-<!-- lixels <- lixelize_lines(central_roads, 700, mindist = 350) -->
+```
 
-<!-- samples <- lines_center(lixels) -->
+```{r}
 
-<!-- write_rds(lixels, "Data/Geospatial/RDS/central_road_lixels.rds") -->
+weekday_densities <- read_rds("Data/Geospatial/RDS/Grab_weekday_nkde.rds")
 
-<!-- write_rds(samples, "Data/Geospatial/RDS/central_road_centrepoints.rds") -->
+samples$density <- weekday_densities * 1000
+lixels$density <- weekday_densities * 1000
 
-<!-- ``` -->
+```
 
-<!-- Saving the produced lixel and centrepoint objects for future use ... -->
+#### Visualising the Network Constrained Kernel Density Estimate of the Weekday Grab Data over an interactive *OpenStreetMap* layer
 
-<!-- ```{r} -->
+```{r}
+#| eval: false
 
-<!-- lixels <- read_rds("Data/Geospatial/RDS/central_road_lixels.rds") -->
+grab_weekday_interactive <-  tm_shape(lixels) +
+  tm_lines(col="density", lwd = 2) +
+  tm_layout(frame = TRUE, main.title = "Network-Constrained Kernel Density Estimation of Grab Call Origins in the CBD") +
+  tm_shape(central_grab_weekday_sf) +
+  tm_dots(col = "green", alpha = 0.5, size = 0.01) +
+  tm_scale_bar() +
+  tm_basemap("OpenStreetMap")
 
-<!-- samples <- read_rds("Data/Geospatial/RDS/central_road_centrepoints.rds") -->
+grab_weekday_interactive <- tmap_leaflet(grab_weekday_interactive)
 
-<!-- ``` -->
+saveWidget(grab_weekday_interactive, "Screenshots/CBD_grab_weekday_interactive.html")
 
-<!-- ### Performing the Network Constrained Kernel Density Estimation -->
+```
 
-<!-- #### Weekday Data: -->
+<!--html_preserve-->
 
-<!-- ```{r} -->
+<iframe src="Screenshots/CBD_grab_weekday_interactive.html" width="600" height="400">
 
-<!-- weekday_densities <- nkde(central_roads,  -->
+</iframe>
 
-<!--                   events = central_grab_weekend_sf, -->
+<!--html_preserve-->
 
-<!--                   w = rep(1,nrow(central_grab_weekend_sf)), -->
+#### Weekend Data:
 
-<!--                   samples = samples, -->
+```{r}
+#| eval: false
 
-<!--                   kernel_name = "gaussian", -->
+weekend_densities <- nkde(central_roads,
+                  events = central_grab_weekend_sf,
+                  w = rep(1,nrow(central_grab_weekend_sf)),
+                  samples = samples,
+                  kernel_name = "gaussian",
+                  bw = 300,
+                  div= "bw",
+                  method = "simple",
+                  digits = 1,
+                  tol = 1,
+                  grid_shape = c(1,1),
+                  max_depth = 8,
+                  agg = 5,
+                  sparse = TRUE,
+                  verbose = TRUE)
 
-<!--                   bw = 300,  -->
+write_rds(weekend_densities, "Data/Geospatial/RDS/Grab_weekend_nkde.rds")
 
-<!--                   div= "bw",  -->
+```
 
-<!--                   method = "simple",  -->
+```{r}
 
-<!--                   digits = 1,  -->
+weekend_densities <- read_rds("Data/Geospatial/RDS/Grab_weekend_nkde.rds")
 
-<!--                   tol = 1, -->
+samples$density <- weekend_densities * 1000
+lixels$density <- weekend_densities * 1000
 
-<!--                   grid_shape = c(1,1),  -->
+```
 
-<!--                   max_depth = 8, -->
+#### Visualising the Network Constrained Kernel Density Estimate of the Weekend Grab Data over an interactive *OpenStreetMap* layer
 
-<!--                   agg = 5, -->
+```{r}
+#| eval: false
 
-<!--                   sparse = TRUE, -->
+grab_weekend_interactive <-  tm_shape(lixels) +
+  tm_lines(col="density", lwd = 2) +
+  tm_layout(frame = TRUE) +
+  tm_shape(central_grab_weekend_sf) +
+  tm_dots(col = "green", alpha = 0.5, size = 0.01) +
+  tm_scale_bar() +
+  tm_basemap("OpenStreetMap")
 
-<!--                   verbose = FALSE) -->
+grab_weekend_interactive <- tmap_leaflet(grab_weekend_interactive)
 
-<!-- samples$density <- weekday_densities * 1000 -->
+saveWidget(grab_weekend_interactive, "Screenshots/CBD_grab_weekend_interactive.html")
 
-<!-- lixels$density <- weekday_densities * 1000 -->
+```
 
-<!-- ``` -->
+<!--html_preserve-->
 
-<!-- #### Visualising the Network Constrained Kernel Density Estimate of the Weekday Grab Data over an interactive *OpenStreetMap* layer -->
+<iframe src="Screenshots/CBD_grab_weekend_interactive.html" width="600" height="400">
 
-<!-- ```{r} -->
+</iframe>
 
-<!-- tmap_mode('view') -->
-
-<!-- tm_shape(lixels) + -->
-
-<!--   tm_lines(col="density", lwd = 2) + -->
-
-<!--   tm_basemap("OpenStreetMap") -->
-
-<!-- ``` -->
-
-<!-- #### Weekend Data: -->
-
-<!-- ```{r} -->
-
-<!-- weekend_densities <- nkde(central_roads,  -->
-
-<!--                   events = central_grab_weekend_sf, -->
-
-<!--                   w = rep(1,nrow(central_grab_weekend_sf)), -->
-
-<!--                   samples = samples, -->
-
-<!--                   kernel_name = "gaussian", -->
-
-<!--                   bw = 300,  -->
-
-<!--                   div= "bw",  -->
-
-<!--                   method = "simple",  -->
-
-<!--                   digits = 1,  -->
-
-<!--                   tol = 1, -->
-
-<!--                   grid_shape = c(1,1),  -->
-
-<!--                   max_depth = 8, -->
-
-<!--                   agg = 5, -->
-
-<!--                   sparse = TRUE, -->
-
-<!--                   verbose = FALSE) -->
-
-<!-- samples$density <- weekend_densities * 1000 -->
-
-<!-- lixels$density <- weekend_densities * 1000 -->
-
-<!-- ``` -->
-
-<!-- #### Visualising the Network Constrained Kernel Density Estimate of the Weekend Grab Data over an interactive *OpenStreetMap* layer -->
-
-<!-- ```{r} -->
-
-<!-- tmap_mode('view') -->
-
-<!-- tm_shape(lixels) + -->
-
-<!--   tm_lines(col="density", lwd = 2) + -->
-
-<!--   tm_basemap("OpenStreetMap") -->
-
-<!-- ``` -->
+<!--html_preserve-->
