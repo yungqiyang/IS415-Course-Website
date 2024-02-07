@@ -21,6 +21,8 @@ toc-depth: 4
 progress: true
 ---
 
+## Preparing the R-Environment for analysis
+
 ### Loading the necessary R-packages
 
 The following R-packages and their use case are as follows:
@@ -42,11 +44,13 @@ pacman::p_load(sf, tidyverse, arrow, lubridate, tmap, maptools, spatstat, spNetw
 
 ```
 
+## Conducting data pre-processing for analysis
+
 ### Importing the datasets of interest
 
 For this report, 3 different datasets are of interest. ***Grab-Posisi*** (*parquet*) from **Grab** to obtain the spatial events of Grab trips, ***MPSZ2019*** (*shp*)from **data.gov.sg** to provide us with the geographical boundaries for our analysis and ***gis_osm_roads_free_1*** (*shp*) from **OpenStreetMap** to obtain the road networks for analysis.
 
-#### Grab-Posisi Data:
+##### Grab-Posisi Data:
 
 The Grab-Posisi data is contained within 10 compartmentalised parquet files, thus, the *read_parquet()* function from the *Arrow* package is required. The files are loaded iteratively in a loop and immediately appended to each other without assignment using the *bind_rows()* function.
 
@@ -119,7 +123,7 @@ grab_origin_df <- read_rds("Data/Geospatial/RDS/Grab_Origins_Posisi.rds")
 
 ```
 
-#### Singapore Master Plan Subzone and Road Network Data
+##### Singapore Master Plan Subzone and Road Network Data
 
 Both the Singapore Master Plan Subzone (***mpsz***) and Road Network Data are spatial data which require the *sf* package to read in order to retain the spatial information contained. As such, we will use the *st_read()* function to read the data, and apply the *st_transform()* function to cast them to a consistent coordinate reference system (**CRS**) so that we may apply spatial analysis across both data. The **CRS** we will use is [SVY21]{.underline}, which is specific for Singapore.
 
@@ -241,7 +245,7 @@ Here we can observe that there is an extensive road network present outside the 
 
 First though, we should investigate the Grab-Posisi Data further as seen prior, we will need to reduce the scope of our analysis so that computations may be completed in a reasonable amount of time.
 
-#### Transforming the Grab-Posisi Data into a *simple features* object
+##### Transforming the Grab-Posisi Data into a *simple features* object
 
 To investigate the Grab-Posisi data, we must first cast it into a *simple features* object so that R can recognise the coordinate fields in the dataset as spatial and not simply numeric data. The *st_as_af()* function is used for this purpose, specifying the longitude and latitudes in that order, and the CRS as WGS84 (or EPSG: 4326 equivalently) as the data are geographical coordinates. The CRS of the data is then transformed into SVY21 format using the *st_transform()* function by specifying the *crs* parameter to be 3414, the EPSG code for SVY21.
 
@@ -257,7 +261,7 @@ summary(grab_origin_sf)
 
 We can see from a the summary of the data that the casting of the grab origins data to a *simple features* object is successful and that a spatial point *geometry* column has been added to the data in place of *"rawlng"* and *"rawlat"*.
 
-#### Transforming the Grab-Posisi data further into *Spatial Points*, generic *sp* and *ppp* objects
+##### Transforming the Grab-Posisi data further into *Spatial Points*, generic *sp* and *ppp* objects
 
 As we are using the spatstat package, we will need to cast our Grab trip origins events data from a *simple features* (*sf*) object to a *planar point pattern* (*ppp*) object to work with it.
 
@@ -284,7 +288,7 @@ summary(grab_origin_ppp)
 
 ```
 
-### Visualising the Grab-Posisi origins data in interactive view
+### Visualising the Grab-Posisi trip origins data
 
 To visualise the Grab trip origins data we prepared, we can use the *tm_dots()* function. Additionally, as there are 28,000 event points located on a relatively small geographical area, we can expect the points to be dense enough such that we are likely to see clusters without being able to visually make out their densities or individual points.
 
@@ -344,7 +348,9 @@ From the darker colouration, it appears that Grab calls in our data were much mo
 
 Considering the size of the Grab origins data and the complexity of the road network, it makes sense to try to limit the area of study so our machines can handle the computations in reasonable time. Considering the spread of the data, the central region is chosen as our area of focus.
 
-### Extracting the CBD polygons
+### Limiting the scope of the study
+
+#### Extracting the CBD polygons
 
 Using the Urban Redevelopment Authority of Singapore's (URA) definition of the CBD, the planning areas which makes it up are extracted from the mpsz spatial data. These polygons are identified using the "PLN_AREA_N" feature in the data, and extracted using base dataframe splicing methods and the %in% operator in R.
 
@@ -357,6 +363,8 @@ summary(central_sg)
 ```
 
 The spliced *sf* object is assigned to *central_sg* and a summary of the data reveals that it contains 50 spatial polygon objects. Much smaller than the 332 polygon features that were originally in the mpsz dataset.
+
+#### Visualising the geograpical scope of study
 
 To visualise the new geographical area of study:
 
@@ -404,7 +412,7 @@ tmap_save(central_region_SG_outline, "Screenshots/central_region_SG_outline.png"
 
 ![](Screenshots/central_region_SG_outline.png)
 
-### Filtering down the Grab call origins data to match out study area
+### Filtering down the Grab call origins data to match the study area
 
 Now that we have dictated the study area for the rest of the study, we will also need to trim down the Grab call origins data that we have. This can be achieve via the *st_intersection()* function to reduce the data to only those within the boundaries of the *central_sg* polygon we produced.
 
@@ -425,7 +433,7 @@ summary(central_grab_weekday_sf)
 
 A quick examination of the data shows that there were 2335 trips which originated on weekdays, and 698 calls on the weekends. In general, we can also expect around 25 less calls on Saturdays than during the work week and roughly 60 less calls on Sundays. Thursdays also generated the most calls at 540 trip originations happening on thursdays across the 2 weeks.
 
-### Visualising the origins of Grab trips over the weekends and weekdays in the Central Region of Singapore.
+#### Visualising the origins of Grab trips over the weekends and weekdays in the Central Region of Singapore.
 
 To visualise the rough density patterns across the 2 different time periods in the CBD, we can employ the following code:
 
@@ -461,11 +469,11 @@ It appears that on the weekends, calls not only originate from the CBD less ofte
 
 Additionally, it seems also that the geographical patterns in Grab calls also differ on the weekends and weekdays. On the weekdays the Grab trip origins appear to be more evenly distributed whilst being slightly more concentrated in the nothern regions of the CBD on the weekends with barely any calls from the center and southern parts during this period.
 
-### Transforming the filtered Grab origins data into *Spatial Points*, generic *sp* and *ppp* objects
+#### Transforming the filtered Grab origins data into *Spatial Points*, generic *sp* and *ppp* objects
 
 As before with the *simple features* Grab data we need to transform the data to a *ppp* object if we want to conduct analysis on it using the *spatstats* package. To do so:
 
-#### For the Weekend:
+##### For the Weekend:
 
 ```{r}
 
@@ -486,7 +494,7 @@ summary(central_grab_weekend_ppp)
 
 ```
 
-#### For the Weekdays:
+##### For the Weekdays:
 
 ```{r}
 
@@ -509,7 +517,7 @@ summary(central_grab_weekday_ppp)
 
 Again, summaries of each casting step are displayed to our purview.
 
-### Scaling the *ppp* objects to "km" for more interpretable patterns when we produce the kernel density estimates
+#### Scaling the *ppp* objects to "km" for more interpretable patterns when we produce the kernel density estimates
 
 As mentioned prior, the data is scaled in meters. This means that when we generate the kernel density estimates (KDE) we will be given densities which suggests that certain areas receive 0.0005 calls per meter^2^ for instance as we are running a KDE across an entire country. This has very low interpretability, so we should re-scale the data points to km so that we can receive easy to understand density estimates when we conduct KDE.
 
@@ -528,6 +536,8 @@ summary(central_grab_weekday_ppp.km)
 ```
 
 Summaries of the Grab trip origins planar point pattern objects now show that the points have successfully been re-scaled to km.
+
+## Conducting and Analysing Kernel Density Estimation
 
 ### Using the ***ppl*** method to conduct the Kernel Density Estimations
 
@@ -585,6 +595,8 @@ clarkevans.test(central_grab_weekend_ppp.km, correction="cdf", alternative=c("cl
 
 From the p-values of the Clark-Evan's test, we have to conclude that the distributions of the Grab trip origins display clustering patterns within Singapore's CBD regardless of the part of the week. This is a conclusion supported by our KDE plots either using *ppl* or adaptive bandwidth methods.
 
+## Conducting and analysing Network-Constrained Kernel Density Estimations
+
 ### Limiting the Road Network Data to Central Singapore
 
 Earlier in this report, we conducted an extraction of the road networks from **OpenStreetMap** using the *st_intersection()* function. We will need to do so again as we have since further limited the scope of our study to the CBD. This time however, as the purpose of using the road network data lies in constructing Network-Contrained Kernel Density Estimations, we will need to ensure that only spatial Line features exist in the data. To do so, we can employ the *st_cast()* function to coerce any other spatial features to Spatial Lines.
@@ -592,7 +604,7 @@ Earlier in this report, we conducted an extraction of the road networks from **O
 ```{r}
 #| eval: false
 
-central_roads <- st_intersection(roads_sg, central_sg)
+central_roads <- st_intersection(roads, central_sg)
 
 central_roads <- st_cast(central_roads, "LINESTRING")
 
@@ -610,7 +622,7 @@ central_roads <- st_simplify(central_roads, preserveTopology = FALSE)
 
 ```
 
-### Visualising the Road Network Data across the CBD
+#### Visualising the Road Network Data across the CBD
 
 Using the tm_lines() function we can build a visual plot of the road networks in the CBD
 
@@ -660,7 +672,7 @@ samples <- read_rds("Data/Geospatial/RDS/central_road_centrepoints.rds")
 
 Now that we have prepared the lixels and their center points, we can run the NKDE across our 2 segmented Grab data. Our previous KDE plots provides us with some indicates of the parameters in which we can run our NKDE upon. Firstly, the kernel used should be "quartic" as we are looking for several spikes in the data whilst being less sensitive to outlier events because we know that the southern parts of the CBD are less densely serviced by Grab than the northern parts during the weekends. And even though the data is more evenly spread out in the workweek, the adaptive KDE reveals that the data exists as multiple hot-spots with strong drop-offs rather than a smooth transition to the next hot-spot. We run it on a "simple" method and set sparse to [*TRUE*]{.underline} to reduce computation time, but also set verbose to [*TRUE*]{.underline} to get updated that the process is running properly as the computation is expected to be very time-consuming regardless.
 
-#### Weekday Data:
+#### For the Weekday Data:
 
 Using the *nkde()* function to compute the network-constrained kernel density estimates of the weekday Grab trips in the CBD:
 
@@ -729,7 +741,19 @@ saveWidget(grab_weekday_interactive, "Screenshots/CBD_grab_weekday_interactive.h
 
 <!--html_preserve-->
 
-#### Weekend Data:
+Examining the network constrained kernel density estimation plot for Grab trips in the CBD on weekdays, we can see that there are 5 main clusters which have been formed in the following areas:
+
+1.  In Orchard, around the junctions near Orchard Ion Shopping Center.
+2.  Along Somerset and Orchard Roads, between Somerset and Dhoby Ghaut MRT stations.
+3.  Around Rochor and Bugis.
+4.  Chinatown
+5.  Raffles Place
+
+Intuitively, we this makes sense as 1. and 2. are huge shopping districts in addition to housing plenty of offices. As such, we should expect them to be frequented by tourist who may be more inclined to using Grab, as well as office workers returning home from the area after work or a night out. For hot spot 3., even though less offices are expected there, there are more nightlife spots in the area which could explain why a cluster if formed there as well.
+
+The hot-spots 4. and 5. are especially strong when compared to the other 3. This is likely a result of the concentration of financial institutions and large multinational corporations concentrated in the area unlike around the other 3 clusters. Thus, an explanation for hot spots 4 and 5 would be that demand from office workers returning home either from work or a night out is strongly contributing to Grab demand in these parts of the CBD.
+
+#### For the Weekend Data:
 
 Using the *nkde()* function to compute the network-constrained kernel density estimates of the weekend Grab trips in the CBD:
 
@@ -793,3 +817,7 @@ saveWidget(grab_weekend_interactive, "Screenshots/CBD_grab_weekend_interactive.h
 </iframe>
 
 <!--html_preserve-->
+
+Looking at the network constrained kernel density estimation plot generated for Grab trips in the CBD on weekends, we cannot pin point any new and significant clusters when compared to the NKDE generated for the weekdays. There are 2 main differences however. The region around Fort Canning Park and the Esplanade appear to be slightly more dense than before, and clusters 4. and 5. have all but disappeared. It is possible that people are leaving from Fort Canning and the Esplanade more often on the weekends, but a more like cause is that the disappearance of clusters 4. and 5. and biased the NKDE computation slightly in these areas.
+
+The visualisation of the weekend NKDE gives credence to the earlier suggestion that office workers are the heaviest contributors to the Grab call demand in Chinatown and Raffles Place as majority of offices are not opened on the weekends which would explain the tank in the Grab call demand.

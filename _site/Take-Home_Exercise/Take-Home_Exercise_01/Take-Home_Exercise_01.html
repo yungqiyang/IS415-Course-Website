@@ -210,36 +210,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#loading-the-necessary-r-packages" id="toc-loading-the-necessary-r-packages" class="nav-link active" data-scroll-target="#loading-the-necessary-r-packages">Loading the necessary R-packages</a></li>
-  <li><a href="#importing-the-datasets-of-interest" id="toc-importing-the-datasets-of-interest" class="nav-link" data-scroll-target="#importing-the-datasets-of-interest">Importing the datasets of interest</a>
+  <li><a href="#preparing-the-r-environment-for-analysis" id="toc-preparing-the-r-environment-for-analysis" class="nav-link active" data-scroll-target="#preparing-the-r-environment-for-analysis">Preparing the R-Environment for analysis</a>
   <ul>
-  <li><a href="#grab-posisi-data" id="toc-grab-posisi-data" class="nav-link" data-scroll-target="#grab-posisi-data">Grab-Posisi Data:</a></li>
-  <li><a href="#singapore-master-plan-subzone-and-road-network-data" id="toc-singapore-master-plan-subzone-and-road-network-data" class="nav-link" data-scroll-target="#singapore-master-plan-subzone-and-road-network-data">Singapore Master Plan Subzone and Road Network Data</a></li>
-  <li><a href="#transforming-the-grab-posisi-data-into-a-simple-features-object" id="toc-transforming-the-grab-posisi-data-into-a-simple-features-object" class="nav-link" data-scroll-target="#transforming-the-grab-posisi-data-into-a-simple-features-object">Transforming the Grab-Posisi Data into a <em>simple features</em> object</a></li>
-  <li><a href="#transforming-the-grab-posisi-data-further-into-spatial-points-generic-sp-and-ppp-objects" id="toc-transforming-the-grab-posisi-data-further-into-spatial-points-generic-sp-and-ppp-objects" class="nav-link" data-scroll-target="#transforming-the-grab-posisi-data-further-into-spatial-points-generic-sp-and-ppp-objects">Transforming the Grab-Posisi data further into <em>Spatial Points</em>, generic <em>sp</em> and <em>ppp</em> objects</a></li>
+  <li><a href="#loading-the-necessary-r-packages" id="toc-loading-the-necessary-r-packages" class="nav-link" data-scroll-target="#loading-the-necessary-r-packages">Loading the necessary R-packages</a></li>
   </ul></li>
-  <li><a href="#visualising-the-grab-posisi-origins-data-in-interactive-view" id="toc-visualising-the-grab-posisi-origins-data-in-interactive-view" class="nav-link" data-scroll-target="#visualising-the-grab-posisi-origins-data-in-interactive-view">Visualising the Grab-Posisi origins data in interactive view</a></li>
+  <li><a href="#conducting-data-pre-processing-for-analysis" id="toc-conducting-data-pre-processing-for-analysis" class="nav-link" data-scroll-target="#conducting-data-pre-processing-for-analysis">Conducting data pre-processing for analysis</a>
+  <ul>
+  <li><a href="#importing-the-datasets-of-interest" id="toc-importing-the-datasets-of-interest" class="nav-link" data-scroll-target="#importing-the-datasets-of-interest">Importing the datasets of interest</a></li>
+  <li><a href="#visualising-the-grab-posisi-trip-origins-data" id="toc-visualising-the-grab-posisi-trip-origins-data" class="nav-link" data-scroll-target="#visualising-the-grab-posisi-trip-origins-data">Visualising the Grab-Posisi trip origins data</a></li>
+  <li><a href="#limiting-the-scope-of-the-study" id="toc-limiting-the-scope-of-the-study" class="nav-link" data-scroll-target="#limiting-the-scope-of-the-study">Limiting the scope of the study</a>
+  <ul class="collapse">
   <li><a href="#extracting-the-cbd-polygons" id="toc-extracting-the-cbd-polygons" class="nav-link" data-scroll-target="#extracting-the-cbd-polygons">Extracting the CBD polygons</a></li>
-  <li><a href="#filtering-down-the-grab-call-origins-data-to-match-out-study-area" id="toc-filtering-down-the-grab-call-origins-data-to-match-out-study-area" class="nav-link" data-scroll-target="#filtering-down-the-grab-call-origins-data-to-match-out-study-area">Filtering down the Grab call origins data to match out study area</a></li>
-  <li><a href="#visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore." id="toc-visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore." class="nav-link" data-scroll-target="#visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore.">Visualising the origins of Grab trips over the weekends and weekdays in the Central Region of Singapore.</a></li>
-  <li><a href="#transforming-the-filtered-grab-origins-data-into-spatial-points-generic-sp-and-ppp-objects" id="toc-transforming-the-filtered-grab-origins-data-into-spatial-points-generic-sp-and-ppp-objects" class="nav-link" data-scroll-target="#transforming-the-filtered-grab-origins-data-into-spatial-points-generic-sp-and-ppp-objects">Transforming the filtered Grab origins data into <em>Spatial Points</em>, generic <em>sp</em> and <em>ppp</em> objects</a>
-  <ul>
-  <li><a href="#for-the-weekend" id="toc-for-the-weekend" class="nav-link" data-scroll-target="#for-the-weekend">For the Weekend:</a></li>
-  <li><a href="#for-the-weekdays" id="toc-for-the-weekdays" class="nav-link" data-scroll-target="#for-the-weekdays">For the Weekdays:</a></li>
+  <li><a href="#visualising-the-geograpical-scope-of-study" id="toc-visualising-the-geograpical-scope-of-study" class="nav-link" data-scroll-target="#visualising-the-geograpical-scope-of-study">Visualising the geograpical scope of study</a></li>
   </ul></li>
+  <li><a href="#filtering-down-the-grab-call-origins-data-to-match-the-study-area" id="toc-filtering-down-the-grab-call-origins-data-to-match-the-study-area" class="nav-link" data-scroll-target="#filtering-down-the-grab-call-origins-data-to-match-the-study-area">Filtering down the Grab call origins data to match the study area</a>
+  <ul class="collapse">
+  <li><a href="#visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore." id="toc-visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore." class="nav-link" data-scroll-target="#visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore.">Visualising the origins of Grab trips over the weekends and weekdays in the Central Region of Singapore.</a></li>
+  <li><a href="#transforming-the-filtered-grab-origins-data-into-spatial-points-generic-sp-and-ppp-objects" id="toc-transforming-the-filtered-grab-origins-data-into-spatial-points-generic-sp-and-ppp-objects" class="nav-link" data-scroll-target="#transforming-the-filtered-grab-origins-data-into-spatial-points-generic-sp-and-ppp-objects">Transforming the filtered Grab origins data into <em>Spatial Points</em>, generic <em>sp</em> and <em>ppp</em> objects</a></li>
   <li><a href="#scaling-the-ppp-objects-to-km-for-more-interpretable-patterns-when-we-produce-the-kernel-density-estimates" id="toc-scaling-the-ppp-objects-to-km-for-more-interpretable-patterns-when-we-produce-the-kernel-density-estimates" class="nav-link" data-scroll-target="#scaling-the-ppp-objects-to-km-for-more-interpretable-patterns-when-we-produce-the-kernel-density-estimates">Scaling the <em>ppp</em> objects to “km” for more interpretable patterns when we produce the kernel density estimates</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#conducting-and-analysing-kernel-density-estimation" id="toc-conducting-and-analysing-kernel-density-estimation" class="nav-link" data-scroll-target="#conducting-and-analysing-kernel-density-estimation">Conducting and Analysing Kernel Density Estimation</a>
+  <ul>
   <li><a href="#using-the-ppl-method-to-conduct-the-kernel-density-estimations" id="toc-using-the-ppl-method-to-conduct-the-kernel-density-estimations" class="nav-link" data-scroll-target="#using-the-ppl-method-to-conduct-the-kernel-density-estimations">Using the <strong><em>ppl</em></strong> method to conduct the Kernel Density Estimations</a></li>
   <li><a href="#using-the-adaptive-bandwidth-method-to-conduct-the-kernel-density-estimations" id="toc-using-the-adaptive-bandwidth-method-to-conduct-the-kernel-density-estimations" class="nav-link" data-scroll-target="#using-the-adaptive-bandwidth-method-to-conduct-the-kernel-density-estimations">Using the <strong><em>Adaptive Bandwidth</em></strong> method to conduct the Kernel Density Estimations</a></li>
   <li><a href="#conducting-the-clark-evans-test-for-spatial-point-pattern" id="toc-conducting-the-clark-evans-test-for-spatial-point-pattern" class="nav-link" data-scroll-target="#conducting-the-clark-evans-test-for-spatial-point-pattern">Conducting the Clark-Evans test for Spatial Point Pattern</a></li>
-  <li><a href="#limiting-the-road-network-data-to-central-singapore" id="toc-limiting-the-road-network-data-to-central-singapore" class="nav-link" data-scroll-target="#limiting-the-road-network-data-to-central-singapore">Limiting the Road Network Data to Central Singapore</a></li>
+  </ul></li>
+  <li><a href="#conducting-and-analysing-network-constrained-kernel-density-estimations" id="toc-conducting-and-analysing-network-constrained-kernel-density-estimations" class="nav-link" data-scroll-target="#conducting-and-analysing-network-constrained-kernel-density-estimations">Conducting and analysing Network-Constrained Kernel Density Estimations</a>
+  <ul>
+  <li><a href="#limiting-the-road-network-data-to-central-singapore" id="toc-limiting-the-road-network-data-to-central-singapore" class="nav-link" data-scroll-target="#limiting-the-road-network-data-to-central-singapore">Limiting the Road Network Data to Central Singapore</a>
+  <ul class="collapse">
   <li><a href="#visualising-the-road-network-data-across-the-cbd" id="toc-visualising-the-road-network-data-across-the-cbd" class="nav-link" data-scroll-target="#visualising-the-road-network-data-across-the-cbd">Visualising the Road Network Data across the CBD</a></li>
+  </ul></li>
   <li><a href="#preparing-the-lixel-objects-and-generating-the-line-centre-points" id="toc-preparing-the-lixel-objects-and-generating-the-line-centre-points" class="nav-link" data-scroll-target="#preparing-the-lixel-objects-and-generating-the-line-centre-points">Preparing the lixel objects and generating the line centre points</a></li>
   <li><a href="#performing-the-network-constrained-kernel-density-estimation" id="toc-performing-the-network-constrained-kernel-density-estimation" class="nav-link" data-scroll-target="#performing-the-network-constrained-kernel-density-estimation">Performing the Network Constrained Kernel Density Estimation</a>
-  <ul>
-  <li><a href="#weekday-data" id="toc-weekday-data" class="nav-link" data-scroll-target="#weekday-data">Weekday Data:</a></li>
+  <ul class="collapse">
+  <li><a href="#for-the-weekday-data" id="toc-for-the-weekday-data" class="nav-link" data-scroll-target="#for-the-weekday-data">For the Weekday Data:</a></li>
   <li><a href="#visualising-the-network-constrained-kernel-density-estimate-of-the-weekday-grab-data-over-an-interactive-openstreetmap-layer" id="toc-visualising-the-network-constrained-kernel-density-estimate-of-the-weekday-grab-data-over-an-interactive-openstreetmap-layer" class="nav-link" data-scroll-target="#visualising-the-network-constrained-kernel-density-estimate-of-the-weekday-grab-data-over-an-interactive-openstreetmap-layer">Visualising the Network Constrained Kernel Density Estimate of the Weekday Grab Data over an interactive <em>OpenStreetMap</em> layer</a></li>
-  <li><a href="#weekend-data" id="toc-weekend-data" class="nav-link" data-scroll-target="#weekend-data">Weekend Data:</a></li>
+  <li><a href="#for-the-weekend-data" id="toc-for-the-weekend-data" class="nav-link" data-scroll-target="#for-the-weekend-data">For the Weekend Data:</a></li>
   <li><a href="#visualising-the-network-constrained-kernel-density-estimate-of-the-weekend-grab-data-over-an-interactive-openstreetmap-layer" id="toc-visualising-the-network-constrained-kernel-density-estimate-of-the-weekend-grab-data-over-an-interactive-openstreetmap-layer" class="nav-link" data-scroll-target="#visualising-the-network-constrained-kernel-density-estimate-of-the-weekend-grab-data-over-an-interactive-openstreetmap-layer">Visualising the Network Constrained Kernel Density Estimate of the Weekend Grab Data over an interactive <em>OpenStreetMap</em> layer</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -282,6 +292,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<section id="preparing-the-r-environment-for-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="preparing-the-r-environment-for-analysis">Preparing the R-Environment for analysis</h2>
 <section id="loading-the-necessary-r-packages" class="level3">
 <h3 class="anchored" data-anchor-id="loading-the-necessary-r-packages">Loading the necessary R-packages</h3>
 <p>The following R-packages and their use case are as follows:</p>
@@ -303,11 +315,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
+</section>
+<section id="conducting-data-pre-processing-for-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="conducting-data-pre-processing-for-analysis">Conducting data pre-processing for analysis</h2>
 <section id="importing-the-datasets-of-interest" class="level3">
 <h3 class="anchored" data-anchor-id="importing-the-datasets-of-interest">Importing the datasets of interest</h3>
 <p>For this report, 3 different datasets are of interest. <strong><em>Grab-Posisi</em></strong> (<em>parquet</em>) from <strong>Grab</strong> to obtain the spatial events of Grab trips, <strong><em>MPSZ2019</em></strong> (<em>shp</em>)from <strong>data.gov.sg</strong> to provide us with the geographical boundaries for our analysis and <strong><em>gis_osm_roads_free_1</em></strong> (<em>shp</em>) from <strong>OpenStreetMap</strong> to obtain the road networks for analysis.</p>
-<section id="grab-posisi-data" class="level4">
-<h4 class="anchored" data-anchor-id="grab-posisi-data">Grab-Posisi Data:</h4>
+<section id="grab-posisi-data" class="level5">
+<h5 class="anchored" data-anchor-id="grab-posisi-data">Grab-Posisi Data:</h5>
 <p>The Grab-Posisi data is contained within 10 compartmentalised parquet files, thus, the <em>read_parquet()</em> function from the <em>Arrow</em> package is required. The files are loaded iteratively in a loop and immediately appended to each other without assignment using the <em>bind_rows()</em> function.</p>
 <div class="cell">
 <details class="code-fold">
@@ -366,8 +381,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="singapore-master-plan-subzone-and-road-network-data" class="level4">
-<h4 class="anchored" data-anchor-id="singapore-master-plan-subzone-and-road-network-data">Singapore Master Plan Subzone and Road Network Data</h4>
+<section id="singapore-master-plan-subzone-and-road-network-data" class="level5">
+<h5 class="anchored" data-anchor-id="singapore-master-plan-subzone-and-road-network-data">Singapore Master Plan Subzone and Road Network Data</h5>
 <p>Both the Singapore Master Plan Subzone (<strong><em>mpsz</em></strong>) and Road Network Data are spatial data which require the <em>sf</em> package to read in order to retain the spatial information contained. As such, we will use the <em>st_read()</em> function to read the data, and apply the <em>st_transform()</em> function to cast them to a consistent coordinate reference system (<strong>CRS</strong>) so that we may apply spatial analysis across both data. The <strong>CRS</strong> we will use is <u>SVY21</u>, which is specific for Singapore.</p>
 <p>The Singapore Master Plan Subzone is loaded into the R-Environment below:</p>
 <div class="cell">
@@ -489,8 +504,8 @@ Geodetic CRS:  WGS 84</code></pre>
 <p>Here we can observe that there is an extensive road network present outside the mainland of Singapore in the dataset. Thus, we will need to remove them if mainland Singapore is the scope of the study, or if they fall within the scope regardless as they will otherwise affect network contrained kernel density estimates. This is as Grab is unlikely to operate outside the mainland especially on islands like Pulau Tekong, thus, impacting global kernel density estimates because of its low or zero local density.</p>
 <p>First though, we should investigate the Grab-Posisi Data further as seen prior, we will need to reduce the scope of our analysis so that computations may be completed in a reasonable amount of time.</p>
 </section>
-<section id="transforming-the-grab-posisi-data-into-a-simple-features-object" class="level4">
-<h4 class="anchored" data-anchor-id="transforming-the-grab-posisi-data-into-a-simple-features-object">Transforming the Grab-Posisi Data into a <em>simple features</em> object</h4>
+<section id="transforming-the-grab-posisi-data-into-a-simple-features-object" class="level5">
+<h5 class="anchored" data-anchor-id="transforming-the-grab-posisi-data-into-a-simple-features-object">Transforming the Grab-Posisi Data into a <em>simple features</em> object</h5>
 <p>To investigate the Grab-Posisi data, we must first cast it into a <em>simple features</em> object so that R can recognise the coordinate fields in the dataset as spatial and not simply numeric data. The <em>st_as_af()</em> function is used for this purpose, specifying the longitude and latitudes in that order, and the CRS as WGS84 (or EPSG: 4326 equivalently) as the data are geographical coordinates. The CRS of the data is then transformed into SVY21 format using the <em>st_transform()</em> function by specifying the <em>crs</em> parameter to be 3414, the EPSG code for SVY21.</p>
 <div class="cell">
 <details class="code-fold">
@@ -530,8 +545,8 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 <p>We can see from a the summary of the data that the casting of the grab origins data to a <em>simple features</em> object is successful and that a spatial point <em>geometry</em> column has been added to the data in place of <em>“rawlng”</em> and <em>“rawlat”</em>.</p>
 </section>
-<section id="transforming-the-grab-posisi-data-further-into-spatial-points-generic-sp-and-ppp-objects" class="level4">
-<h4 class="anchored" data-anchor-id="transforming-the-grab-posisi-data-further-into-spatial-points-generic-sp-and-ppp-objects">Transforming the Grab-Posisi data further into <em>Spatial Points</em>, generic <em>sp</em> and <em>ppp</em> objects</h4>
+<section id="transforming-the-grab-posisi-data-further-into-spatial-points-generic-sp-and-ppp-objects" class="level5">
+<h5 class="anchored" data-anchor-id="transforming-the-grab-posisi-data-further-into-spatial-points-generic-sp-and-ppp-objects">Transforming the Grab-Posisi data further into <em>Spatial Points</em>, generic <em>sp</em> and <em>ppp</em> objects</h5>
 <p>As we are using the spatstat package, we will need to cast our Grab trip origins events data from a <em>simple features</em> (<em>sf</em>) object to a <em>planar point pattern</em> (<em>ppp</em>) object to work with it.</p>
 <p>To do so, we can utilise the <em>as_Spatial()</em> function from the sf package to first convert it into a spatial point dataframe which can then be further transformed to a generic <em>sp</em> object using the <em>as()</em> from the same package by specifying the object class to be “SpatialPoints”. This is required to safely convert an <em>sf</em> object to a <em>ppp</em> object as the <em>as()</em> function does not support casting an <em>sf</em> object to a <em>ppp</em> object directly. The resulting <em>sp</em> object is then computed as a <em>ppp</em> object using the <em>as()</em> function but this time specifying the new object class to be “ppp”.</p>
 <p>The transformation process and a summary of each casting step are as follows:</p>
@@ -622,8 +637,8 @@ Window area = 1131920000 square units</code></pre>
 </div>
 </section>
 </section>
-<section id="visualising-the-grab-posisi-origins-data-in-interactive-view" class="level3">
-<h3 class="anchored" data-anchor-id="visualising-the-grab-posisi-origins-data-in-interactive-view">Visualising the Grab-Posisi origins data in interactive view</h3>
+<section id="visualising-the-grab-posisi-trip-origins-data" class="level3">
+<h3 class="anchored" data-anchor-id="visualising-the-grab-posisi-trip-origins-data">Visualising the Grab-Posisi trip origins data</h3>
 <p>To visualise the Grab trip origins data we prepared, we can use the <em>tm_dots()</em> function. Additionally, as there are 28,000 event points located on a relatively small geographical area, we can expect the points to be dense enough such that we are likely to see clusters without being able to visually make out their densities or individual points.</p>
 <p>To help with this problem, we can visualise the data using an interactive map style so that we may zoom into specific areas and reduce the density of our visualisation. Normally this can be achieved by specifying <em>tmap_mode()</em> to “view” but as such visualisations are large and computationally expensive, it is in our interest to build the in R and embed them as a HTML widget thus, avoiding building them during the render process. To do so, we leave it in “plot” mode in order to transform them to a <em>leaflet</em> object using the <em>tmap_leaflet()</em> function. The resulting <em>leaflet</em> object can then be saved as a HTML widget using the <em>saveWidget()</em> function from the <em>htmlwidgets</em> package.</p>
 <div class="cell">
@@ -671,8 +686,10 @@ Window area = 1131920000 square units</code></pre>
 <p>From the darker colouration, it appears that Grab calls in our data were much more concentrated in the central-southern part of Singapore than pretty much any other region. This of course makes sense as that region is where the central business district (CBD) lies, and considering the difference in cost of Grab vs.&nbsp;other forms of public transport, it should be expected that Grab customers are more likely fall within the CBD area especially towards the end of the workday.</p>
 <p>Considering the size of the Grab origins data and the complexity of the road network, it makes sense to try to limit the area of study so our machines can handle the computations in reasonable time. Considering the spread of the data, the central region is chosen as our area of focus.</p>
 </section>
-<section id="extracting-the-cbd-polygons" class="level3">
-<h3 class="anchored" data-anchor-id="extracting-the-cbd-polygons">Extracting the CBD polygons</h3>
+<section id="limiting-the-scope-of-the-study" class="level3">
+<h3 class="anchored" data-anchor-id="limiting-the-scope-of-the-study">Limiting the scope of the study</h3>
+<section id="extracting-the-cbd-polygons" class="level4">
+<h4 class="anchored" data-anchor-id="extracting-the-cbd-polygons">Extracting the CBD polygons</h4>
 <p>Using the Urban Redevelopment Authority of Singapore’s (URA) definition of the CBD, the planning areas which makes it up are extracted from the mpsz spatial data. These polygons are identified using the “PLN_AREA_N” feature in the data, and extracted using base dataframe splicing methods and the %in% operator in R.</p>
 <div class="cell">
 <details class="code-fold">
@@ -693,6 +710,9 @@ Window area = 1131920000 square units</code></pre>
 </div>
 </div>
 <p>The spliced <em>sf</em> object is assigned to <em>central_sg</em> and a summary of the data reveals that it contains 50 spatial polygon objects. Much smaller than the 332 polygon features that were originally in the mpsz dataset.</p>
+</section>
+<section id="visualising-the-geograpical-scope-of-study" class="level4">
+<h4 class="anchored" data-anchor-id="visualising-the-geograpical-scope-of-study">Visualising the geograpical scope of study</h4>
 <p>To visualise the new geographical area of study:</p>
 <div class="cell">
 <details class="code-fold">
@@ -731,8 +751,9 @@ Window area = 1131920000 square units</code></pre>
 </div>
 <p><img src="Screenshots/central_region_SG_outline.png" class="img-fluid"></p>
 </section>
-<section id="filtering-down-the-grab-call-origins-data-to-match-out-study-area" class="level3">
-<h3 class="anchored" data-anchor-id="filtering-down-the-grab-call-origins-data-to-match-out-study-area">Filtering down the Grab call origins data to match out study area</h3>
+</section>
+<section id="filtering-down-the-grab-call-origins-data-to-match-the-study-area" class="level3">
+<h3 class="anchored" data-anchor-id="filtering-down-the-grab-call-origins-data-to-match-the-study-area">Filtering down the Grab call origins data to match the study area</h3>
 <p>Now that we have dictated the study area for the rest of the study, we will also need to trim down the Grab call origins data that we have. This can be achieve via the <em>st_intersection()</em> function to reduce the data to only those within the boundaries of the <em>central_sg</em> polygon we produced.</p>
 <p>A further interesting point of study might be the difference in calls between the weekends and weekdays. As mentioned in the justification for choosing the CBD as the scope, we expect that most of the Grab call events occur as a result of office workers travelling home. Thus, as most offices are closed on the weekends, it will be interesting to examine the difference in call patterns during the work week vs.&nbsp;the weekends . To do so, we will break the data into 2 parts using the <em>weekday</em> column generated prior to identify calls that fall on the weekends.</p>
 <div class="cell">
@@ -804,9 +825,8 @@ Window area = 1131920000 square units</code></pre>
 </div>
 </div>
 <p>A quick examination of the data shows that there were 2335 trips which originated on weekdays, and 698 calls on the weekends. In general, we can also expect around 25 less calls on Saturdays than during the work week and roughly 60 less calls on Sundays. Thursdays also generated the most calls at 540 trip originations happening on thursdays across the 2 weeks.</p>
-</section>
-<section id="visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore." class="level3">
-<h3 class="anchored" data-anchor-id="visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore.">Visualising the origins of Grab trips over the weekends and weekdays in the Central Region of Singapore.</h3>
+<section id="visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore." class="level4">
+<h4 class="anchored" data-anchor-id="visualising-the-origins-of-grab-trips-over-the-weekends-and-weekdays-in-the-central-region-of-singapore.">Visualising the origins of Grab trips over the weekends and weekdays in the Central Region of Singapore.</h4>
 <p>To visualise the rough density patterns across the 2 different time periods in the CBD, we can employ the following code:</p>
 <div class="cell">
 <details class="code-fold">
@@ -834,11 +854,11 @@ Window area = 1131920000 square units</code></pre>
 <p>It appears that on the weekends, calls not only originate from the CBD less often. Although this is neither obvious nor interpretable from the visualisation alone as we are comparing 10 days of data vs.&nbsp;4 days worth. However, our quick investigation of the spliced data above does make this a reasonable observation to have here.</p>
 <p>Additionally, it seems also that the geographical patterns in Grab calls also differ on the weekends and weekdays. On the weekdays the Grab trip origins appear to be more evenly distributed whilst being slightly more concentrated in the nothern regions of the CBD on the weekends with barely any calls from the center and southern parts during this period.</p>
 </section>
-<section id="transforming-the-filtered-grab-origins-data-into-spatial-points-generic-sp-and-ppp-objects" class="level3">
-<h3 class="anchored" data-anchor-id="transforming-the-filtered-grab-origins-data-into-spatial-points-generic-sp-and-ppp-objects">Transforming the filtered Grab origins data into <em>Spatial Points</em>, generic <em>sp</em> and <em>ppp</em> objects</h3>
+<section id="transforming-the-filtered-grab-origins-data-into-spatial-points-generic-sp-and-ppp-objects" class="level4">
+<h4 class="anchored" data-anchor-id="transforming-the-filtered-grab-origins-data-into-spatial-points-generic-sp-and-ppp-objects">Transforming the filtered Grab origins data into <em>Spatial Points</em>, generic <em>sp</em> and <em>ppp</em> objects</h4>
 <p>As before with the <em>simple features</em> Grab data we need to transform the data to a <em>ppp</em> object if we want to conduct analysis on it using the <em>spatstats</em> package. To do so:</p>
-<section id="for-the-weekend" class="level4">
-<h4 class="anchored" data-anchor-id="for-the-weekend">For the Weekend:</h4>
+<section id="for-the-weekend" class="level5">
+<h5 class="anchored" data-anchor-id="for-the-weekend">For the Weekend:</h5>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
@@ -925,8 +945,8 @@ Window area = 24186800 square units</code></pre>
 </div>
 </div>
 </section>
-<section id="for-the-weekdays" class="level4">
-<h4 class="anchored" data-anchor-id="for-the-weekdays">For the Weekdays:</h4>
+<section id="for-the-weekdays" class="level5">
+<h5 class="anchored" data-anchor-id="for-the-weekdays">For the Weekdays:</h5>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
@@ -1015,8 +1035,8 @@ Window area = 30832200 square units</code></pre>
 <p>Again, summaries of each casting step are displayed to our purview.</p>
 </section>
 </section>
-<section id="scaling-the-ppp-objects-to-km-for-more-interpretable-patterns-when-we-produce-the-kernel-density-estimates" class="level3">
-<h3 class="anchored" data-anchor-id="scaling-the-ppp-objects-to-km-for-more-interpretable-patterns-when-we-produce-the-kernel-density-estimates">Scaling the <em>ppp</em> objects to “km” for more interpretable patterns when we produce the kernel density estimates</h3>
+<section id="scaling-the-ppp-objects-to-km-for-more-interpretable-patterns-when-we-produce-the-kernel-density-estimates" class="level4">
+<h4 class="anchored" data-anchor-id="scaling-the-ppp-objects-to-km-for-more-interpretable-patterns-when-we-produce-the-kernel-density-estimates">Scaling the <em>ppp</em> objects to “km” for more interpretable patterns when we produce the kernel density estimates</h4>
 <p>As mentioned prior, the data is scaled in meters. This means that when we generate the kernel density estimates (KDE) we will be given densities which suggests that certain areas receive 0.0005 calls per meter<sup>2</sup> for instance as we are running a KDE across an entire country. This has very low interpretability, so we should re-scale the data points to km so that we can receive easy to understand density estimates when we conduct KDE.</p>
 <p>To do so, we rely upon the <em>rescale()</em> function, parsing the conversion rate of 1000 to the function:</p>
 <div class="cell">
@@ -1057,6 +1077,10 @@ Unit of length: 1 km</code></pre>
 </div>
 <p>Summaries of the Grab trip origins planar point pattern objects now show that the points have successfully been re-scaled to km.</p>
 </section>
+</section>
+</section>
+<section id="conducting-and-analysing-kernel-density-estimation" class="level2">
+<h2 class="anchored" data-anchor-id="conducting-and-analysing-kernel-density-estimation">Conducting and Analysing Kernel Density Estimation</h2>
 <section id="using-the-ppl-method-to-conduct-the-kernel-density-estimations" class="level3">
 <h3 class="anchored" data-anchor-id="using-the-ppl-method-to-conduct-the-kernel-density-estimations">Using the <strong><em>ppl</em></strong> method to conduct the Kernel Density Estimations</h3>
 <p>The <em>ppl</em> method is favoured here because the pre-emptive visualisation showed us that the call origins are generally spread out in multiple clusters over the week. As such, we do not use the <em>diggle</em> bandwidth method as we are not searching for a single cluster within a bunch of noise but rather multiple clusters.</p>
@@ -1163,13 +1187,16 @@ alternative hypothesis: clustered (R &lt; 1)</code></pre>
 </div>
 <p>From the p-values of the Clark-Evan’s test, we have to conclude that the distributions of the Grab trip origins display clustering patterns within Singapore’s CBD regardless of the part of the week. This is a conclusion supported by our KDE plots either using <em>ppl</em> or adaptive bandwidth methods.</p>
 </section>
+</section>
+<section id="conducting-and-analysing-network-constrained-kernel-density-estimations" class="level2">
+<h2 class="anchored" data-anchor-id="conducting-and-analysing-network-constrained-kernel-density-estimations">Conducting and analysing Network-Constrained Kernel Density Estimations</h2>
 <section id="limiting-the-road-network-data-to-central-singapore" class="level3">
 <h3 class="anchored" data-anchor-id="limiting-the-road-network-data-to-central-singapore">Limiting the Road Network Data to Central Singapore</h3>
 <p>Earlier in this report, we conducted an extraction of the road networks from <strong>OpenStreetMap</strong> using the <em>st_intersection()</em> function. We will need to do so again as we have since further limited the scope of our study to the CBD. This time however, as the purpose of using the road network data lies in constructing Network-Contrained Kernel Density Estimations, we will need to ensure that only spatial Line features exist in the data. To do so, we can employ the <em>st_cast()</em> function to coerce any other spatial features to Spatial Lines.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Reveal Code</summary>
-<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>central_roads <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(roads_sg, central_sg)</span>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>central_roads <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(roads, central_sg)</span>
 <span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>central_roads <span class="ot">&lt;-</span> <span class="fu">st_cast</span>(central_roads, <span class="st">"LINESTRING"</span>)</span>
 <span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -1185,9 +1212,8 @@ alternative hypothesis: clustered (R &lt; 1)</code></pre>
 <span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>central_roads <span class="ot">&lt;-</span> <span class="fu">st_simplify</span>(central_roads, <span class="at">preserveTopology =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-</section>
-<section id="visualising-the-road-network-data-across-the-cbd" class="level3">
-<h3 class="anchored" data-anchor-id="visualising-the-road-network-data-across-the-cbd">Visualising the Road Network Data across the CBD</h3>
+<section id="visualising-the-road-network-data-across-the-cbd" class="level4">
+<h4 class="anchored" data-anchor-id="visualising-the-road-network-data-across-the-cbd">Visualising the Road Network Data across the CBD</h4>
 <p>Using the tm_lines() function we can build a visual plot of the road networks in the CBD</p>
 <div class="cell">
 <details class="code-fold">
@@ -1202,6 +1228,7 @@ alternative hypothesis: clustered (R &lt; 1)</code></pre>
 </details>
 </div>
 <p><img src="Screenshots/central_road_network.png" class="img-fluid"></p>
+</section>
 </section>
 <section id="preparing-the-lixel-objects-and-generating-the-line-centre-points" class="level3">
 <h3 class="anchored" data-anchor-id="preparing-the-lixel-objects-and-generating-the-line-centre-points">Preparing the lixel objects and generating the line centre points</h3>
@@ -1231,8 +1258,8 @@ alternative hypothesis: clustered (R &lt; 1)</code></pre>
 <section id="performing-the-network-constrained-kernel-density-estimation" class="level3">
 <h3 class="anchored" data-anchor-id="performing-the-network-constrained-kernel-density-estimation">Performing the Network Constrained Kernel Density Estimation</h3>
 <p>Now that we have prepared the lixels and their center points, we can run the NKDE across our 2 segmented Grab data. Our previous KDE plots provides us with some indicates of the parameters in which we can run our NKDE upon. Firstly, the kernel used should be “quartic” as we are looking for several spikes in the data whilst being less sensitive to outlier events because we know that the southern parts of the CBD are less densely serviced by Grab than the northern parts during the weekends. And even though the data is more evenly spread out in the workweek, the adaptive KDE reveals that the data exists as multiple hot-spots with strong drop-offs rather than a smooth transition to the next hot-spot. We run it on a “simple” method and set sparse to <u><em>TRUE</em></u> to reduce computation time, but also set verbose to <u><em>TRUE</em></u> to get updated that the process is running properly as the computation is expected to be very time-consuming regardless.</p>
-<section id="weekday-data" class="level4">
-<h4 class="anchored" data-anchor-id="weekday-data">Weekday Data:</h4>
+<section id="for-the-weekday-data" class="level4">
+<h4 class="anchored" data-anchor-id="for-the-weekday-data">For the Weekday Data:</h4>
 <p>Using the <em>nkde()</em> function to compute the network-constrained kernel density estimates of the weekday Grab trips in the CBD:</p>
 <div class="cell">
 <details class="code-fold">
@@ -1291,9 +1318,19 @@ alternative hypothesis: clustered (R &lt; 1)</code></pre>
 <iframe src="Screenshots/CBD_grab_weekday_interactive.html" width="650" height="400">
 </iframe>
 <!--html_preserve-->
+<p>Examining the network constrained kernel density estimation plot for Grab trips in the CBD on weekdays, we can see that there are 5 main clusters which have been formed in the following areas:</p>
+<ol type="1">
+<li>In Orchard, around the junctions near Orchard Ion Shopping Center.</li>
+<li>Along Somerset and Orchard Roads, between Somerset and Dhoby Ghaut MRT stations.</li>
+<li>Around Rochor and Bugis.</li>
+<li>Chinatown</li>
+<li>Raffles Place</li>
+</ol>
+<p>Intuitively, we this makes sense as 1. and 2. are huge shopping districts in addition to housing plenty of offices. As such, we should expect them to be frequented by tourist who may be more inclined to using Grab, as well as office workers returning home from the area after work or a night out. For hot spot 3., even though less offices are expected there, there are more nightlife spots in the area which could explain why a cluster if formed there as well.</p>
+<p>The hot-spots 4. and 5. are especially strong when compared to the other 3. This is likely a result of the concentration of financial institutions and large multinational corporations concentrated in the area unlike around the other 3 clusters. Thus, an explanation for hot spots 4 and 5 would be that demand from office workers returning home either from work or a night out is strongly contributing to Grab demand in these parts of the CBD.</p>
 </section>
-<section id="weekend-data" class="level4">
-<h4 class="anchored" data-anchor-id="weekend-data">Weekend Data:</h4>
+<section id="for-the-weekend-data" class="level4">
+<h4 class="anchored" data-anchor-id="for-the-weekend-data">For the Weekend Data:</h4>
 <p>Using the <em>nkde()</em> function to compute the network-constrained kernel density estimates of the weekend Grab trips in the CBD:</p>
 <div class="cell">
 <details class="code-fold">
@@ -1350,8 +1387,11 @@ alternative hypothesis: clustered (R &lt; 1)</code></pre>
 <iframe src="Screenshots/CBD_grab_weekend_interactive.html" width="650" height="400">
 </iframe>
 <!--html_preserve-->
+<p>Looking at the network constrained kernel density estimation plot generated for Grab trips in the CBD on weekends, we cannot pin point any new and significant clusters when compared to the NKDE generated for the weekdays. There are 2 main differences however. The region around Fort Canning Park and the Esplanade appear to be slightly more dense than before, and clusters 4. and 5. have all but disappeared. It is possible that people are leaving from Fort Canning and the Esplanade more often on the weekends, but a more like cause is that the disappearance of clusters 4. and 5. and biased the NKDE computation slightly in these areas.</p>
+<p>The visualisation of the weekend NKDE gives credence to the earlier suggestion that office workers are the heaviest contributors to the Grab call demand in Chinatown and Raffles Place as majority of offices are not opened on the weekends which would explain the tank in the Grab call demand.</p>
 
 
+</section>
 </section>
 </section>
 
