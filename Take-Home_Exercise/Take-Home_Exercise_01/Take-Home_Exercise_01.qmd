@@ -16,11 +16,25 @@ date: "`r Sys.Date()`"
 
 toc: true
 toc-location: left
+toc-depth: 4
 
 progress: true
 ---
 
 ### Loading the necessary R-packages
+
+The following R-packages and their use case are as follows:
+
+-   **arrow:** The Grab-Posisi datasets are stored in snappy.parquet format, so we will need to leverage upon the arrow package to read and write these data.
+-   **tidyverse:** To allow us to investigate, manipulate and write the datasets of interest in a readable manner. Also has great compatibility with *sf* objects.
+-   **lubridate:** To handle time format data and conversion of other data types into time formats.
+-   **sf:** Allows us to handle spatial data, specifically the master plan subzone and OpenStreetMap road network data.
+-   **spatstat:** Used to compute the Clark-Evan's test and various Kernel Density Estimates in this report.
+-   **maptools:** Dependency for spatstat.
+-   **tmap:** For visualisation of the spatial data.
+-   **htmlwidgets:** Used to save interactive spatial data visualisations as HTML widgets to lessen the burden on Quarto when rendering.
+
+The *p_load()* functionfrom the pacman package is used to load the libraries and automatically install them for the user if they aren't already installed.
 
 ```{r}
 
@@ -30,9 +44,11 @@ pacman::p_load(sf, tidyverse, arrow, lubridate, tmap, maptools, spatstat, spNetw
 
 ### Importing the datasets of interest
 
+For this report, 3 different datasets are of interest. ***Grab-Posisi*** (*parquet*) from **Grab** to obtain the spatial events of Grab trips, ***MPSZ2019*** (*shp*)from **data.gov.sg** to provide us with the geographical boundaries for our analysis and ***gis_osm_roads_free_1*** (*shp*) from **OpenStreetMap** to obtain the road networks for analysis.
+
 #### Grab-Posisi Data:
 
-The Grab-Posisi data is contained within 10 segmented parquet files, thus, the *read_parquet* function from the *Arrow* package is required. Upon loading, the files are combined into 1 large dataset and saved.
+The Grab-Posisi data is contained within 10 compartmentalised parquet files, thus, the *read_parquet()* function from the *Arrow* package is required. The files are loaded iteratively in a loop and immediately appended to each other without assignment using the *bind_rows()* function.
 
 ```{r}
 #| eval: false
@@ -41,12 +57,12 @@ grab_df <- read_parquet("Data/Geospatial/GrabPosisi/part-00000-8bbff892-97d2-401
 
 for (i in 1:9) {
   grab_df <- grab_df %>%
-    rbind(read_parquet(paste0("Data/Geospatial/GrabPosisi/part-0000", as.character(i), "-8bbff892-97d2-4011-9961-703e38972569.c000.snappy.parquet")))
+    bind_rows(read_parquet(paste0("Data/Geospatial/GrabPosisi/part-0000", as.character(i), "-8bbff892-97d2-4011-9961-703e38972569.c000.snappy.parquet")))
 }
 
 ```
 
-We can see that the Grab-Posisi dataset in its entirety is way too large for computation.
+We can see that the Grab-Posisi dataset in its entirety at 30+ million rows is way too large for computation.
 
 ```{r}
 #| eval: false
@@ -59,7 +75,7 @@ grab_df$pingtimestamp <- as_datetime(grab_df$pingtimestamp)
 
 ![](Screenshots/Grab_Posisi_Data_Glimpse.png)
 
-Grab-Posisi is stored here in case there is a need for it in its entirety.
+We will store the compiled Grab-Posisi just in case there is a need for its entirety in the future as there is spare memory on my drive for now.
 
 ```{r}
 #| eval: false
@@ -68,7 +84,7 @@ write_parquet(grab_df, "Data/Geospatial/GrabPosisi/Grab_Posisi.parquet")
 
 ```
 
-As we are interested in the analysis of only the origins of Grab calls in Singapore, the Grab-Posisi data is subset here to reduce the size of the dataframe in the R-Environment to the necessary only.
+Luckily, as we are interested only in the analysis of the origins of Grab calls in Singapore, the Grab-Posisi data can be subset to reduce its size in the R-Environment to the necessary only. This is achieved using the *group_by()* function to sort each trip record by its ping time-stamp within the trip itself only. *filter()* is used to extract only the earliest, and therefore, the origin record while *mutate()* is used to extract the day of the week in which the trip occurred. The result is stored as an R-Data Structure (RDS) file using the *write_rds()* function to avoid re-computation in the future.
 
 ```{r}
 #| eval: false
@@ -77,9 +93,11 @@ grab_origin_df <- grab_df %>%
   group_by(trj_id) %>% 
   arrange(pingtimestamp) %>% 
   filter(row_number() == 1) %>% 
-  mutate(weekday = wday(pingtimestamp, label = TRUE, abbr = TRUE), start_hr = factor(hour(pingtimestamp)), day = factor(mday(pingtimestamp)))
+  mutate(weekday = wday(pingtimestamp, label = TRUE, abbr = TRUE))
 
 glimpse(grab_origin_df)
+
+paste("From:", min(grab_origin_df$pingtimestamp), "To:", max(grab_origin_df$pingtimestamp))
 
 write_rds(grab_origin_df, "Data/Geospatial/RDS/Grab_Origins_Posisi.rds")
 
@@ -87,13 +105,25 @@ write_rds(grab_origin_df, "Data/Geospatial/RDS/Grab_Origins_Posisi.rds")
 
 ![](Screenshots/Grab_Origins_Data_Glimpse.png)
 
+From a *glimpse()* of the subset data, we can see that the data set has been reduced considerably to 28,000 rows. This is still too large for kernel density estimations for my computer to handle, but for data wrangling and investigation purposes, it is good enough. As such, we will not rush to remove columns in case there is a need for them later especially as the main constraint in spatial computations is the number of events in the data.
+
+![](Screenshots/Grab_origins_daterange.png)
+
+Additionally, we can see that the data exists for 14 days only between 8th April 2019 and 21st April 2019.
+
+We save this subset data so that the code may be re-run in the future without going through the costly process of compiling and subsetting again.
+
 ```{r}
 
 grab_origin_df <- read_rds("Data/Geospatial/RDS/Grab_Origins_Posisi.rds")
 
 ```
 
-#### Singapore Planning Zone and Road Network Data
+#### Singapore Master Plan Subzone and Road Network Data
+
+Both the Singapore Master Plan Subzone (***mpsz***) and Road Network Data are spatial data which require the *sf* package to read in order to retain the spatial information contained. As such, we will use the *st_read()* function to read the data, and apply the *st_transform()* function to cast them to a consistent coordinate reference system (**CRS**) so that we may apply spatial analysis across both data. The **CRS** we will use is [SVY21]{.underline}, which is specific for Singapore.
+
+The Singapore Master Plan Subzone is loaded into the R-Environment below:
 
 ```{r}
 
@@ -105,20 +135,9 @@ summary(mpsz2019)
 
 ```
 
-```{r}
-#| eval: false
+From the *summary()* of the data, we can see that it contains spatial polygon features, originally projected in [WGS84]{.underline}, and we were successful in transforming the CRS to [SVY21]{.underline} (or EPSG: 3414 equivalently).
 
-roads <-
-  st_read("Data/Geospatial/OSM", layer = "gis_osm_roads_free_1") %>%
-  st_transform(crs = 3414)
-
-summary(roads)
-
-```
-
-![](Screenshots/OSM_Road_Network.png)
-
-Plotting the Master-Plan Subzone geospatial data for visualisation
+Plotting the Master-Plan Subzone geospatial data with *tmap*'s *tm_polygons()* function for visualisation:
 
 ```{r}
 #| eval: false
@@ -134,18 +153,82 @@ tmap_save(tm = mpsz2019_plot, "Screenshots/mpsz2019.png")
 
 ![](Screenshots/mpsz2019.png)
 
-From the plot, we can see that the Master-Plan Subzone Data includes the outer islands of Singapore.
+The **OpenStreetMap** (OSM) Road is loaded into the R-Environment below:
 
-To observe if it is impactful, we plot the road network upon the previous layer.
+```{r}
+#| eval: false
+
+roads <-
+  st_read("Data/Geospatial/OSM", layer = "gis_osm_roads_free_1") %>%
+  st_transform(crs = 3414)
+
+summary(roads)
+
+```
+
+![](Screenshots/OSM_Road_Network.png)
+
+Here, the data contains spatial linestrings, and like the mpsz data, is originally projected using WGS84 and successfully converted to SVY21. Also, although we know from the data source that the OSM road networks encompasses Singapore, Brunei and Malaysia, we can also tell from the R-outputs that it extends beyond Singapore's borders. Compared to the mpsz data, its [bounding box]{.underline} is clearly further extending. This also explains the vast number of features the data contains and its long reading time.
+
+In the interest of computation times, we will subset the road networks to Singapore's borders only. To do so, first we generate the Singaporean borders as a spatial polygon object using the *st_union()* function. We then employ the *st_intersection()* function on the generated outline of Singapore and the OSM road network to obtain the Singaporean road network only.
+
+First, the coastal outline of Singapore is generated, and its result is saved as an RDS file with the *write_rds()* function to again avoid re-generation in the future.
+
+```{r}
+#| eval: false
+
+coastal_outline <- st_union(mpsz2019)
+
+write_rds(coastal_outline, "Data/Geospatial/RDS/coastal_outline_sg.rds")
+
+```
+
+```{r}
+
+coastal_outline <- read_rds("Data/Geospatial/RDS/coastal_outline_sg.rds")
+
+```
+
+```{r}
+#| eval: false
+
+sg_coastal_outline_plot <- tm_shape(coastal_outline) +
+  tm_polygons(col = "white", border.col = "red", lwd = 1.7) +
+  tm_layout("Coastal Outine of Singapore 2019")
+
+tmap_save(sg_coastal_outline_plot, "Screenshots/sg_coastal_outline_plot.png")
+
+```
+
+![](Screenshots/sg_coastal_outline_plot.png)
+
+Next, we subset the OSM road networks by using the *st_intersection()* function to constrict the spatial line objects to those within the coastal boundaries of Singapore as generated. Considering the long computation time due to the size of the OSM data, we will save the constricted road network as an RDS file.
+
+```{r}
+#| eval: false
+
+roads_sg <- st_intersection(coastal_outline, roads)
+
+write_rds(roads_sg, "Data/Geospatial/RDS/sg_road_network.rds")
+
+```
+
+```{r}
+
+roads_sg <- read_rds("Data/Geospatial/RDS/sg_road_network.rds")
+
+```
+
+Visualising the generated Singapore road networks with *tmap* using
 
 ```{r}
 #| eval: false
 
 mpsz_w_roads2019_plot <-
-  tm_shape(mpsz2019) +
-  tm_polygons(col = "lightyellow", border.col = "orange", border.alpha = 0.6) + tm_layout(main.title = "Singapore Road Network 2019", main.title.size = 1) +
+  tm_shape(coastal_outline) +
+  tm_polygons(col = "lightyellow", border.col = "red", border.alpha = 0.6) + tm_layout(main.title = "Singapore Road Network 2019", main.title.size = 1) +
   tm_compass(size = 1) +
-  tm_shape(roads) +
+  tm_shape(roads_sg) +
   tm_lines()
 
 tmap_save(tm = mpsz_w_roads2019_plot, "Screenshots/mpsz_w_roads2019.png")
@@ -154,9 +237,13 @@ tmap_save(tm = mpsz_w_roads2019_plot, "Screenshots/mpsz_w_roads2019.png")
 
 ![](Screenshots/mpsz_w_roads2019.png)
 
-Here we can observe that there are road networks present outside the mainland in the dataset. Thus, we need to remove them if mainland Singapore is the scope of the study. First though, we should investigate the Grab-Posisi Data further.
+Here we can observe that there is an extensive road network present outside the mainland of Singapore in the dataset. Thus, we will need to remove them if mainland Singapore is the scope of the study, or if they fall within the scope regardless as they will otherwise affect network contrained kernel density estimates. This is as Grab is unlikely to operate outside the mainland especially on islands like Pulau Tekong, thus, impacting global kernel density estimates because of its low or zero local density.
+
+First though, we should investigate the Grab-Posisi Data further as seen prior, we will need to reduce the scope of our analysis so that computations may be completed in a reasonable amount of time.
 
 #### Transforming the Grab-Posisi Data into a *simple features* object
+
+To investigate the Grab-Posisi data, we must first cast it into a *simple features* object so that R can recognise the coordinate fields in the dataset as spatial and not simply numeric data. The *st_as_af()* function is used for this purpose, specifying the longitude and latitudes in that order, and the CRS as WGS84 (or EPSG: 4326 equivalently) as the data are geographical coordinates. The CRS of the data is then transformed into SVY21 format using the *st_transform()* function by specifying the *crs* parameter to be 3414, the EPSG code for SVY21.
 
 ```{r}
 
@@ -168,7 +255,15 @@ summary(grab_origin_sf)
 
 ```
 
-#### Transforming the Grab-Posisi data furthur into *Spatial Points*, generic *sp* and *ppp* objects
+We can see from a the summary of the data that the casting of the grab origins data to a *simple features* object is successful and that a spatial point *geometry* column has been added to the data in place of *"rawlng"* and *"rawlat"*.
+
+#### Transforming the Grab-Posisi data further into *Spatial Points*, generic *sp* and *ppp* objects
+
+As we are using the spatstat package, we will need to cast our Grab trip origins events data from a *simple features* (*sf*) object to a *planar point pattern* (*ppp*) object to work with it.
+
+To do so, we can utilise the *as_Spatial()* function from the sf package to first convert it into a spatial point dataframe which can then be further transformed to a generic *sp* object using the *as()* from the same package by specifying the object class to be "SpatialPoints". This is required to safely convert an *sf* object to a *ppp* object as the *as()* function does not support casting an *sf* object to a *ppp* object directly. The resulting *sp* object is then computed as a *ppp* object using the *as()* function but this time specifying the new object class to be "ppp".
+
+The transformation process and a summary of each casting step are as follows:
 
 ```{r}
 
@@ -182,7 +277,7 @@ grab_origin_sp <- grab_origin_spatial %>%
 
 summary(grab_origin_sp)
 
-grab_origin_ppp <- grab_origin_sp %>%
+grab_origin_ppp <- grab_origin_sp %>%  
   as("ppp")
 
 summary(grab_origin_ppp)
@@ -190,6 +285,10 @@ summary(grab_origin_ppp)
 ```
 
 ### Visualising the Grab-Posisi origins data in interactive view
+
+To visualise the Grab trip origins data we prepared, we can use the *tm_dots()* function. Additionally, as there are 28,000 event points located on a relatively small geographical area, we can expect the points to be dense enough such that we are likely to see clusters without being able to visually make out their densities or individual points.
+
+To help with this problem, we can visualise the data using an interactive map style so that we may zoom into specific areas and reduce the density of our visualisation. Normally this can be achieved by specifying *tmap_mode()* to "view" but as such visualisations are large and computationally expensive, it is in our interest to build the in R and embed them as a HTML widget thus, avoiding building them during the render process. To do so, we leave it in "plot" mode in order to transform them to a *leaflet* object using the *tmap_leaflet()* function. The resulting *leaflet* object can then be saved as a HTML widget using the *saveWidget()* function from the *htmlwidgets* package.
 
 ```{r}
 #| eval: false
@@ -212,7 +311,9 @@ saveWidget(widget = grab_origins_interactive, file = "Screenshots/grab_origins_i
 
 <!--html_preserve-->
 
-If we zoom in, it appears that there are little to no overlaps in the point coordinates in the data. To confirm,
+If we zoom in, it appears that there are little to no overlaps of point coordinates in the data. This is to be expected for 2 reasons. First, pick-up locations are unlikely to fall in the exact same location especially when collected for 2 weeks only. Secondly, the data is very precise (to the cm) when considering that it exists on a country-wide scale. We know this as the data is precise to 2 decimal places when converted to SVY21 and SVY21 geographical points are listed in meters.
+
+To be sure, we can use the following code to check for duplicated points.
 
 ```{r}
 
@@ -220,9 +321,9 @@ any(duplicated(grab_origin_ppp))
 
 ```
 
-This is good as there is no need to account for point duplication in the dataset.
+This is a good finding as it confirms that there is no need to account for point duplication in the dataset.
 
-Now, we visualise the spread of the point of origins of Grab calls in Singapore.
+Now, we need to solve the next problem which is the scope of our analysis. To do so, we can look for general point clusters across Singapore which might be of interest to us. A quick visualisation using the coastal outline previously generated as the base layer is performed to help with this.
 
 ```{r}
 #| eval: false
@@ -239,13 +340,13 @@ tmap_save(grab_origin_sg_plot, "Screenshots/Grab_Origins_SG.png")
 
 ![](Screenshots/Grab_Origins_SG.png)
 
-It is clear that the central region of Singapore handles more calls than other parts of the country. This of course makes sense as the central region is where the central business district lies, and considering the difference in cost of Grab vs. other forms of public transport, it should be expected that most customers of Grab fall within the CBD area.
+From the darker colouration, it appears that Grab calls in our data were much more concentrated in the central-southern part of Singapore than pretty much any other region. This of course makes sense as that region is where the central business district (CBD) lies, and considering the difference in cost of Grab vs. other forms of public transport, it should be expected that Grab customers are more likely fall within the CBD area especially towards the end of the workday.
 
-Considering the size of the datasets and the complexity of the road network, it makes sense to try to limit the area of study so our machines can handle the computation reasonably. Considering the spread of the data, the central region is chosen as it focus area.
+Considering the size of the Grab origins data and the complexity of the road network, it makes sense to try to limit the area of study so our machines can handle the computations in reasonable time. Considering the spread of the data, the central region is chosen as our area of focus.
 
-### Extracting the "Central Region" polygons
+### Extracting the CBD polygons
 
-Only specific polygons within the "Central Region" is chosen to further narrow down the scope of study to a feasible size.
+Using the Urban Redevelopment Authority of Singapore's (URA) definition of the CBD, the planning areas which makes it up are extracted from the mpsz spatial data. These polygons are identified using the "PLN_AREA_N" feature in the data, and extracted using base dataframe splicing methods and the %in% operator in R.
 
 ```{r}
 
@@ -254,6 +355,10 @@ central_sg <- mpsz2019[mpsz2019$PLN_AREA_N %in% c("DOWNTOWN CORE", "MARINA EAST"
 summary(central_sg)
 
 ```
+
+The spliced *sf* object is assigned to *central_sg* and a summary of the data reveals that it contains 50 spatial polygon objects. Much smaller than the 332 polygon features that were originally in the mpsz dataset.
+
+To visualise the new geographical area of study:
 
 ```{r}
 #| eval: false
@@ -270,11 +375,19 @@ tmap_save(central_region_plot, "Screenshots/central_region_SG.png")
 
 ![](Screenshots/central_region_SG.png)
 
+From the visualisation, we can confirm that the spliced polygons comprises of roughly the area of interest which we identified earlier and that we have reduced the boundaries of our data considerably (much more than the 332 → 50 polygon reduction would suggest).
+
+Also, we can confirm that none of Singapore's outer islands are involved in the focus area we have chosen, and as such we would not need to further narrow down the area to rid of any such polygons.
+
+As the focus of the study is the CBD as a whole, and not specific planning areas within the CBD, it makes sense to recomputed the sliced data to consist of the outer boundaries of the CBD only. Like before, the *st_union()* function is used.
+
 ```{r}
 
 central_sg <- st_union(central_sg)
 
 ```
+
+A visualisation of the computed boundary polygon can again be visualised by layering it upon the mpsz spatial data using multiple calls to the *tm_polygons()* function.
 
 ```{r}
 #| eval: false
@@ -293,7 +406,9 @@ tmap_save(central_region_SG_outline, "Screenshots/central_region_SG_outline.png"
 
 ### Filtering down the Grab call origins data to match out study area
 
-One interesting point of study might be the difference in calls between the weekends and weekdays. Most offices are closed on the weekends, so it might be interesting to investigate how the data differs between the time periods. Thus, we also break the data into 2 parts apart from limiting its geographical scope.
+Now that we have dictated the study area for the rest of the study, we will also need to trim down the Grab call origins data that we have. This can be achieve via the *st_intersection()* function to reduce the data to only those within the boundaries of the *central_sg* polygon we produced.
+
+A further interesting point of study might be the difference in calls between the weekends and weekdays. As mentioned in the justification for choosing the CBD as the scope, we expect that most of the Grab call events occur as a result of office workers travelling home. Thus, as most offices are closed on the weekends, it will be interesting to examine the difference in call patterns during the work week vs. the weekends . To do so, we will break the data into 2 parts using the *weekday* column generated prior to identify calls that fall on the weekends.
 
 ```{r}
 
@@ -308,7 +423,11 @@ summary(central_grab_weekday_sf)
 
 ```
 
+A quick examination of the data shows that there were 2335 trips which originated on weekdays, and 698 calls on the weekends. In general, we can also expect around 25 less calls on Saturdays than during the work week and roughly 60 less calls on Sundays. Thursdays also generated the most calls at 540 trip originations happening on thursdays across the 2 weeks.
+
 ### Visualising the origins of Grab trips over the weekends and weekdays in the Central Region of Singapore.
+
+To visualise the rough density patterns across the 2 different time periods in the CBD, we can employ the following code:
 
 ```{r}
 #| eval: false
@@ -336,9 +455,15 @@ tmap_save(grab_central_weekend_plot, "Screenshots/grab_central_weekend_plot.png"
 
 ![](Screenshots/grab_central_weekend_plot.png)
 
-It appears that on the weekends, calls not only originate from the central region far less often, but also become more sparsely spread out. This makes sense as the central region encompasses subzones outside the CBD, so as the weekend comes, even though calls may fall off in the CBD, these subzones will remain steady. Thus, contributing to the more even distribution observed.
+[*tm_dots()*]{.underline} is used to identify the Grab trip origins and a reasonably low *alpha* value is specified to introduce transparency in the visualisation so that areas of denser events will stand out with deeper colours.
+
+It appears that on the weekends, calls not only originate from the CBD less often. Although this is neither obvious nor interpretable from the visualisation alone as we are comparing 10 days of data vs. 4 days worth. However, our quick investigation of the spliced data above does make this a reasonable observation to have here.
+
+Additionally, it seems also that the geographical patterns in Grab calls also differ on the weekends and weekdays. On the weekdays the Grab trip origins appear to be more evenly distributed whilst being slightly more concentrated in the nothern regions of the CBD on the weekends with barely any calls from the center and southern parts during this period.
 
 ### Transforming the filtered Grab origins data into *Spatial Points*, generic *sp* and *ppp* objects
+
+As before with the *simple features* Grab data we need to transform the data to a *ppp* object if we want to conduct analysis on it using the *spatstats* package. To do so:
 
 #### For the Weekend:
 
@@ -382,7 +507,13 @@ summary(central_grab_weekday_ppp)
 
 ```
 
-### Scaling the *ppp* objects to "km" for more discernable patterns when we produce the kernel density estimates
+Again, summaries of each casting step are displayed to our purview.
+
+### Scaling the *ppp* objects to "km" for more interpretable patterns when we produce the kernel density estimates
+
+As mentioned prior, the data is scaled in meters. This means that when we generate the kernel density estimates (KDE) we will be given densities which suggests that certain areas receive 0.0005 calls per meter^2^ for instance as we are running a KDE across an entire country. This has very low interpretability, so we should re-scale the data points to km so that we can receive easy to understand density estimates when we conduct KDE.
+
+To do so, we rely upon the *rescale()* function, parsing the conversion rate of 1000 to the function:
 
 ```{r}
 
@@ -396,29 +527,37 @@ summary(central_grab_weekday_ppp.km)
 
 ```
 
-### Using the ***Diggle*** method to conduct the Kernel Density Estimations
+Summaries of the Grab trip origins planar point pattern objects now show that the points have successfully been re-scaled to km.
 
-Diggle method is favoured here because the pre-emptive visualisation showed us that the call origins are clustered in multiple regions on weekdays and highly dispersed on weekends.
+### Using the ***ppl*** method to conduct the Kernel Density Estimations
+
+The *ppl* method is favoured here because the pre-emptive visualisation showed us that the call origins are generally spread out in multiple clusters over the week. As such, we do not use the *diggle* bandwidth method as we are not searching for a single cluster within a bunch of noise but rather multiple clusters.
+
+The KDE are computed using the *density()* function from *spatstat*, specifying *bw.ppl* for the kernel bandwidth. Especially as there are large clusters near the edge of our project's geographical boundaries observable from earlier visualisations, it is imperative that we correct for edge bias by specifying it to [*TRUE*]{.underline}.
 
 ```{r}
 
-par(mfrow=c(1, 2), cex.main = 0.5)
+par(cex.main = 0.7)
 
-kde_central_grab_weekend_diggle_bw.km <- density(central_grab_weekend_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+kde_central_grab_weekend_ppl_bw.km <- density(central_grab_weekend_ppp.km, sigma=bw.ppl, edge=TRUE, kernel="gaussian")
 
-kde_central_grab_weekday_diggle_bw.km <- density(central_grab_weekday_ppp.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+kde_central_grab_weekday_ppl_bw.km <- density(central_grab_weekday_ppp.km, sigma=bw.ppl, edge=TRUE, kernel="gaussian")
 
-plot(kde_central_grab_weekend_diggle_bw.km, main = "Scaled Kernel Density Estimate of Grab Trip Origins in Central SG on Weekends (Diggle)")
+plot(kde_central_grab_weekend_ppl_bw.km, main = "Scaled Kernel Density Estimate of Grab Trip Origins in Central SG on Weekends (ppl)")
 
-plot(kde_central_grab_weekday_diggle_bw.km, main = "Scaled Kernel Density Estimate of Grab Trip Origins in Central SG on Weekdays (Diggle)")
+plot(kde_central_grab_weekday_ppl_bw.km, main = "Scaled Kernel Density Estimate of Grab Trip Origins in Central SG on Weekdays (ppl)")
 
 ```
 
+From the produced KDE plots, we can confirm that the Grab trip origins are pretty evenly spread out in multiple clusters across the CBD on the weekdays. However, the trips are far more concentrated in the northern half of the CBD than we initially realised, with 2 big hotspots in there which stand out from the rest.
+
 ### Using the ***Adaptive Bandwidth*** method to conduct the Kernel Density Estimations
+
+An adaptive bandwidth method can also be applied to our kernel density estimates instead:
 
 ```{r}
 
-par(mfrow=c(1, 2), cex.main = 0.4)
+par(cex.main = 0.7)
 
 kde_central_grab_weekend_ppp_adaptive <- adaptive.density(central_grab_weekend_ppp.km, method="kernel")
 
@@ -430,26 +569,30 @@ plot(kde_central_grab_weekday_ppp_adaptive, main = "Kernel Density Estimate of G
 
 ```
 
-The KDE plots here become especially useful as it shows how the previous simple plot of the Grab trip origins can be misleading. Here, the KDE estimates tells us that the distribution of the trip origins still happen to be heavily skewed towards what should be the CBD area of Singapore regardless of the part of the week. Whereas, previous plots, probably as a result of lower volume would have us believe that there is the difference in spread.
+The adaptive KDE plots tells a similar story to when the *ppl* bandwidth method was applied. However, this time, the clustering of the origins of Grab trips towards the northern half of the CBD during the weekends are far more evident than before. In fact, when adapative bandwidth is applied, the southern half of the CBD is what can only be described as a cold-spot with barely any purple-ish colouration present. The evidence of multiple but well-spread out clusters across the CBD during the weekdays is more evident here than before as previously it seems like the hot-spots may have been briefly connected, here, the drop-off between each hot-spot is much more obvious.
 
 ### Conducting the Clark-Evans test for Spatial Point Pattern
 
+To conduct a Clark-Evans' hypothesis test as to the randomness of the spatial point distribution of Grab trips in the CBD, we can utilise the *clarkevans.test()* function. Within the function, we can correct for edge bias again, especially now that we know from the KDE that we can expect the data to be heavily concentrated near the top during the weekends. *CDF* correction method is applied as recommended in the Clark-Evans documentation in R which suggests Donnelly correction for rectangular windows only.
+
 ```{r}
 
-clarkevans.test(central_grab_weekday_ppp.km, correction="none", clipregion="central_sg_owin", alternative=c("clustered"), nsim=99)
+clarkevans.test(central_grab_weekday_ppp.km, correction="cdf", alternative=c("clustered"), nsim=99)
 
-clarkevans.test(central_grab_weekend_ppp.km, correction="none", clipregion="central_sg_owin", alternative=c("clustered"), nsim=99)
+clarkevans.test(central_grab_weekend_ppp.km, correction="cdf", alternative=c("clustered"), nsim=99)
 
 ```
 
-From the p-values of the Clark-Evan's test, we have to conclude that the distributions of the Grab trip origins are clustered in the central planning region of Singapore. A conclusion supported by out KDE plots.
+From the p-values of the Clark-Evan's test, we have to conclude that the distributions of the Grab trip origins display clustering patterns within Singapore's CBD regardless of the part of the week. This is a conclusion supported by our KDE plots either using *ppl* or adaptive bandwidth methods.
 
 ### Limiting the Road Network Data to Central Singapore
+
+Earlier in this report, we conducted an extraction of the road networks from **OpenStreetMap** using the *st_intersection()* function. We will need to do so again as we have since further limited the scope of our study to the CBD. This time however, as the purpose of using the road network data lies in constructing Network-Contrained Kernel Density Estimations, we will need to ensure that only spatial Line features exist in the data. To do so, we can employ the *st_cast()* function to coerce any other spatial features to Spatial Lines.
 
 ```{r}
 #| eval: false
 
-central_roads <- st_intersection(roads, central_sg)
+central_roads <- st_intersection(roads_sg, central_sg)
 
 central_roads <- st_cast(central_roads, "LINESTRING")
 
@@ -457,15 +600,19 @@ write_rds(central_roads, "Data/Geospatial/RDS/central_road_network.rds")
 
 ```
 
-Saving the produced road network for future use ...
+Once again we save the spliced data for further use as it is computationally expensive.
 
 ```{r}
 
 central_roads <- read_rds("Data/Geospatial/RDS/central_road_network.rds")
 
-central_roads <- st_simplify(central_roads, preserveTopology = TRUE)
+central_roads <- st_simplify(central_roads, preserveTopology = FALSE)
 
 ```
+
+### Visualising the Road Network Data across the CBD
+
+Using the tm_lines() function we can build a visual plot of the road networks in the CBD
 
 ```{r}
 #| eval: false
@@ -484,10 +631,12 @@ tmap_save(central_road_network_plot, "Screenshots/central_road_network.png")
 
 ### Preparing the lixel objects and generating the line centre points
 
+In order to conduct NKDE, we will need to use the *spNetwork* package which requires that we parse *lixel* objects rather than *sf* objects with *LINESTRING* geometry type. Thus, we need to generate these *lixels* using the *lixelize_lines()* function. Additionally, the computation of NKDE also requires that we generate the center points of these *lixels*. This can be generated by parsing the *lixels* into the *lines_center()* function.
+
 ```{r}
 #| eval: false
 
-lixels <- lixelize_lines(central_roads, 700, mindist = 350)
+lixels <- lixelize_lines(central_roads, 700, mindist = 300)
 
 samples <- lines_center(lixels)
 
@@ -497,7 +646,7 @@ write_rds(samples, "Data/Geospatial/RDS/central_road_centrepoints.rds")
 
 ```
 
-Saving the produced lixel and centrepoint objects for future use ...
+As the road network data is quite extensive, the computation of the *lixels* are extremely computationally expensive and time consuming. Thus, we save the generated *lixels* and *lixel* center points as RDS files also.
 
 ```{r}
 
@@ -509,7 +658,11 @@ samples <- read_rds("Data/Geospatial/RDS/central_road_centrepoints.rds")
 
 ### Performing the Network Constrained Kernel Density Estimation
 
+Now that we have prepared the lixels and their center points, we can run the NKDE across our 2 segmented Grab data. Our previous KDE plots provides us with some indicates of the parameters in which we can run our NKDE upon. Firstly, the kernel used should be "quartic" as we are looking for several spikes in the data whilst being less sensitive to outlier events because we know that the southern parts of the CBD are less densely serviced by Grab than the northern parts during the weekends. And even though the data is more evenly spread out in the workweek, the adaptive KDE reveals that the data exists as multiple hot-spots with strong drop-offs rather than a smooth transition to the next hot-spot. We run it on a "simple" method and set sparse to [*TRUE*]{.underline} to reduce computation time, but also set verbose to [*TRUE*]{.underline} to get updated that the process is running properly as the computation is expected to be very time-consuming regardless.
+
 #### Weekday Data:
+
+Using the *nkde()* function to compute the network-constrained kernel density estimates of the weekday Grab trips in the CBD:
 
 ```{r}
 #| eval: false
@@ -518,7 +671,7 @@ weekday_densities <- nkde(central_roads,
                           events = central_grab_weekday_sf,  
                           w = rep(1,nrow(central_grab_weekday_sf)), 
                           samples = samples, 
-                          kernel_name = "gaussian", 
+                          kernel_name = "quartic", 
                           bw = 300, 
                           div= "bw", 
                           method = "simple", 
@@ -534,6 +687,8 @@ write_rds(weekday_densities, "Data/Geospatial/RDS/Grab_weekday_nkde.rds")
 
 ```
 
+Once the density estimates are computed, we store them away as RDS files to avoid running them again unless there is a change in the data.
+
 ```{r}
 
 weekday_densities <- read_rds("Data/Geospatial/RDS/Grab_weekday_nkde.rds")
@@ -543,7 +698,11 @@ lixels$density <- weekday_densities * 1000
 
 ```
 
+We then reassign the computed densities to the *lixel* and *lixel* center point objects used.
+
 #### Visualising the Network Constrained Kernel Density Estimate of the Weekday Grab Data over an interactive *OpenStreetMap* layer
+
+Using the densities appended to the *lixels* generated, and the tm_lines() and tm_dots() function, we can visualise the NKDE plots. Furthermore, we shall use tm_basemap("OpenStreetMap") as the base layer rather than the central_sg polygons previously used. This will allow us to obtain contextualised information of the hot-spots from the NKDE produced.
 
 ```{r}
 #| eval: false
@@ -564,13 +723,15 @@ saveWidget(grab_weekday_interactive, "Screenshots/CBD_grab_weekday_interactive.h
 
 <!--html_preserve-->
 
-<iframe src="Screenshots/CBD_grab_weekday_interactive.html" width="600" height="400">
+<iframe src="Screenshots/CBD_grab_weekday_interactive.html" width="650" height="400">
 
 </iframe>
 
 <!--html_preserve-->
 
 #### Weekend Data:
+
+Using the *nkde()* function to compute the network-constrained kernel density estimates of the weekend Grab trips in the CBD:
 
 ```{r}
 #| eval: false
@@ -579,7 +740,7 @@ weekend_densities <- nkde(central_roads,
                   events = central_grab_weekend_sf,
                   w = rep(1,nrow(central_grab_weekend_sf)),
                   samples = samples,
-                  kernel_name = "gaussian",
+                  kernel_name = "quartic",
                   bw = 300,
                   div= "bw",
                   method = "simple",
@@ -606,6 +767,8 @@ lixels$density <- weekend_densities * 1000
 
 #### Visualising the Network Constrained Kernel Density Estimate of the Weekend Grab Data over an interactive *OpenStreetMap* layer
 
+Similarly, like in the visualisation of the weekday Grab data, we can visualise the weekend Grab data within the CBD on weekends:
+
 ```{r}
 #| eval: false
 
@@ -625,7 +788,7 @@ saveWidget(grab_weekend_interactive, "Screenshots/CBD_grab_weekend_interactive.h
 
 <!--html_preserve-->
 
-<iframe src="Screenshots/CBD_grab_weekend_interactive.html" width="600" height="400">
+<iframe src="Screenshots/CBD_grab_weekend_interactive.html" width="650" height="400">
 
 </iframe>
 
