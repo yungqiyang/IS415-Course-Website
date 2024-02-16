@@ -12,17 +12,19 @@ execute:
   echo: true
   warning: false
 date: "`r Sys.Date()`"
+
+code-annotations: select
 ---
 
-# Getting Started
+## Getting Started
 
-#1.3
+## 1.3
 
 ```{r}
 
 #Installing the pacman package
 #install.packages('pacman')
-pacman::p_load(sf, tidyverse)
+pacman::p_load(sf, tidyverse) #load
 
 ```
 
