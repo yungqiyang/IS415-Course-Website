@@ -107,4 +107,3 @@ glimpse(moranI)
 global_moran_test(wm_q$GDPPC, wm_q$nb, wm_q$wt)
 
 ```
-
