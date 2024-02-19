@@ -4,6 +4,7 @@ title: "Hands-On Exercise 1: Geospatial Data Wrangling with R"
 author: "Yung Qi Yang"
 format: 
   html:
+    code-tools: true
     code-fold: true
     code-summary: "Reveal Code"
     
@@ -24,7 +25,7 @@ code-annotations: select
 
 #Installing the pacman package
 #install.packages('pacman')
-pacman::p_load(sf, tidyverse) #load
+pacman::p_load(sf, tidyverse) 
 
 ```
 

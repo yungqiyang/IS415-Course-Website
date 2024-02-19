@@ -23,7 +23,7 @@ progress: true
 
 ```{r}
 
-pacman::p_load(sf, sfdep, sfdep, tidyverse, tmap)
+pacman::p_load(sf, sfdep, plotly, tidyverse, tmap, Kendall)
 
 ```
 
@@ -73,13 +73,15 @@ tmap_mode("plot")
 
 tm_shape(hunan_GDPPC) +
   tm_fill("GDPPC", style = "quantile", palette = "Blues", title = "GDPPC") +
-  tm_layout(main.title = "Distribution of GDP per capita by  county, Hunan province", main.title.position = "center", main.title.size = 1.2, legend.height = 0.45, legend.width = 0.35, frame = TRUE) +
+  tm_layout(main.title = "Distribution of GDP per capita by  county, Hunan province", main.title.position = "center", main.title.size = 0.8, legend.height = 0.45, legend.width = 0.35, frame = TRUE) +
   tm_borders(alpha = 0.5) +
   tm_compass(type = "8star", size = 2) +
   tm_scale_bar() +
   tm_grid(alpha = 0.2)
 
 ```
+
+## Global and Local Moran's I Analysis
 
 ### Deriving the congruity weights using the ***QUEEN***'s method
 
@@ -90,7 +92,7 @@ wm_q <- hunan_GDPPC %>%
 
 ```
 
-### Computing the Moran's I statistic
+### Computing the Global Moran's I statistic
 
 ```{r}
 
@@ -107,3 +109,278 @@ glimpse(moranI)
 global_moran_test(wm_q$GDPPC, wm_q$nb, wm_q$wt)
 
 ```
+
+### Performing the Global Moran's I permutation test
+
+```{r}
+
+global_moran_perm(x = wm_q$GDPPC, nb = wm_q$nb, wt = wm_q$wt, nsim = 999)
+
+```
+
+### Computing the Local Moran's I Statistic
+
+```{r}
+
+lisa <- wm_q %>% 
+  mutate(local_moran = local_moran(GDPPC, nb, wt, nsim = 999), .before = 1) %>%
+  unnest(local_moran)
+
+glimpse(lisa)
+
+```
+
+### Visualising the Local Moran's I Statistic
+
+```{r}
+
+tmap_mode("plot")
+
+tm_shape(lisa) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I of GDPPC",
+            main.title.size = 0.8)
+
+```
+
+### Visualising the Local Moran's I p-value
+
+```{r}
+
+tmap_mode("plot")
+
+tm_shape(lisa) +
+  tm_fill("p_ii_sim") + 
+  tm_borders(alpha = 0.5) +
+   tm_layout(main.title = "p-value of local Moran's I",
+            main.title.size = 0.8)
+
+```
+
+### Visualising the LISA map
+
+```{r}
+
+lisa_sig <- lisa  %>%
+  filter(p_ii < 0.05)
+
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+```
+
+## Hot & Cold Spot Analysis
+
+### Computing the Local Gi\* Statistic
+
+```{r}
+
+wm_idw <- hunan_GDPPC %>%
+  mutate(nb = st_contiguity(geometry),
+         wts = st_inverse_distance(nb, geometry,
+                                   scale = 1,
+                                   alpha = 1),
+         .before = 1)
+
+HCSA <- wm_idw %>% 
+  mutate(local_Gi = local_gstar_perm(
+    GDPPC, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+
+glimpse(HCSA)
+
+```
+
+### Visualisng the Local Gi\* Statistic
+
+```{r}
+
+tmap_mode("plot")
+
+tm_shape(HCSA) +
+  tm_fill("gi_star") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8))
+
+```
+
+### Visualising the Local Gi\* p-value
+
+```{r}
+
+tmap_mode("plot")
+
+tm_shape(HCSA) +
+  tm_fill("gi_star") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8))
+
+```
+
+### Visualising the Hot & Cold Spot Areas
+
+```{r}
+
+HCSA_sig <- HCSA  %>%
+  filter(p_sim < 0.05)
+
+tmap_mode("plot")
+
+tm_shape(HCSA) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig) +
+  tm_fill("gi_star") + 
+  tm_borders(alpha = 0.4)
+
+```
+
+## Emerging Hot & Cold Spot Analysis
+
+## Creating the Spatial-Temporal Cube
+
+```{r}
+
+GDPPC_st <- spacetime(hunanGDPPC, hunan,
+                      .loc_col = "County",
+                      .time_col = "Year")
+
+is_spacetime_cube(GDPPC_st)
+
+```
+
+### Computing the Local Gi\* Statistic
+
+#### Deriving the Spatial Weights
+
+```{r}
+
+GDPPC_nb <- GDPPC_st %>%
+  activate("geometry") %>%
+  mutate(nb = include_self(st_contiguity(geometry)),
+         wt = st_inverse_distance(nb, geometry,
+                                  scale = 1,
+                                  alpha = 1),
+         .before = 1) %>%
+  set_nbs("nb") %>%
+  set_wts("wt")
+
+```
+
+#### Computing the Gi* Statistic
+
+```{r}
+
+gi_stars <- GDPPC_nb %>% 
+  group_by(Year) %>% 
+  mutate(gi_star = local_gstar_perm(
+    GDPPC, nb, wt)) %>% 
+  tidyr::unnest(gi_star)
+
+```
+
+### Conducting the Mann-Kendall Test
+
+```{r}
+
+cbg <- gi_stars %>% 
+  ungroup() %>% 
+  filter(County == "Changsha") |> 
+  select(County, Year, gi_star)
+
+```
+
+### Visualising the Mann-Kendall Test Results
+
+```{r}
+
+ggplot(data = cbg, 
+       aes(x = Year, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+
+```
+
+### Visualising the Mann-Kendall Test Result Interactively
+
+```{r}
+
+p <- ggplot(data = cbg, 
+       aes(x = Year, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+
+ggplotly(p)
+
+```
+
+### Computing the Mann-Kendall p-value to identify emerging hot-spots
+
+```{r}
+
+ehsa <- gi_stars %>%
+  group_by(County) %>%
+  summarise(mk = list(unclass(MannKendall(gi_star)))) %>% 
+      unnest_wider(mk)
+
+emerging <- ehsa %>% 
+  arrange(sl, abs(tau)) %>% 
+  slice(1:5)
+
+emerging
+
+```
+
+### Performing the emerging hot-spot analysis
+
+```{r}
+
+ehsa <- emerging_hotspot_analysis(
+  x = GDPPC_st, 
+  .var = "GDPPC", 
+  k = 1, 
+  nsim = 99
+)
+
+```
+
+### Visualising the emerging hotspot classes
+
+```{r}
+
+ggplot(data = ehsa,
+       aes(x = classification)) +
+  geom_bar()
+
+```
+
+### Visualising the emerging hot-spots geospatially
+
+```{r}
+
+hunan_ehsa <- hunan %>%
+  left_join(ehsa,
+            by = join_by(County == location))
+
+ehsa_sig <- hunan_ehsa  %>%
+  filter(p_value < 0.05)
+tmap_mode("plot")
+tm_shape(hunan_ehsa) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(ehsa_sig) +
+  tm_fill("classification") + 
+  tm_borders(alpha = 0.4)
+
+```
+
