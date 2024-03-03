@@ -51,7 +51,7 @@ glimpse(hunanGDPPC)
 #| eval: false
 
 hunan_GDPPC <- left_join(hunan, hunan2012) %>% 
-  select(1:4, 7, 14)
+  select(1:4, 7, 15)
 
 write_rds(hunan_GDPPC, "Data/Geospatial/RDS/Hunan.rds")
 
@@ -275,7 +275,7 @@ GDPPC_nb <- GDPPC_st %>%
 
 ```
 
-#### Computing the Gi* Statistic
+#### Computing the Gi\* Statistic
 
 ```{r}
 
@@ -383,4 +383,3 @@ tm_shape(ehsa_sig) +
   tm_borders(alpha = 0.4)
 
 ```
-
