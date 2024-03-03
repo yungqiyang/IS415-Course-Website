@@ -1,0 +1,580 @@
+---
+title: "Take-Home Exercise 2: Using Spatial-Temporal Analysis to investigate the distribution of Dengue Fever cases in Tainan City, Taiwan"
+author: "Yung Qi Yang"
+
+format: 
+  html:
+    code-fold: true
+    code-summary: "Reveal Code"
+    
+execute: 
+  eval: true
+  echo: true
+  warning: false
+date: "`r Sys.Date()`"
+
+toc: true
+toc-location: left
+
+progress: true
+---
+
+## Priming the project
+
+As mentioned in the project outline, Taiwan has been very successful in containing the spread of Dengue Fever for many years. However, in 2023, especially between the epidemic weeks 31 to 50 (which corresponds to the end of July to the middle of December), Taiwan saw a dramatic spike in Dengue Fever cases. The interest of this report then, is to conduct an analysis into the cause of the outbreak, specifically in Tainan City, Taiwan, from a spatial autocorrelation perspective.
+
+## Preparing the R-Environment for analysis
+
+### Loading the necessary R-packages
+
+To do so, we will need the following R-packages:
+
+-   **sf:** Allows us to handle both spatial data, i.e. the Tainan map data and XY coordinates within the dengue dataset.
+-   **sfdep:** Allows us to run spatial autocorrelation statistical analysis of our data.
+-   **Kendall:** Used to run the Mann-Kendall's test in emerging hotspot analysis
+-   **tmap:** For visualisation of the spatial data.
+-   **tidyverse:** To allow us to investigate, manipulate and write the datasets of interest in a readable manner. Also has great compatibility with *sf* objects.
+-   **lubridate:** To handle time format data and conversion of other data types into time formats.
+-   **ggplot2:** Used to visualise data in forms like histograms and line graphs.
+-   **htmlwidgets:** Used to save interactive spatial data visualisations as HTML widgets to lessen the burden on Quarto when rendering.
+
+The *p_load()* functionfrom the pacman package is used to load the libraries and automatically install them for the user if they aren't already installed.
+
+```{r}
+
+pacman::p_load(sf, sfdep, Kendall, tmap, tidyverse, lubridate, ggplot2, htmlwidgets)
+
+```
+
+## Conducting data pre-processing for analysis
+
+There are 2 datasets of interest to us in this report, the *Tainan* spatial data, and the *dengue_daily* aspatial data. The *Tainan* dataset contains spatial polygon information about the geographical boundaries of Tainan City, whilst the *dengue_daily* dataset is a record of all reported instances of dengue fever in Taiwan from 1998 till 2023.
+
+### Importing the datasets of interest
+
+#### Tainan Spatial Data:
+
+To import the Tainan dataset, we require the the *st_read()* function from the *sf* package so as to preserve its spatial features. Additionally, *st_transform()* is required in order to cast the data set into the WGS84 coordinate reference system as the data is originally in TWD97, the Taiwanese *CRS*. We need to do so in order to visualise the data later on upon *OpenStreetMap* later as *OpenStreetMap* is coded in WGS84. From the *glimpse()* of the data, we can see that we were successful in doing so.
+
+```{r}
+
+tainan <- st_read(dsn = "Data/Geospatial", layer = "TAINAN_VILLAGE") %>% 
+  st_transform(4326)
+
+summary(tainan)
+glimpse(tainan)
+
+```
+
+Plotting the Tainan geospatial data with tmap's tm_polygons() function for a quick visualisation (and confirmation of the data):
+
+```{r}
+
+tm_shape(tainan) +
+  tm_polygons(col = "darkgreen", border.col = "black") + 
+  tm_layout(main.title = "Map of Tainan, Taiwan", main.title.size = 0.9, main.title.position = "center", bg.color = "lightblue") +
+  tm_compass(type = "rose", size = 3) +
+  tm_scale_bar(width = 0.2, )
+
+```
+
+#### Daily Dengue report data:
+
+Next, we will import the *dengue_daily* dataset, which is in *csv* (comma-separated values) format. We will rely on the *read_csv()* function from the *readr* package which is part of the *tidyverse* repository to do so. Additionally, we will not need the *sf* package for now as the spatial information in the dataset is in *character* format and thus, will not be recognised automatically by *st_read()* anyways:
+
+```{r}
+
+dengue <- read_csv("Data/Aspatial/Dengue_Daily.csv")
+glimpse(dengue)
+
+```
+
+A quick investigation of the data yields the following:
+
+1.  There are missing spatial information in the dataset (some reports do not list reporting coordinates).
+2.  It is a medium sized dataset with 106, 861 rows.
+
+A quick calculation reveals that there are 1560 rows with missing coordinate information. Considering the overall size of the data, it is reasonable, nor do we have much option anyways, to remove rows with missing spatial information from the dataset as that will have repurcussions on our analysis if we leave them be.
+
+To do so, we rely upon the *mutate()* and *filter()* functions from *dplyr()*, whilst using *as.numeric()* to convert the coordinates into floating number values so that *sf* may recognise it. To convert the dataset into a *simple features* object, we explicitly parse the *"最小統計區中心點X"* and *"最小統計區中心點Y"* columns as spatial information, using the *st_as_st()* function to cast the *dataframe*, and the *st_set_crs()* function to specify the use of the *WGS84* coordinate reference system.
+
+```{r}
+
+dengue <- dengue %>% 
+  mutate(最小統計區中心點X = as.numeric(最小統計區中心點X),
+         最小統計區中心點Y = as.numeric(最小統計區中心點Y)) %>%
+  filter(!is.na(最小統計區中心點X) & !is.na(最小統計區中心點Y)) %>% 
+  st_as_sf(coords = c("最小統計區中心點X", "最小統計區中心點Y"), crs = "TWD97") %>% 
+  st_set_crs(4326)
+
+summary(dengue)
+glimpse(dengue)
+
+```
+
+As the dengue information covers the whole of Taiwan, the *st_intersection()* function is used to confine the spread of the data solely to Tainan, our project objective. *st_union()* is applied here to draw the outer boundaries of Tainan, and speed up the computation time.
+
+```{r}
+#| eval: false
+
+dengue <- dengue %>% 
+  st_intersection(st_union(tainan))
+
+```
+
+```{r}
+#| eval: false
+
+dengue %>% 
+  write_rds("Data/RDS/dengue_tainan.rds")
+
+```
+
+```{r}
+#| echo: false
+#| eval: true
+
+dengue <- read_rds("Data/RDS/dengue_tainan.rds")
+
+```
+
+A visualisation of the locations of dengue fever reports in Tainan is as follows:
+
+```{r}
+
+tm_shape(tainan) + 
+  tm_polygons(col = "darkgreen", border.col = "black") + 
+  tm_layout(main.title = "Outbreak of Dengue Fever in Tainan, Taiwan", main.title.size = 0.9, main.title.position = "center", bg.color = "lightblue") +
+tm_shape(dengue) + 
+  tm_dots(size = 0.05, alpha = 0.2, col = "red") +
+  tm_compass(type = "rose", size = 3, position = "left") +
+  tm_scale_bar(width = 0.2, position = "left")
+
+```
+
+From the incident map drawn, we can see that the majority of dengue fever reports occur in the south-western part of the city which explains why a further restriction of the data to a couple of towns within Tainan was specified as part of the report. Below, we will constrict the *Tainan* spatial polygon data to the requested towns using the *filter()* function from *dpylr*, and produce an easy visualisation of the new area of focus.
+
+```{r}
+
+tainan <- tainan %>% 
+  filter(TOWNID %in% c("D01", "D02", "D04", "D06", "D07", "D08", "D32", "D39"))
+glimpse(tainan)
+
+tm_shape(tainan) +
+  tm_polygons(col = "darkgreen", border.col = "black") + 
+  tm_layout(main.title = "Outbreak Region of Tainan, Taiwan", main.title.size = 0.9, main.title.position = "center", bg.color = "lightblue") +
+  tm_compass(type = "rose", size = 3, position = "left") +
+  tm_scale_bar(width = 0.2, position = "left")
+
+```
+
+As the boundary of the reports have been re-drawn, we will need to employ the *st_intersection()* function once again to restrict the dengue reports to the focus area:
+
+```{r}
+
+dengue <- dengue %>% 
+  st_intersection(st_union(tainan))
+
+```
+
+By plotting the newly restricted *daily_dengue* data over the *Tainan* data subset, we can confirm that the restriction process has gone well:
+
+```{r}
+
+tm_shape(tainan) + 
+  tm_polygons(col = "darkgreen", border.col = "black") + 
+  tm_layout(main.title = "Cases of Dengue Fever in Tainan, Taiwan", main.title.size = 0.9, main.title.position = "center", bg.color = "lightblue") +
+tm_shape(dengue) + 
+  tm_dots(size = 0.05, alpha = 0.2, col = "red") +
+  tm_compass(type = "rose", size = 3, position = "left") +
+  tm_scale_bar(width = 0.2, position = "left")
+
+```
+
+Next, we will need to reduce the dengue report data that we have to the time period which we are interested in, namely the 31^st^ to 50^th^ epidemic weeks of 2023. To do so, we first need to extract out the year and week information from the data. Thus, we apply the *year()* and *isoweek()* functions from the *lubridate* package to do so, and the *mutate()* function from *dplyr* to create these new columns in the data.
+
+There are 3 functions to extract the week information from a *date* field in *lubridate*, but we will use *isoweek()* for the following reason. In order to conduct year-on-year analysis of the data, we will need a way to standardise the weeks extracted across the years. *weeks()* will not allow us to do so, whereas *isoweek()* will. Of course as we are not doing year-on-year analysis, choosing *isoweek()* will not make an impactful difference, but it still is good practice to do so. *epiweek()* is discounted on the other hand, as even though it standardises week extraction, it starts the week on a Sunday rather than a Monday as is standard in Taiwan.
+
+```{r}
+
+dengue <- dengue %>% 
+  mutate(發病年 = year(發病日), 發病周 = isoweek(發病日)) 
+
+dengue %>% 
+  group_by(發病周) %>% 
+  summarise(dengue_count = n()) %>% 
+    ggplot(aes(y = dengue_count, x = 發病周)) +
+    geom_line(col = "orange", scale_colour_hue = 100) +
+    labs(title = "Trend of Dengue Fever Cases in Tainan, Taiwan") +
+    xlab("Epidemic Week") +
+    ylab("Number of Dengue Cases Reported") + 
+    theme(panel.background = element_rect(fill = "navy"), 
+          panel.grid.major = element_line(color = "black", linewidth = 0.1),
+          panel.grid.minor = element_line(color = "black", linewidth = 0.1))
+
+```
+
+Using *ggplot2* this time, we visualise above, the trend of dengue reports across our area of focus in Taiwan over 2023 on a weekly basis. From our graph, it becomes evident that the dengue reports does pick up dramatically from weeks 31 to 50 as the project outline states. Thus, we employ the *filter()* function once again to narrow down our study scope.
+
+```{r}
+#| eval: false
+
+dengue <- dengue %>%
+  filter(發病年 == 2023 & (between(發病周, 31, 50)))
+
+```
+
+```{r}
+#| eval: false
+
+dengue %>% 
+  write_rds("Data/RDS/dengue_tainan_wk31_50.rds")
+
+```
+
+```{r}
+#| echo: false
+#| eval: true
+
+dengue <- read_rds("Data/RDS/dengue_tainan_wk31_50.rds")
+
+```
+
+A visualisation of the base of our study using *tmap* is thus, as follows:
+
+```{r}
+
+tm_shape(tainan) + 
+  tm_polygons(col = "darkgreen", border.col = "black") + 
+  tm_layout(main.title = "Cases of Dengue Fever between epidemic weeks 31 to 50 in Tainan, Taiwan", main.title.size = 0.75, main.title.position = "center", bg.color = "lightblue") +
+tm_shape(dengue) + 
+  tm_dots(size = 0.05, alpha = 0.2, col = "red") +
+  tm_compass(type = "rose", size = 3, position = "left") +
+  tm_scale_bar(width = 0.2, position = "left")
+
+```
+
+## Conducting Global Spatial Auto-correlation analysis
+
+To conduct our global spatial autocorrelation analysis, we will employ **Moran's I** statistics rather than **Geary's C** as transmission of dengue occurs via the Aedes vector, and we should not lighten the impact of linear associations of dengue reports from our analysis.
+
+To start, we need to count the number of reports which occurred in each polygon of our geographical scope. The *st_intersects()* function is employed over the *st_intersection()* function here for computation speed as we need not retain all information in the data, only just the counts. *lengths()* is used to compute the length of each element in the list generated by *st_intersects()*.
+
+```{r}
+
+tainan$dengue_count <- tainan %>% 
+  st_intersects(dengue) %>% 
+  lengths()
+
+glimpse(tainan)
+
+```
+
+Next, we need to compute the congruity weight matrix as **Moran's I** is a congruity based method. The *st_contiguity()* is used to do so, with the *queen* option set to true as mentioned prior, the vector-transmission method of dengue fever does not allow us to discount neither the neighbours at the edge nor vertices. The *st_weights()* function is used to compute the weights of each polygon in the dataset, with *style* set to 'W' so that row-standardised weights are computed.
+
+```{r}
+
+weight_matrix_queen <- tainan %>% 
+  mutate(neighbours = st_contiguity(geometry, queen = TRUE),
+         weight = st_weights(neighbours, style = "W"),
+         .before = 1)
+
+summary(weight_matrix_queen$neighbours)
+
+```
+
+After we obtain the row-standardised weight matrix of our spatial data, we can proceed to compute the global Moran's statistic with it. *global_moran_perm()* is used to conduct a Monte-Carlo simulation of the **global Moran's I** statistic with 500 simulations done. As in all **Monte-Carlo** simulations conducted in this report, 500 simulations will be used as it represents the largest amount of simulations my computer can conduct in a reasonable amount of time.
+
+Additionally, *set.seed()* is used to ensure that the results of the simulation are repeatable.
+
+```{r}
+
+set.seed(3142)
+
+global_moran_500 <- global_moran_perm(weight_matrix_queen$dengue_count, 
+                  weight_matrix_queen$neighbours,
+                  weight_matrix_queen$weight,
+                  nsim = 499)
+
+print(global_moran_500)
+
+```
+
+From the simulation results, we can see that the p-value is extremely low, leading to a conclusion that the incidents of dengue cases in Tainan show evidence of non-randomness at all reasonable levels of statistical significance. This result is not surprising as Aedes mosquitoes breed and travel short ranges, meaning that when they start carrying the Dengue virus, we expect people near to the initial carrier of dengue to suffer from it to. Also, we might think from the perspective that areas where Aedes mosquitoes thrive will frequently give rise to clusters of dengue cases as they are more prone to breeding of mosquitoes which makes it difficult to eliminate the vector in these areas.
+
+We can visualise the Monte-Carlo simulation using *geom_histogram()* and *geom_vline()* from ggplot2 as below:
+
+```{r}
+
+ggplot() + 
+  geom_histogram(aes(global_moran_500$res[1:499]),
+                 bins = 100, 
+                 fill = "blue", 
+                 color = "black", 
+                 alpha = 0.7, 
+                 size = 0.25) + 
+  geom_vline(xintercept = mean(global_moran_500$res[1:499]), 
+              color = "red") +
+  labs(title = "Monte-Carlo Simulation of Global Moran's I test-statistic (n = 500)") +
+  xlab("Global Moran's I test-statistic") +
+  ylab("Frequency") +
+  theme_classic()
+
+```
+
+## Conducting Local Spatial Auto-correlation analysis
+
+For the same reasons as in the global spatial auto-correlation analysis, Moran's I statistic will be used over Geary's C here.
+
+Like in our global spatial auto-correlation analysis, we will need a congruity weight matrix first as Moran's I is a congruity-based method. Luckily, there is no obvious reason to compute a different congruity weight matrix and thus we will used the one generated in our global spatial auto-correlation analysis.
+
+To apply the local Moran's I test, the *local_moran()* function is used and simulated over 500 times. As the result of the *local_moran()* function is a nested list, *unnest()* is thus, needed to expand it into a readable format.
+
+```{r}
+
+lisa <- weight_matrix_queen %>% 
+  mutate(local_moran = local_moran(weight_matrix_queen$dengue_count, 
+                  weight_matrix_queen$neighbours,
+                  weight_matrix_queen$weight,
+                  nsim = 499),
+         .before = 1) %>%
+  unnest(local_moran)
+
+```
+
+An interactive display of the Moran's I statistic is shown below:
+
+```{r}
+#| eval: false
+
+lisa_leaflet <- tm_shape(lisa) +
+  tm_fill("ii", 
+          title = "Local Moran's I", 
+          interactive = TRUE,
+          alpha = 0.3) + 
+  tm_borders(alpha = 1) + 
+  tm_basemap("OpenStreetMap")
+
+lisa_leaflet <- tmap_leaflet(lisa_leaflet)
+
+saveWidget(lisa_leaflet, "Screenshots/lisa_leaflet.html")
+
+```
+
+<!--html_preserve-->
+
+<iframe src="Screenshots/lisa_leaflet.html" width="650" height="400">
+
+</iframe>
+
+<!--html_preserve-->
+
+An interactive display of the p-values of the Moran's I statistic is shown below:
+
+```{r}
+#| eval: false
+
+lisa_p_leaflet <- tm_shape(lisa) +
+  tm_fill("p_ii_sim", 
+          title = "Local Moran's I p-value", 
+          interactive = TRUE,
+          alpha = 0.3) + 
+  tm_borders(alpha = 1) + 
+  tm_basemap("OpenStreetMap")
+
+lisa_p_leaflet <- tmap_leaflet(lisa_p_leaflet)
+
+saveWidget(lisa_p_leaflet, "Screenshots/lisa_p_leaflet.html")
+
+```
+
+<!--html_preserve-->
+
+<iframe src="Screenshots/lisa_p_leaflet.html" width="650" height="400">
+
+</iframe>
+
+<!--html_preserve-->
+
+An interactive display of the regions with a significant Moran's I statistic (5% level) is shown below:
+
+```{r}
+#| eval: false
+
+lisa_sig_leaflet <- lisa %>%
+  tm_shape(filter = .$p_ii <= 0.05) +
+    tm_fill("mean", 
+            title = "Local Moran's I clusters", 
+            interactive = TRUE,
+            alpha = 0.3) + 
+    tm_borders(alpha = 1) + 
+    tm_basemap("OpenStreetMap")
+
+lisa_sig_leaflet <- tmap_leaflet(lisa_sig_leaflet)
+
+saveWidget(lisa_sig_leaflet, "Screenshots/lisa_sig_leaflet.html")
+
+```
+
+<!--html_preserve-->
+
+<iframe src="Screenshots/lisa_sig_leaflet.html" width="650" height="400">
+
+</iframe>
+
+<!--html_preserve-->
+
+## Conducting Emerging Hot-Spot Analysis
+
+Beyond spatial auto-correlation analysis, we should also be interested in spatio-temporal analysis as the intensity of the outbreak over time will determine how easy is it to contain it. To do so, we will need to create a *spacetime_cube* object using the *spacetime()* function in *sfdep*.
+
+However, before we can proceed to do so, we will need to create a dataframe of all possible combinations of spatio-temporal events across our dataset. This is done via the following code:
+
+```{r}
+#| eval: false
+
+spatial_temporal_dengue_count <- crossing(dengue$發病周, 
+         tainan$VILLCODE) %>% 
+  rename("WEEK" = "dengue$發病周", 
+         "VILLCODE" = "tainan$VILLCODE") %>% 
+  left_join(tainan, by = "VILLCODE") %>% 
+  select("WEEK", "VILLCODE", "geometry") %>% 
+  st_as_sf(crs = "WGS84")
+
+spatial_temporal_dengue_count$DENGUE_COUNT <- NA
+
+for (t in 31:50) {
+  
+  spatial_temporal_dengue_count[spatial_temporal_dengue_count$WEEK == t, "DENGUE_COUNT"] <- 
+    st_intersects(
+      spatial_temporal_dengue_count %>% 
+        filter(WEEK == t), 
+      dengue %>% 
+        filter(發病周 == t)
+      ) %>% 
+    lengths()
+  
+}
+
+spatial_temporal_dengue_count <- spatial_temporal_dengue_count %>% 
+  st_drop_geometry()
+
+glimpse(spatial_temporal_dengue_count)
+sum(spatial_temporal_dengue_count$DENGUE_COUNT)
+
+```
+
+*crossing()* is used to create a dataframe of all possible weeks over all spatial regions in Tainan, resulting in a total of 5160 combinations. After which, *st_intersects()* and *filter()* are employed iteratively, to give a count of the number of dengue reports in each region over each time period.
+
+```{r}
+#| eval: false
+
+spatial_temporal_dengue_count %>% 
+  write_rds("Data/RDS/spatial_temporal_dengue_count.rds")
+
+```
+
+```{r}
+#| echo: false
+#| true: false
+
+spatial_temporal_dengue_count <- read_rds("Data/RDS/spatial_temporal_dengue_count.rds")
+
+glimpse(spatial_temporal_dengue_count)
+sum(spatial_temporal_dengue_count$DENGUE_COUNT)
+
+```
+
+A *sum()* of our counts column matches up with the total number of cases in our reduced *dengue_daily* data.
+
+```{r}
+
+dengue_spt <- spacetime(.data = spatial_temporal_dengue_count, 
+                        .geometry = tainan,
+                        .loc_col = "VILLCODE", 
+                        .time_col = "WEEK")
+
+is_spacetime_cube(dengue_spt)
+
+
+```
+
+And *is_spacetime_cube()* confirms that we were successful. Thus, we can proceed to conduct the emerging hot-spot analysis using our spacetime cube, upon the *DENGUE_COUNT* feature which we created in the earlier step. The analysis is performed using the *emerging_hotspot_analysis()* function from *sfdep*, which utilises both Gerd-Ord's Gi\* statistic and Mann-Kendall statistic to do so. Thus, *Kendall* needs to be installed in the R-Environment as earlier.
+
+```{r}
+#| eval: false
+
+ehsa <- emerging_hotspot_analysis(
+  x = dengue_spt, 
+  .var = "DENGUE_COUNT", 
+  k = 1, 
+  nsim = 499)
+
+glimpse(ehsa)
+
+```
+
+```{r}
+#| eval: false
+
+ehsa %>% 
+  write_rds("Data/RDS/dengue_ehsa.rds")
+
+```
+
+```{r}
+#| echo: false
+#| eval: true
+
+ehsa <- read_rds("Data/RDS/dengue_ehsa.rds")
+
+glimpse(ehsa)
+
+```
+
+Using *ggplot2*, we can visualise the frequency of each type of hot-spot identified in our emerging hot-spot analysis Monte-Carlo simulation.
+
+```{r}
+
+ggplot(data = ehsa,
+       aes(x = classification)) +
+  geom_bar(fill = "orange") + 
+  labs(title = "Types of Hot-Spots Identified") +
+  xlab("Classification") +
+  ylab("Number of hot-spots") +
+  theme(axis.text.x = element_text(angle = 10, hjust = 0.5, vjust = 0.7),
+        panel.background = element_rect(fill = "lightgrey")) 
+
+```
+
+And using *tmap*, we can display an interactive map of the different hot-spots over *OpenStreetMap*.
+
+```{r}
+#| eval: false
+
+ehsa_leaflet <- tainan %>% 
+  left_join(ehsa,
+            by = join_by(VILLCODE == location)) %>% 
+  tm_shape(filter = .$p_value <= 0.05) +
+    tm_fill("classification",
+            interactive = TRUE,
+            alpha = 0.3,
+            title = "Classification") + 
+    tm_borders(alpha = 1) + 
+  tm_basemap("OpenStreetMap")
+
+ehsa_leaflet <- tmap_leaflet(ehsa_leaflet)
+
+saveWidget(ehsa_leaflet, "Screenshots/ehsa_leaflet.html")
+
+```
+
+<!--html_preserve-->
+
+<iframe src="Screenshots/ehsa_leaflet.html" width="650" height="400">
+
+</iframe>
+
+<!--html_preserve-->
+
+From the interactive map produced, we can see that most of the hot-spots are oscillating hot and cold spots, and are also mostly centered around the central parts of our map scope. There is actually quite an intuitive explanation. The proximity and human density of the hot/cold spots are probably really high considering their location, which will only make it easier for Dengue Fever to spread. Additionally, public facilities like pipes and drains are likely to be under higher stress, making it easier for Aedes mosquitoes to breed. Thus, it is likely that these areas will be most prone to dengue outbreaks and it is a testament to Taiwan's dengue management that they are oscillation spots, because this mostly likely happens as they are able to contain outbreaks but not fast enough to stop the spread to other regions.
