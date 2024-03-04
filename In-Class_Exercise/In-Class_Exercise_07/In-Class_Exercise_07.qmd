@@ -11,6 +11,7 @@ execute:
   eval: true
   echo: true
   warning: false
+  
 date: "`r Sys.Date()`"
 
 toc: true
@@ -19,11 +20,338 @@ toc-location: left
 progress: true
 ---
 
+## Loading the required packages into the R-Environment
+
 ```{r}
 
 pacman::p_load(rgdal, sfdep, tmap, sf, ClustGeo, 
                ggpubr, cluster, factoextra, NbClust,
                heatmaply, corrplot, psych, tidyverse, GGally)
+
+```
+
+### Importing the datasets of interest
+
+#### Importing the Shan geospatial data
+
+```{r}
+
+shan_sf <- st_read(dsn = "Data/Geospatial", 
+                   layer = "myanmar_township_boundaries")
+
+```
+
+#### Importing the Shan ICT aspatial data
+
+```{r}
+
+ict <- read_csv ("Data/Aspatial/Shan-ICT.csv")
+
+summary(ict)
+
+```
+
+## Preparing the datasets of interest for clustering analysis
+
+#### Extracting the Shan region from the geospatial polygons of Myanmar
+
+```{r}
+
+shan_sf <- shan_sf %>%
+  filter(ST %in% c("Shan (East)", "Shan (North)", "Shan (South)")) %>%
+  select(c(2:7))
+
+glimpse(shan_sf)
+
+```
+
+### Standardising the aspatial data via Scaling using the total number of households
+
+```{r}
+
+ict_derived <- ict %>%
+  mutate(`RADIO_PR` = `Radio`/`Total households`*1000) %>%
+  mutate(`TV_PR` = `Television`/`Total households`*1000) %>%
+  mutate(`LLPHONE_PR` = `Land line phone`/`Total households`*1000) %>%
+  mutate(`MPHONE_PR` = `Mobile phone`/`Total households`*1000) %>%
+  mutate(`COMPUTER_PR` = `Computer`/`Total households`*1000) %>%
+  mutate(`INTERNET_PR` = `Internet at home`/`Total households`*1000) %>%
+  rename(`DT_PCODE` =`District Pcode`,`DT`=`District Name`,
+         `TS_PCODE`=`Township Pcode`, `TS`=`Township Name`,
+         `TT_HOUSEHOLDS`=`Total households`,
+         `RADIO`=`Radio`, `TV`=`Television`, 
+         `LLPHONE`=`Land line phone`, `MPHONE`=`Mobile phone`,
+         `COMPUTER`=`Computer`, `INTERNET`=`Internet at home`) 
+
+summary(ict_derived)
+
+```
+
+#### Plotting the scaled ICT information in the Shan region
+
+```{r}
+
+
+radio <- ggplot(data=ict_derived, 
+             aes(x= `RADIO_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+tv <- ggplot(data=ict_derived, 
+             aes(x= `TV_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+llphone <- ggplot(data=ict_derived, 
+             aes(x= `LLPHONE_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+mphone <- ggplot(data=ict_derived, 
+             aes(x= `MPHONE_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+computer <- ggplot(data=ict_derived, 
+             aes(x= `COMPUTER_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+internet <- ggplot(data=ict_derived, 
+             aes(x= `INTERNET_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+ggarrange(radio, tv, llphone, mphone, computer, internet, 
+          ncol = 3, 
+          nrow = 2)
+
+```
+
+#### Joining the geospatial and aspatial data
+
+```{r}
+
+shan_sf <- left_join(shan_sf, 
+                     ict_derived, by=c("TS_PCODE"="TS_PCODE"))
+  
+write_rds(shan_sf, "Data/RDS/shan_sf.rds")
+
+```
+
+```{r}
+
+shan_sf <- read_rds("Data/RDS/shan_sf.rds")
+
+```
+
+#### Visualising the Shan ICT data
+
+```{r}
+
+TT_HOUSEHOLDS.map <- tm_shape(shan_sf) + 
+  tm_fill(col = "TT_HOUSEHOLDS",
+          n = 5,
+          style = "jenks", 
+          title = "Total households") + 
+  tm_borders(alpha = 0.5) 
+
+RADIO.map <- tm_shape(shan_sf) + 
+  tm_fill(col = "RADIO",
+          n = 5,
+          style = "jenks",
+          title = "Number Radio ") + 
+  tm_borders(alpha = 0.5) 
+
+tmap_arrange(TT_HOUSEHOLDS.map, RADIO.map,
+             asp=NA, ncol=2)
+
+```
+
+```{r}
+
+tm_shape(shan_sf) +
+    tm_polygons(c("TT_HOUSEHOLDS", "RADIO_PR"),
+                style="jenks") +
+    tm_facets(sync = TRUE, ncol = 2) +
+  tm_legend(legend.position = c("right", "bottom"))+
+  tm_layout(outer.margins=0, asp=0)
+
+```
+
+#### Using the *corrplot* library to visualise the correlation matrix of the Shan ICT variables
+
+```{r}
+
+cluster_vars.cor = cor(ict_derived[,12:17])
+corrplot.mixed(cluster_vars.cor,
+         lower = "ellipse", 
+               upper = "number",
+               tl.pos = "lt",
+               diag = "l",
+               tl.col = "black")
+
+```
+
+#### Extracting the clustering variables
+
+```{r}
+
+cluster_vars <- shan_sf %>%
+  st_drop_geometry() %>%
+  select("TS.x", "RADIO_PR", "TV_PR", "LLPHONE_PR", "MPHONE_PR", "COMPUTER_PR")
+
+head(cluster_vars, 10)
+
+```
+
+#### Using Township names as row indexes of the cluster variable dataframe
+
+```{r}
+
+row.names(cluster_vars) <- cluster_vars$"TS.x"
+
+shan_ict <- select(cluster_vars, c(2:6))
+
+head(shan_ict, 10)
+
+```
+
+### Data Standardisation
+
+#### Using Min-Max standardisation method to standardise the Shan ICT data
+
+```{r}
+
+shan_ict.std <- normalize(shan_ict)
+summary(shan_ict.std)
+
+```
+
+#### Using Z-score standardisation method to standardise the Shan ICT data
+
+```{r}
+
+shan_ict.z <- scale(shan_ict)
+describe(shan_ict.z)
+
+```
+
+#### Visualising the effects of standardisation on the Shan ICT data
+
+```{r}
+
+r <- ggplot(data=ict_derived, 
+             aes(x= `RADIO_PR`)) +
+  geom_density(color="black",
+               fill="light blue") +
+  ggtitle("Raw values without standardisation")
+
+shan_ict_s_df <- as.data.frame(shan_ict.std)
+s <- ggplot(data=shan_ict_s_df, 
+       aes(x=`RADIO_PR`)) +
+  geom_density(color="black",
+               fill="light blue") +
+  ggtitle("Min-Max Standardisation")
+
+shan_ict_z_df <- as.data.frame(shan_ict.z)
+z <- ggplot(data=shan_ict_z_df, 
+       aes(x=`RADIO_PR`)) +
+  geom_density(color="black",
+               fill="light blue") +
+  ggtitle("Z-score Standardisation")
+
+ggarrange(r, s, z,
+          ncol = 3,
+          nrow = 1)
+
+
+```
+
+## Conducting clustering analysis on the Shan ICT data
+
+### Computing the proximity distance matrix
+
+```{r}
+
+proxmat <- dist(shan_ict, method = 'euclidean')
+
+proxmat
+
+```
+
+### Computing the hierachical clusters
+
+```{r}
+
+hclust_ward <- hclust(proxmat, method = 'ward.D')
+
+plot(hclust_ward, cex = 0.6)
+
+
+```
+
+### Investigating the optimal clustering algorithm
+
+```{r}
+
+m <- c( "average", "single", "complete", "ward")
+names(m) <- c( "average", "single", "complete", "ward")
+
+ac <- function(x) {
+  agnes(shan_ict, method = x)$ac
+}
+
+map_dbl(m, ac)
+
+```
+
+### Determining the local optimal number of clusters using Gap statistics
+
+```{r}
+
+set.seed(12345)
+
+gap_stat <- clusGap(shan_ict, 
+                    FUN = hcut, 
+                    nstart = 25, 
+                    K.max = 10, 
+                    B = 50)
+# Print the result
+print(gap_stat, method = "firstmax")
+
+```
+
+### Visualising the Gap statistics trend
+
+```{r}
+
+fviz_gap_stat(gap_stat)
+
+```
+
+### Intepreting the selected optimum hierachical cluster dendogram
+
+```{r}
+
+plot(hclust_ward, cex = 0.6)
+rect.hclust(hclust_ward, 
+            k = 6, 
+            border = 2:5)
+
+```
+
+###
+
+```{r}
+
+
 
 ```
 
