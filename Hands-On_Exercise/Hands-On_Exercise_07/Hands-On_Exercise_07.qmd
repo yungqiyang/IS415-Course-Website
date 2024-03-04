@@ -11,7 +11,7 @@ execute:
   eval: true
   echo: true
   warning: false
-date: "`r as.Date('03-03-2024', format = '%d-%m-%Y')`"
+date: "`r Sys.Date()`"
 
 toc: true
 toc-location: left
@@ -21,7 +21,7 @@ progress: true
 
 ```{r}
 
-pacman::p_load(rgdal, spdep, tmap, sf, ClustGeo, 
+pacman::p_load(sp, spdep, tmap, sf, ClustGeo, 
                ggpubr, cluster, factoextra, NbClust,
                heatmaply, corrplot, psych, tidyverse, GGally)
 

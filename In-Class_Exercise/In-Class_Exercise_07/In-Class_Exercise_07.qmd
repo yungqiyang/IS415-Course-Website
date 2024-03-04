@@ -1,5 +1,5 @@
 ---
-title: "In-Class Exercise 7: "
+title: "In-Class Exercise 7: Geographical Segmentation with Spatially Constrained Clustering Techniques"
 author: "Yung Qi Yang"
 
 format: 
@@ -11,10 +11,19 @@ execute:
   eval: true
   echo: true
   warning: false
-date: "`r as.Date('03-03-2024', format = '%d-%m-%Y')`"
+date: "`r Sys.Date()`"
 
 toc: true
 toc-location: left
 
 progress: true
 ---
+
+```{r}
+
+pacman::p_load(rgdal, sfdep, tmap, sf, ClustGeo, 
+               ggpubr, cluster, factoextra, NbClust,
+               heatmaply, corrplot, psych, tidyverse, GGally)
+
+```
+
