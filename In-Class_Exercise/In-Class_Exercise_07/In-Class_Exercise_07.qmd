@@ -1,0 +1,20 @@
+---
+title: "In-Class Exercise 7: "
+author: "Yung Qi Yang"
+
+format: 
+  html:
+    code-fold: true
+    code-summary: "Reveal Code"
+    
+execute: 
+  eval: true
+  echo: true
+  warning: false
+date: "`r as.Date('03-03-2024', format = '%d-%m-%Y')`"
+
+toc: true
+toc-location: left
+
+progress: true
+---
