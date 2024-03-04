@@ -346,12 +346,72 @@ rect.hclust(hclust_ward,
             border = 2:5)
 
 ```
-
-###
+## Visually-driven hierarchical clustering analysis
 
 ```{r}
 
+shan_ict_mat <- data.matrix(shan_ict)
 
+```
+
+```{r}
+
+heatmaply(normalize(shan_ict_mat),
+          Colv=NA,
+          dist_method = "euclidean",
+          hclust_method = "ward.D",
+          seriate = "OLO",
+          colors = Blues,
+          k_row = 6,
+          margins = c(NA,200,60,NA),
+          fontsize_row = 4,
+          fontsize_col = 5,
+          main="Geographic Segmentation of Shan State by ICT indicators",
+          xlab = "ICT Indicators",
+          ylab = "Townships of Shan State"
+          )
+
+```
+
+### Assigning each row in the Shan ICT dataset to the prior determined cluster
+
+```{r}
+
+groups <- as.factor(cutree(hclust_ward, k=6))
+
+shan_sf_cluster <- cbind(shan_sf, as.matrix(groups)) %>%
+  rename(`CLUSTER`=`as.matrix.groups.`)
+
+```
+
+### Visualising the assigned hierachical clusters in the Shan region
+
+```{r}
+
+qtm(shan_sf_cluster, "CLUSTER")
+
+```
+
+### Deriving the contiguity matrix of the Shan geographical region
+
+```{r}
+
+shan.nb <- st_contiguity(shan_sf)
+glimpse(shan.nb)
+
+```
+
+### Visualising the contiguity network in the Shan region
+
+```{r}
+
+plot(st_geometry(shan_sf), 
+     border=grey(.5))
+
+plot(shan.nb, 
+     st_coordinates(st_centroid(shan_sf)), 
+     col="blue", 
+     add=TRUE)
 
 ```
 
