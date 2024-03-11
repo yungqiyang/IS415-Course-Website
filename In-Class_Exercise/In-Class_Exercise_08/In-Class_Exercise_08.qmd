@@ -1,0 +1,22 @@
+---
+---
+title: "In-Class Exercise 8"
+author: "Yung Qi Yang"
+
+format: 
+  html:
+    code-fold: true
+    code-summary: "Reveal Code"
+    
+execute: 
+  eval: true
+  echo: true
+  warning: false
+  
+date: "`r Sys.Date()`"
+
+toc: true
+toc-location: left
+
+progress: true
+---
