@@ -1,0 +1,371 @@
+---
+title: "In-Class Exercise 9: Geographically-weighted Random Forest methods"
+author: "Yung Qi Yang"
+
+format: 
+  html:
+    code-fold: true
+    code-summary: "Reveal Code"
+    
+execute: 
+  eval: true
+  echo: true
+  warning: false
+  
+date: "`r Sys.Date()`"
+
+toc: true
+toc-location: left
+
+progress: true
+---
+
+## Loading the required packages into the R-Environment
+
+```{r}
+
+pacman::p_load(sf, spdep, GWmodel, SpatialML, tmap, rsample, tidymodels, tidyverse, gtsummary, rpart, rpart.plot, ggstatsplot, performance, ranger, yardstick)
+
+```
+
+## Importing the datasets of interest
+
+### Importing the HDB resale price data
+
+```{r}
+
+rs_sf <- read_rds("Data/RDS/HDB_resale.rds")
+rs_sf
+
+```
+
+## Preparing the HDB resale data for predictive analysis
+
+### Splitting the data into training and testing datasets
+
+```{r}
+
+set.seed(1234)
+
+resale_split <- initial_split(rs_sf, prop = 5/10)
+
+train_sf <- training(resale_split)
+test_sf <- testing(resale_split)
+
+```
+
+### Obtaining the data frame object from the HDB dataset
+
+```{r}
+
+train_df <- train_sf %>% 
+  st_drop_geometry() %>% 
+  as.data.frame()
+
+test_df <- test_sf %>% 
+  st_drop_geometry() %>% 
+  as.data.frame()
+
+```
+
+## Computing the correlation matrix
+
+```{r}
+
+rs_df <- rs_sf %>% 
+  st_drop_geometry() %>% 
+  as.data.frame()
+
+ggcorrmat(rs_df[, 2:17])
+
+```
+
+## Building a multivariate linear non-spatial regression model
+
+```{r}
+
+rs_mlr <- lm(RESALE_PRICE ~ FLOOR_AREA_SQM +
+                  STOREY_ORDER + REMAINING_LEASE_MTHS +
+                  PROX_CBD + PROX_ELDERLYCARE + + PROX_CHAS + PROX_HAWKER +
+                  PROX_MRT + PROX_PARK + PROX_GOOD_PRISCH + PROX_MALL + 
+                  PROX_SUPERMARKET + WITHIN_350M_KINDERGARTEN +
+                  WITHIN_350M_CHILDCARE + WITHIN_350M_BUS +
+                  WITHIN_1KM_PRISCH,
+                data= train_df)
+
+tbl_regression(rs_mlr, intercept = TRUE)
+
+```
+
+## Revising the regression model
+
+### Dropping the insignificant variables from the testing & training datasets
+
+```{r}
+
+train_df <- train_df %>% 
+  select(-c(PROX_CHAS))
+
+test_df <- test_df %>% 
+  select(-c(PROX_CHAS))
+
+train_sf <- train_sf %>% 
+  select(-c(PROX_CHAS))
+
+test_sf <- test_sf %>% 
+  select(-c(PROX_CHAS))
+
+```
+
+### Building the revised multivariate linear non-spatial regression model
+
+```{r}
+
+rs_mlr <- lm(RESALE_PRICE ~ FLOOR_AREA_SQM +
+                  STOREY_ORDER + REMAINING_LEASE_MTHS +
+                  PROX_CBD + PROX_ELDERLYCARE + PROX_HAWKER +
+                  PROX_MRT + PROX_PARK + PROX_GOOD_PRISCH + PROX_MALL + 
+                  PROX_SUPERMARKET + WITHIN_350M_KINDERGARTEN +
+                  WITHIN_350M_CHILDCARE + WITHIN_350M_BUS +
+                  WITHIN_1KM_PRISCH,
+                data= train_df)
+
+tbl_regression(rs_mlr, intercept = TRUE)
+
+```
+
+## Conducting the geographically weighted random forest 
+
+### Converting the *sf* objects into SpatialPointsDataFrame objects
+
+```{r}
+
+train_sp <- as_Spatial(train_sf)
+
+train_sp
+
+```
+
+### Extracting the coordinates from the full, test and training datasets
+
+```{r}
+
+coords <- st_coordinates(rs_sf)
+coords_train <- st_coordinates(train_sf)
+coords_test <- st_coordinates(test_sf)
+
+```
+
+### Building a recursive partitioning model
+
+```{r}
+
+set.seed(1234)
+
+rs_rp <- rpart(RESALE_PRICE ~ FLOOR_AREA_SQM +
+                  STOREY_ORDER + REMAINING_LEASE_MTHS +
+                  PROX_CBD + PROX_ELDERLYCARE + PROX_HAWKER +
+                  PROX_MRT + PROX_PARK + PROX_GOOD_PRISCH + PROX_MALL + 
+                  PROX_SUPERMARKET + WITHIN_350M_KINDERGARTEN +
+                  WITHIN_350M_CHILDCARE + WITHIN_350M_BUS +
+                  WITHIN_1KM_PRISCH,
+                data= train_df)
+
+summary(rs_rp)
+
+rpart.plot(rs_rp)
+
+```
+
+### Calibrating the random forest model
+
+```{r}
+
+rs_rf <- ranger(RESALE_PRICE ~ FLOOR_AREA_SQM +
+                  STOREY_ORDER + REMAINING_LEASE_MTHS +
+                  PROX_CBD + PROX_ELDERLYCARE + PROX_HAWKER +
+                  PROX_MRT + PROX_PARK + PROX_GOOD_PRISCH + PROX_MALL + 
+                  PROX_SUPERMARKET + WITHIN_350M_KINDERGARTEN +
+                  WITHIN_350M_CHILDCARE + WITHIN_350M_BUS +
+                  WITHIN_1KM_PRISCH, 
+                data= train_df, 
+                importance ="impurity")
+
+rs_rf
+
+```
+
+### Extracting the variable importance values of the random forest model
+
+```{r}
+
+vi <- as.data.frame(rs_rf$variable.importance)
+vi$variables <- rownames(vi)
+
+vi <- vi %>% 
+  rename(vi = "rs_rf$variable.importance")
+
+```
+
+### Visualing the variable importance factors
+
+```{r}
+
+ggplot(data = vi, 
+       aes(x = vi, y = reorder(variables, vi))) + 
+  geom_bar(stat = "identity")
+
+```
+
+### Building the geographically-weighted random forest model
+
+```{r}
+#| eval: false
+
+rs_gwrf <- grf(formula = RESALE_PRICE ~ FLOOR_AREA_SQM +
+                  STOREY_ORDER + REMAINING_LEASE_MTHS +
+                  PROX_CBD + PROX_ELDERLYCARE + PROX_HAWKER +
+                  PROX_MRT + PROX_PARK + PROX_GOOD_PRISCH + PROX_MALL + 
+                  PROX_SUPERMARKET + WITHIN_350M_KINDERGARTEN +
+                  WITHIN_350M_CHILDCARE + WITHIN_350M_BUS +
+                  WITHIN_1KM_PRISCH, 
+               dframe = train_df, 
+               bw = 55,
+               kernel = "adaptive", 
+               coords = coords_train, 
+               geo.weighted = TRUE)
+
+write_rds(rs_gwrf, "Data/Models/rs_gwrf.rds")
+
+```
+
+```{r}
+#| eval: false
+
+rs_gwrf <- read_rds("Data/Models/rs_gwrf.rds")
+
+```
+
+## Comparing the ML model's performance
+
+```{r}
+
+test_df <- cbind(test_sf, coords_test) %>% 
+  st_drop_geometry()
+
+```
+
+### Testing the geographically-weighted random forest performance
+
+```{r}
+#| eval: false
+
+gwrf_pred <- predict.grf(rs_gwrf, 
+                         test_df, 
+                         x.var.name = "X",
+                         y.var.name = "Y", 
+                         local.w = 1,
+                         global.w = 0)
+
+write_rds(gwrf_pred, "Data/Models/rs_gwrf_pred.rds")
+
+```
+
+```{r}
+
+gwrf_pred <- read_rds("Data/Models/rs_gwrf_pred.rds")
+
+```
+
+```{r}
+
+test_pred <- test_df %>% 
+  select(RESALE_PRICE) %>% 
+  cbind(gwrf_pred)
+
+```
+
+### Testing the non-geographically-weighted random forest performance
+
+```{r}
+
+rf_pred <- predict(rs_rf, test_df)
+
+```
+
+```{r}
+
+rf_pred_df <- as.data.frame(rf_pred$predictions) %>% 
+  rename(rf_pred = "rf_pred$predictions")
+
+```
+
+```{r}
+
+test_pred <- cbind(test_pred, rf_pred_df)
+
+```
+
+### Testing the multivariate linear regression performance
+
+```{r}
+
+mlr_pred <- predict(rs_mlr, test_df)
+
+```
+
+```{r}
+
+mlr_pred_df <- as.data.frame(mlr_pred) %>% 
+  rename(mlr_pred = "mlr_pred")
+
+```
+
+```{r}
+
+test_pred <- cbind(test_pred, mlr_pred_df)
+
+```
+
+### Comparing the models' performances using RMSE
+
+```{r}
+
+yardstick::rmse(test_pred, RESALE_PRICE, mlr_pred)
+
+```
+
+```{r}
+
+mc <- test_pred %>% 
+  pivot_longer(cols = c(2:4), 
+               names_to = "models", 
+               values_to = "predicted") %>% 
+  group_by(models) %>% 
+  yardstick::rmse(RESALE_PRICE, predicted)
+
+mc
+
+```
+
+### Visualising the models' performance
+
+```{r}
+
+ggplot(data = test_pred, 
+       aes(x = gwrf_pred, 
+           y = RESALE_PRICE)) + 
+  geom_point()
+
+ggplot(data = test_pred, 
+       aes(x = mlr_pred, 
+           y = RESALE_PRICE)) + 
+  geom_point()
+
+ggplot(data = test_pred, 
+       aes(x = rf_pred, 
+           y = RESALE_PRICE)) + 
+  geom_point()
+
+```
+
