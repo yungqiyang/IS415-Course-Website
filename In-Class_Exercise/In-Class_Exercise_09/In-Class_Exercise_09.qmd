@@ -331,12 +331,6 @@ test_pred <- cbind(test_pred, mlr_pred_df)
 
 ```{r}
 
-yardstick::rmse(test_pred, RESALE_PRICE, mlr_pred)
-
-```
-
-```{r}
-
 mc <- test_pred %>% 
   pivot_longer(cols = c(2:4), 
                names_to = "models", 
