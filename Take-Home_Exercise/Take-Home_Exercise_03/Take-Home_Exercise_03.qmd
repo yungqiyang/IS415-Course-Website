@@ -77,6 +77,8 @@ glimpse(mall)
 
 ### Transforming the aspatial data sets into simple features, *sf*, objects
 
+Using the *Latitude* and *Longitude* fields in the *aspatial* data sets to transform them into *sf* objects using *st_as_sf()*.
+
 ```{r}
 
 hawker_sf <- hawker %>% 
@@ -111,6 +113,8 @@ summary(mall_sf)
 
 ### Preparing the ammenity data for correlation computation
 
+Here, we compute the number of each ammenity found in each planning subzone of Singapore using *st_intersects()* and *lengths()* functions, and compile them into a single *sf* object using *bind_cols()*.
+
 ```{r}
 
 hawker_count <- st_intersects(sg_sf, hawker_sf) %>% 
@@ -141,6 +145,8 @@ ammenities_sf
 
 ### Extracting the clustering variables
 
+We drop the geometric properties of the ammenities *sf* object here using *st_drop_geometry()* for use in computation functions later on.
+
 ```{r}
 
 ammenities <- ammenities_sf[, c(3, 16:20)] %>% 
@@ -150,6 +156,8 @@ ammenities <- ammenities_sf[, c(3, 16:20)] %>%
 
 
 ### Computing the correlation table
+
+The correlational table between the ammenity counts are computed and visualised here using *cor()* and *corrplot.mixed()* respectively.
 
 ```{r}
 
@@ -172,6 +180,8 @@ corrplot.mixed(cluster_vars.corr,
 ```
 
 ## Exploring Data Standardisation Options
+
+In this section, we explore the possibility and usefulness of standardising the ammenity counts either via a Min-Max method, or a Z-score method.
 
 ### Using Min-Max standardisation method
 
@@ -225,6 +235,8 @@ ggarrange(raw, min_max, z_score,
 
 ## Conducting clustering analysis upon the ammenities data in Singapore
 
+In this section, we conduct an analysis into the clustering options that we have for our data set. This involves both the number of clusters to impose on the data set as well as how to assign the planning subzones of Singapore to each cluster.
+
 ### Computing the proximity matrix
 
 ```{r}
@@ -275,7 +287,9 @@ gap_stat <- clusGap(cluster_vars,
 print(gap_stat, method = "firstmax")
 
 ```
-### Visualising the local optimal number of clusters determined using Gap statistics
+#### Visualising the local optimal number of clusters determined using Gap statistics
+
+After computation of the Gap-statistics, we can visualise the results via the *fviz_gap_stat()* function. From the graph drawn, we could use either 8 or 10 clusters in our algorithm as they are quite similar in effectiveness in capturing the clustering patterns of ammenity options across Singapore. Lesser clusters like 7 or 5 might be possible but not optimal. For the rest of this analysis, 8 shall be used as it is more parsimonious than 10 whilst having an indistinguishable Gap statistic.
 
 ```{r}
 
@@ -283,9 +297,13 @@ fviz_gap_stat(gap_stat)
 
 ```
 
-## UI Design
+## User Interface Design
+
+In this section, we shall outline how the UI design will work. The main selectable variable here will be the number of clusters used in the clustering algorithm. For the purpose of this demonstration, 8 shall be the default as it is the optimal number computed using Gap-statistics as a measure. Other selectables to be included are the parts of Singapore to be analysed, the used of planning zone types (i.e. subzone, region etc.) and the types of ammenities to be investigated.
 
 ### Intepreting the selected optimal hierachical cluster dendogram of 8
+
+Here we will produce the cluster dendrogram with each cluster highlighted based on the requested number of clusters selected from above.
 
 ```{r}
 
@@ -298,6 +316,8 @@ rect.hclust(hclust_ward,
 ```
 
 ### Interactive visualisations of cluster heatmap
+
+Like above, the following UI will demonstrate how the clustering mechanism works based on a requested number of clusters selected. Additionally, options to apply different standardisation options will be included. Here, standardisation via Z-score is used for the demonstration.
 
 ```{r}
 
@@ -332,6 +352,8 @@ ammenities_sf_cluster <- cbind(ammenities_sf, as.matrix(groups)) %>%
 ```
 
 ### Visualising the assigned hierachical clusters of Singapore
+
+Lastly, this section will give the user a geographical visualisation of the clustering pattern of ammenities in Singapore based on the number of clusters selected.
 
 ```{r}
 
