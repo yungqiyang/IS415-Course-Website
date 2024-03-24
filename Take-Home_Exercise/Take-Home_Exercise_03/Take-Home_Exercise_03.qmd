@@ -138,12 +138,28 @@ ammenities_sf
   
 ```
 
+### Extracting the clustering variables
+
+```{r}
+
+ammenities <- ammenities_sf[, c(3, 16:20)] %>% 
+  st_drop_geometry()
+
+```
+
+
 ### Computing the correlation table
 
 ```{r}
 
-cluster_vars.corr = cor(ammenities_sf[, 16:20] %>% 
-                          st_drop_geometry())
+cluster_vars <- ammenities
+  
+row.names(cluster_vars) <- cluster_vars$SUBZONE_N
+
+cluster_vars <- cluster_vars %>% 
+  select(-1)
+
+cluster_vars.corr = cor(cluster_vars)
 
 corrplot.mixed(cluster_vars.corr, 
                lower = "ellipse", 
@@ -151,6 +167,118 @@ corrplot.mixed(cluster_vars.corr,
                tl.pos = "lt",
                diag = "l",
                tl.col = "black")
+
+```
+
+## Exploring Data Standardisation Options
+
+### Using Min-Max standardisation method
+
+```{r}
+
+ammenities.std <- cluster_vars %>% 
+  normalize()
+
+describe(ammenities.std)
+
+```
+
+### Using Z-score standardisation method
+
+```{r}
+
+ammenities.z <- cluster_vars %>% 
+  scale()
+
+describe(ammenities.z)
+
+```
+
+### Visualising the impacts of different standardisation methods
+
+```{r}
+
+raw <- ammenities %>% 
+  ggplot(aes(x = mrt_count)) + 
+  geom_density(color="black",
+               fill="light blue") +
+  ggtitle("Raw values without standardisation")
+
+min_max <- as.data.frame(ammenities.std) %>% 
+  ggplot(aes(x = mrt_count)) + 
+  geom_density(color="black",
+               fill="light blue") +
+  ggtitle("Min-Max Standardisation")
+
+z_score <- as.data.frame(ammenities.z) %>% 
+  ggplot(aes(x=mrt_count)) +
+  geom_density(color="black",
+               fill="light blue") +
+  ggtitle("Z-score Standardisation")
+
+ggarrange(raw, min_max, z_score,
+          ncol = 3,
+          nrow = 1)
+
+```
+
+## Conducting clustering analysis upon the ammenities data in Singapore
+
+### Interactive visualisations of cluster heatmap
+
+```{r}
+# | eval: false
+
+ammenities_mat <- data.matrix(ammenities)
+
+
+  heatmaply(normalize(ammenities_mat),
+            Colv = NA,
+            dist_method = "euclidean",
+            hclust_method = "ward.D",
+            seriate = "OLO",
+            colors = Blues,
+            k_row = 6,
+            margins = c(NA, 200, 60, NA),
+            fontsize_row = 4,
+            fontsize_col = 5,
+            main = "Geographic Segmentation of Shan State by ICT indicators",
+            xlab = "ICT Indicators",
+            ylab = "Townships of Shan State"
+            )
+
+```
+
+```{r}
+
+
+# Define UI
+ui <- fluidPage(
+  titlePanel("Basic Shiny App"),
+  sidebarLayout(
+    sidebarPanel(
+      textInput("name", "Enter your name:", value = "World"),
+      actionButton("submit", "Submit")
+    ),
+    mainPanel(
+      h4("Output:"),
+      verbatimTextOutput("greeting")
+    )
+  )
+)
+
+# Define server logic
+server <- function(input, output) {
+  observeEvent(input$submit, {
+    output$greeting <- renderText({
+      paste("Hello,", input$name, "!")
+    })
+  })
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)
+
 
 ```
 
