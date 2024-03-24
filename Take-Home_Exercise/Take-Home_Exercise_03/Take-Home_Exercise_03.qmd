@@ -29,7 +29,7 @@ progress: true
 
 ```{r}
 
-pacman::p_load(rgdal, sfdep, tmap, sf, ClustGeo, ggpubr, cluster, factoextra, NbClust, heatmaply, corrplot, psych, tidyverse, GGally)
+pacman::p_load(rgdal, sfdep, tmap, sf, ClustGeo, ggpubr, cluster, factoextra, NbClust, heatmaply, corrplot, psych, tidyverse, GGally, shiny)
 
 ```
 
