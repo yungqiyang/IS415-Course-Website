@@ -19,6 +19,7 @@ toc-location: left
 toc-depth: 4
 
 progress: true
+
 ---
 
 # Geospatial Segmentation Module
@@ -29,7 +30,7 @@ progress: true
 
 ```{r}
 
-pacman::p_load(rgdal, sfdep, tmap, sf, ClustGeo, ggpubr, cluster, factoextra, NbClust, heatmaply, corrplot, psych, tidyverse, GGally, shiny)
+pacman::p_load(rgdal, sfdep, tmap, sf, ggpubr, cluster, factoextra, heatmaply, corrplot, tidyverse, psych)
 
 ```
 
@@ -224,62 +225,120 @@ ggarrange(raw, min_max, z_score,
 
 ## Conducting clustering analysis upon the ammenities data in Singapore
 
+### Computing the proximity matrix
+
+```{r}
+
+proxmat <- dist(cluster_vars, method = 'euclidean')
+
+glimpse(proxmat)
+
+```
+
+### Computing the hierachical clusters
+
+```{r}
+
+hclust_ward <- hclust(proxmat, method = 'ward.D')
+
+plot(hclust_ward, cex = 0.6)
+
+```
+
+### Investigating the optimal clustering algorithm
+
+```{r}
+
+m <- c( "average", "single", "complete", "ward")
+names(m) <- c( "average", "single", "complete", "ward")
+
+ac <- function(x) {
+  agnes(cluster_vars, method = x)$ac
+}
+
+map_dbl(m, ac)
+
+```
+
+### Determining the local optimal number of clusters using Gap statistics
+
+```{r}
+
+set.seed(3414)
+
+gap_stat <- clusGap(cluster_vars, 
+                    FUN = hcut, 
+                    nstart = 25, 
+                    K.max = 10, 
+                    B = 50)
+
+print(gap_stat, method = "firstmax")
+
+```
+### Visualising the local optimal number of clusters determined using Gap statistics
+
+```{r}
+
+fviz_gap_stat(gap_stat)
+
+```
+
+## UI Design
+
+### Intepreting the selected optimal hierachical cluster dendogram of 8
+
+```{r}
+
+plot(hclust_ward, cex = 0.6)
+
+rect.hclust(hclust_ward, 
+            k = 8, 
+            border = 2:5)
+
+```
+
 ### Interactive visualisations of cluster heatmap
 
 ```{r}
-# | eval: false
 
 ammenities_mat <- data.matrix(ammenities)
 
-
-  heatmaply(normalize(ammenities_mat),
-            Colv = NA,
-            dist_method = "euclidean",
-            hclust_method = "ward.D",
-            seriate = "OLO",
-            colors = Blues,
-            k_row = 6,
-            margins = c(NA, 200, 60, NA),
-            fontsize_row = 4,
-            fontsize_col = 5,
-            main = "Geographic Segmentation of Shan State by ICT indicators",
-            xlab = "ICT Indicators",
-            ylab = "Townships of Shan State"
-            )
+heatmaply(normalize(ammenities_mat),
+          Colv = NA,
+          dist_method = "euclidean",
+          hclust_method = "ward.D",
+          seriate = "OLO",
+          colors = Blues,
+          k_row = 8,
+          margins = c(NA, 200, 60, NA),
+          fontsize_row = 4,
+          fontsize_col = 5,
+          main = "Geographic Segmentation of Singapore by ammenities available",
+          xlab = "Types of Ammenity",
+          ylab = "Planning Subzone"
+          )
 
 ```
+
+### Assigning each planning subzone in the *ammenities simple feature* object to a cluster
 
 ```{r}
 
+groups <- as.factor(cutree(hclust_ward, k = 8))
 
-# Define UI
-ui <- fluidPage(
-  titlePanel("Basic Shiny App"),
-  sidebarLayout(
-    sidebarPanel(
-      textInput("name", "Enter your name:", value = "World"),
-      actionButton("submit", "Submit")
-    ),
-    mainPanel(
-      h4("Output:"),
-      verbatimTextOutput("greeting")
-    )
-  )
-)
-
-# Define server logic
-server <- function(input, output) {
-  observeEvent(input$submit, {
-    output$greeting <- renderText({
-      paste("Hello,", input$name, "!")
-    })
-  })
-}
-
-# Run the application
-shinyApp(ui = ui, server = server)
-
+ammenities_sf_cluster <- cbind(ammenities_sf, as.matrix(groups)) %>%
+  rename(`CLUSTER`=`as.matrix.groups.`)
 
 ```
 
+### Visualising the assigned hierachical clusters of Singapore
+
+```{r}
+
+qtm(ammenities_sf_cluster, "CLUSTER") + 
+  tm_layout(main.title = "Ammenity Clusters of Singapore") + 
+  tm_compass(type = "rose") +
+  tm_scale_bar()
+
+```
 
