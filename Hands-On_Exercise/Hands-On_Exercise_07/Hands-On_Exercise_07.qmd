@@ -410,7 +410,6 @@ qtm(shan_sf_cluster, "CLUSTER")
 
 ```
 
-
 ```{r}
 
 shan_sp <- as_Spatial(shan_sf)
@@ -609,5 +608,3 @@ shan_sf_ngeo_cluster %>%
             mean_COMPUTER_PR = mean(COMPUTER_PR))
 
 ```
-
-

@@ -346,6 +346,7 @@ rect.hclust(hclust_ward,
             border = 2:5)
 
 ```
+
 ## Visually-driven hierarchical clustering analysis
 
 ```{r}
@@ -414,4 +415,3 @@ plot(shan.nb,
      add=TRUE)
 
 ```
-

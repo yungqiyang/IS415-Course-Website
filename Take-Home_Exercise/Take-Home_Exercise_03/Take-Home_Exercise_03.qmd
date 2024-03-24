@@ -1,0 +1,157 @@
+---
+title: "Take-Home Exercise 3: Prototyping geospatial segmentation module for analysis of accessibility in Singapore"
+author: "Yung Qi Yang"
+
+format: 
+  html:
+    code-fold: true
+    code-summary: "Reveal Code"
+    
+execute: 
+  eval: true
+  echo: true
+  warning: false
+  
+date: "`r Sys.Date()`"
+
+toc: true
+toc-location: left
+toc-depth: 4
+
+progress: true
+---
+
+# Geospatial Segmentation Module
+
+## Preparing the R-Environment
+
+### Importing the required R-packages into the R-Environment
+
+```{r}
+
+pacman::p_load(rgdal, sfdep, tmap, sf, ClustGeo, ggpubr, cluster, factoextra, NbClust, heatmaply, corrplot, psych, tidyverse, GGally)
+
+```
+
+### Importing the geospatial Singapore planning zone data
+
+```{r}
+
+sg_sf <- st_read(dsn = "data/geospatial/Master Plan 2014", layer = "MP14_SUBZONE_WEB_PL") %>% 
+  st_transform(crs = 3414)
+
+summary(sg_sf)
+
+sg_sf %>%
+  tm_shape() +
+  tm_polygons(col = "lightyellow") + 
+  tm_compass(type = "rose") + 
+  tm_scale_bar() + 
+  tm_layout(main.title = "Singapore Planning Subzone 2019")
+
+```
+
+### Importing the aspatial data sets of interest
+
+```{r}
+
+hawker = read_csv("data/aspatial/hawker_coordinates.csv") %>% 
+  select(-1)
+mrt = read_csv("data/aspatial/MRT_coordinates.csv") %>% 
+  select(-1)
+school = read_csv("data/aspatial/school_coordinates.csv") %>% 
+  select(-1)
+supermarket = read_csv("data/aspatial/supermarket_coordinates.csv") %>% 
+  select(-1)
+mall = read_csv("data/aspatial/mall_coordinates.csv") %>% 
+  select(-1)
+
+glimpse(hawker)
+glimpse(mrt)
+glimpse(school)
+glimpse(supermarket)
+glimpse(mall)
+
+```
+
+### Transforming the aspatial data sets into simple features, *sf*, objects
+
+```{r}
+
+hawker_sf <- hawker %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+  st_transform(crs = 3414)
+
+mrt_sf <- mrt %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+  st_transform(crs = 3414)
+
+school_sf <- school %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+  st_transform(crs = 3414)
+
+supermarket_sf <- supermarket %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+  st_transform(crs = 3414)
+
+mall_sf <- mall %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+  st_transform(crs = 3414)
+
+summary(hawker_sf)
+summary(mrt_sf)
+summary(school_sf)
+summary(supermarket_sf)
+summary(mall_sf)
+
+```
+
+## Performing Correlation Analysis of the listed ammenities
+
+### Preparing the ammenity data for correlation computation
+
+```{r}
+
+hawker_count <- st_intersects(sg_sf, hawker_sf) %>% 
+  lengths()
+
+mrt_count <- st_intersects(sg_sf, mrt_sf) %>% 
+  lengths()
+
+school_count <- st_intersects(sg_sf, school_sf) %>% 
+  lengths()
+
+supermarket_count <- st_intersects(sg_sf, supermarket_sf) %>% 
+  lengths()
+
+mall_count <- st_intersects(sg_sf, mall_sf) %>% 
+  lengths()
+
+ammenities_sf <- sg_sf %>% 
+  bind_cols(hawker_count = hawker_count, 
+            mrt_count = mrt_count, 
+            school_count = school_count,
+            supermarket_count = supermarket_count,
+            mall_count = mall_count)
+
+ammenities_sf
+  
+```
+
+### Computing the correlation table
+
+```{r}
+
+cluster_vars.corr = cor(ammenities_sf[, 16:20] %>% 
+                          st_drop_geometry())
+
+corrplot.mixed(cluster_vars.corr, 
+               lower = "ellipse", 
+               upper = "number",
+               tl.pos = "lt",
+               diag = "l",
+               tl.col = "black")
+
+```
+
+
