@@ -1,0 +1,161 @@
+---
+title: "In-Class Exercise 10: Modelling Geographical Accessibility using Hansen's Method"
+author: "Yung Qi Yang"
+
+format: 
+  html:
+    code-fold: true
+    code-summary: "Reveal Code"
+    
+execute: 
+  eval: true
+  echo: true
+  warning: false
+  
+date: "`r Sys.Date()`"
+
+toc: true
+toc-location: left
+
+progress: true
+---
+
+## Preparing the R-Environment
+
+### Loading the required libraries into the R-Environment
+
+```{r}
+
+pacman::p_load(tmap, SpatialAcc, sf, ggstatsplot, reshape2, tidyverse)
+
+```
+
+### Importing the required data sets for analysis into the R-Environment
+
+#### Geospatial data
+
+```{r}
+
+mpsz <- st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_NO_SEA_PL") %>% 
+  st_transform(3414)
+
+hexagons <- st_read(dsn = "data/geospatial", layer = "hexagons") %>% 
+  st_transform(3414)
+
+eldercare <- st_read(dsn = "data/geospatial", layer = "ELDERCARE") %>% 
+  st_transform(3414)
+
+```
+
+#### Cleaning and updating the attribute fields of the geospatial data
+
+```{r}
+
+eldercare <- eldercare %>%
+  select(fid, ADDRESSPOS) %>%
+  mutate(capacity = 100)
+
+hexagons <- hexagons %>%
+  select(fid) %>%
+  mutate(demand = 100)
+
+```
+
+### Aspatial data
+
+```{r}
+
+ODMatrix <- read_csv("data/aspatial/OD_Matrix.csv", skip = 0)
+
+```
+
+#### Transforming the origin-destination distance matrix into a format convenient for R
+
+```{r}
+
+distmat <- ODMatrix %>% 
+  select(origin_id, destination_id, total_cost) %>% 
+  pivot_wider(names_from = destination_id, values_from = total_cost) %>%
+  select(c(-c('origin_id')))
+
+```
+
+#### Scaling the origin-destination distance matrix
+
+```{r}
+
+distmat_km <- as.matrix(distmat / 1000)
+
+```
+
+## Modeling the geographical accessibility using the Hansen method
+
+### Computing the Hansen accessibility statistic
+
+```{r}
+
+acc_Hansen <- data.frame(ac(hexagons$demand,
+                            eldercare$capacity,
+                            distmat_km, 
+                            #d0 = 50,
+                            power = 2, 
+                            family = "Hansen"))
+
+colnames(acc_Hansen) <- "accHansen"
+
+hexagon_Hansen <- bind_cols(hexagons, acc_Hansen)
+
+```
+
+## Visualising the computed Hansen's accessibility
+
+### Hansen's Accessibility Statistic
+
+```{r}
+
+mapex <- st_bbox(hexagons)
+
+tmap_mode("plot")
+
+tm_shape(hexagon_Hansen,
+         bbox = mapex) + 
+  tm_fill(col = "accHansen",
+          n = 10,
+          style = "quantile",
+          border.col = "black",
+          border.lwd = 1) +
+tm_shape(eldercare) +
+  tm_symbols(size = 0.1) +
+  tm_layout(main.title = "Accessibility to eldercare: Hansen method",
+            main.title.position = "center",
+            main.title.size = 2,
+            legend.outside = FALSE,
+            legend.height = 0.45, 
+            legend.width = 3.0,
+            legend.format = list(digits = 6),
+            legend.position = c("right", "top"),
+            frame = TRUE) +
+  tm_compass(type="8star", size = 2) +
+  tm_scale_bar(width = 0.15) +
+  tm_grid(lwd = 0.1, alpha = 0.5)
+
+```
+
+### Distribution of Hansen's Accessibility Statistic
+
+```{r}
+
+hexagon_Hansen <- st_join(hexagon_Hansen, mpsz, 
+                          join = st_intersects)
+
+ggplot(data=hexagon_Hansen, 
+       aes(y = log(accHansen), 
+           x= REGION_N)) +
+  geom_boxplot() +
+  geom_point(stat="summary", 
+             fun.y="mean", 
+             colour ="red", 
+             size=2)
+
+```
+

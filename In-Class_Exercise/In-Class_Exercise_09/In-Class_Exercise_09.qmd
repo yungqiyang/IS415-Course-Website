@@ -134,7 +134,7 @@ tbl_regression(rs_mlr, intercept = TRUE)
 
 ```
 
-## Conducting the geographically weighted random forest 
+## Conducting the geographically weighted random forest
 
 ### Converting the *sf* objects into SpatialPointsDataFrame objects
 
@@ -362,4 +362,3 @@ ggplot(data = test_pred,
   geom_point()
 
 ```
-
