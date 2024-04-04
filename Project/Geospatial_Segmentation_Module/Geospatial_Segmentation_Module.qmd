@@ -1,0 +1,371 @@
+---
+title: "Project Module: Geospatial Segmentation"
+author: "Yung Qi Yang"
+
+format: 
+  html:
+    code-fold: true
+    code-summary: "Reveal Code"
+    
+execute: 
+  eval: true
+  echo: true
+  warning: false
+  freeze: true
+
+date: "`r Sys.Date()`"
+
+toc: true
+toc-location: left
+toc-depth: 4
+
+progress: true
+---
+
+## Loading required R-Packages
+
+```{r}
+
+pacman::p_load(rgdal, sfdep, tmap, sf, ggpubr, cluster, factoextra, heatmaply, corrplot, tidyverse, psych, shiny)
+
+```
+
+## Importing Geospatial Data
+
+```{r}
+
+sg_sf <- st_read(dsn = "data/geospatial/MPSZ-2019", layer = "MPSZ-2019") %>% 
+  st_transform(crs = 3414)
+
+```
+
+### Transforming Geospatial Data
+
+```{r}
+
+sg_subzone_sf <- sg_sf %>% 
+  select(starts_with("SUBZONE"))
+
+summary(sg_subzone_sf)
+
+tmap_mode("plot")
+
+sg_subzone_sf %>%
+  tm_shape() +
+  tm_polygons(col = "lightyellow") + 
+  tm_compass(type = "rose") + 
+  tm_scale_bar() + 
+  tm_layout(main.title = "Singapore Planning Subzone 2019")
+
+```
+
+```{r}
+
+sg_area_sf <- sg_sf %>% 
+  select(starts_with("PLN_AREA")) %>% 
+  group_by(PLN_AREA_N, PLN_AREA_C) %>% 
+  summarise(geometry = st_union(geometry))
+
+summary(sg_area_sf)
+
+tmap_mode("plot")
+
+sg_area_sf %>%
+  tm_shape() +
+  tm_polygons(col = "lightyellow") + 
+  tm_compass(type = "rose") + 
+  tm_scale_bar() + 
+  tm_layout(main.title = "Singapore Planning Area 2019")
+
+```
+
+```{r}
+
+sg_region_sf <- sg_sf %>% 
+  select(starts_with("REGION")) %>% 
+  group_by(REGION_N, REGION_C) %>% 
+  summarise(geometry = st_union(geometry))
+
+summary(sg_region_sf)
+
+tmap_mode("plot")
+
+sg_region_sf %>%
+  tm_shape() +
+  tm_polygons(col = "lightyellow") + 
+  tm_compass(type = "rose") + 
+  tm_scale_bar() + 
+  tm_layout(main.title = "Singapore Planning Region 2019")
+
+```
+
+## Importing Aspatial Data
+
+```{r}
+#| warning: false
+
+hawker_df <- read_csv("data/aspatial/hawker_coordinates.csv") %>% 
+  select(-1)
+mrt_df <- read_csv("data/aspatial/MRT_coordinates.csv") %>% 
+  select(-1)
+school_df <- read_csv("data/aspatial/school_coordinates.csv") %>% 
+  select(-1)
+supermarket_df <- read_csv("data/aspatial/supermarket_coordinates.csv") %>% 
+  select(-1)
+mall_df <- read_csv("data/aspatial/mall_coordinates.csv") %>% 
+  select(-1)
+
+glimpse(hawker)
+glimpse(mrt)
+glimpse(school)
+glimpse(supermarket)
+glimpse(mall)
+
+```
+
+### Transforming Aspatial Data
+
+```{r}
+
+
+hawker_sf <- hawker_df %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+  st_transform(crs = 3414)
+
+mrt_sf <- mrt_df %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+  st_transform(crs = 3414)
+
+school_sf <- school_df %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+  st_transform(crs = 3414)
+
+supermarket_sf <- supermarket_df %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+  st_transform(crs = 3414)
+
+mall_sf <- mall_df %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+  st_transform(crs = 3414)
+
+summary(hawker_sf)
+summary(mrt_sf)
+summary(school_sf)
+summary(supermarket_sf)
+summary(mall_sf)
+
+```
+
+## Preparing Ammenities Analytics Data
+
+```{r}
+
+count_ammenities <- function(geospatial_sf){
+  hawker_count <- st_intersects(geospatial_sf, hawker_sf) %>% 
+  lengths()
+
+  mrt_count <- st_intersects(geospatial_sf, mrt_sf) %>% 
+    lengths()
+
+  school_count <- st_intersects(geospatial_sf, school_sf) %>% 
+    lengths()
+  
+  supermarket_count <- st_intersects(geospatial_sf, supermarket_sf) %>% 
+    lengths()
+  
+  mall_count <- st_intersects(geospatial_sf, mall_sf) %>% 
+    lengths()
+  
+  ammenities_sf <- geospatial_sf %>%
+    bind_cols(hawker_count = hawker_count,
+              mrt_count = mrt_count,
+              school_count = school_count,
+              supermarket_count = supermarket_count,
+              mall_count = mall_count)
+  
+  return(ammenities_sf)
+}
+
+ammenities_sf <- count_ammenities(sg_area_sf)
+
+glimpse(ammenities_sf)
+
+```
+
+## Compute and Visualise Cluster Variance Matrix
+
+```{r}
+
+compute_cluster_vars <- function(ammenities_sf){
+  cluster_vars <- ammenities_sf %>% 
+    st_drop_geometry() %>% 
+    column_to_rownames(colnames(.)[1]) %>% 
+    select(-1) %>% 
+    rename_with(
+      ~str_to_title(str_replace_all(., "_count", "")), 
+      everything()
+      )
+  
+  return(cluster_vars)
+}
+
+cluster_vars <- compute_cluster_vars(ammenities_sf)
+
+plot_cluster_vars <- function(cluster_vars){
+  cluster_vars.corr = cor(cluster_vars)
+  
+  corrplot.mixed(cluster_vars.corr,
+                 lower = "ellipse",
+                 upper = "number",
+                 tl.pos = "lt",
+                 diag = "l",
+                 tl.col = "black") %>% 
+    print()
+}
+
+plot_cluster_vars(cluster_vars)
+
+```
+
+## Visualise Cluster Variance Matrix Standardisation
+
+```{r}
+
+plot_cluster_std_vars <- function(cluster_vars, ammenity){
+  raw <- cluster_vars %>%
+    ggplot(aes(x = .[, ammenity])) +
+    geom_density(color="black",
+                 fill="light blue") +
+    ggtitle("Raw values without standardisation") + 
+    xlab(ammenity)
+
+  min_max <- cluster_vars %>%
+    normalize() %>%
+    ggplot(aes(x = .[, ammenity])) +
+    geom_density(color="black",
+                 fill="light blue") +
+    ggtitle("Min-Max Standardisation") + 
+    xlab(ammenity)
+
+  z_score <- cluster_vars %>%
+    scale() %>%
+    ggplot(aes(x = .[, ammenity])) +
+    geom_density(color="black",
+                 fill="light blue") +
+    ggtitle("Z-score Standardisation") + 
+    xlab(ammenity)
+
+  ggarrange(raw, min_max, z_score,
+            ncol = 3,
+            nrow = 1) %>%
+    print()
+}
+
+plot_cluster_std_vars(cluster_vars, "Mrt")
+
+```
+
+## Computing the Distance Proximity Matrix
+
+```{r}
+
+  
+compute_proxmat <- function(cluster_vars, method){
+  proxmat <- cluster_vars %>% 
+    dist(method = method)
+  
+  return(proxmat)
+}
+
+proxmat <- compute_proxmat(cluster_vars, "euclidean")
+
+glimpse(proxmat)
+
+```
+
+## Simulating optimal number of clusters
+
+```{r}
+
+set.seed(3414)
+
+fviz_nbclust(cluster_vars, 
+        FUN = hcut, 
+        diss = proxmat, 
+        method = "gap_stat",
+        nstart = 25, 
+        k.max = 20, 
+        nboot = 100) %>% 
+  plot()
+
+```
+
+## Extract Clusters
+
+```{r}
+
+hclust_ward <- hclust(proxmat, method = 'ward.D')
+
+groups <- as.factor(cutree(hclust_ward, k = 10))
+
+ammenities_sf_cluster <- cbind(ammenities_sf, as.matrix(groups)) %>%
+  rename(`CLUSTER`=`as.matrix.groups.`)
+
+```
+
+## Visualisation
+
+```{r}
+
+tmap_mode("view")
+
+tmap_options(main.title = "Ammenity Clusters of Singapore", check.and.fix = TRUE)
+
+tm_shape(ammenities_sf_cluster) +
+  tm_polygons("CLUSTER", alpha = 0.3) + 
+tm_basemap("OpenStreetMap") +
+tm_scale_bar() +
+tm_mouse_coordinates()
+
+tmap_mode("plot")
+
+```
+
+## Shiny App
+
+```{r}
+# Load your spatial dataset
+
+ui <- fluidPage(
+  titlePanel("Amenity Clusters of Singapore"),
+  sidebarLayout(
+    sidebarPanel(
+      # You can add inputs here if needed
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Map", tmapOutput("map"))
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$map <- renderTmap({
+    tmap_mode("view") # Set tmap mode to view
+    tmap_options(main.title = "Amenity Clusters of Singapore", check.and.fix = TRUE)
+    
+    # Plotting the map
+    tm_shape(ammenities_sf_cluster) +
+      tm_polygons("CLUSTER", alpha = 0.3) +
+      tm_basemap("OpenStreetMap") +
+      tm_scale_bar() +
+      tm_mouse_coordinates()
+  })
+}
+
+shinyApp(ui = ui, server = server)
+
+
+```
+

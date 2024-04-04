@@ -56,8 +56,6 @@ sg_subzone_sf %>%
 
 ```{r}
 
-sg_sf$geometry <- st_geometry(sg_sf$geometry)
-
 sg_area_sf <- sg_sf %>% 
   group_by(PLN_AREA_N) %>%
   summarize(geometry = st_union(geometry))
@@ -376,8 +374,6 @@ ammenities_sf_cluster <- cbind(ammenities_area_sf, as.matrix(groups)) %>%
 ### Visualising the assigned hierachical clusters of Singapore
 
 Lastly, this section will give the user a geographical visualisation of the clustering pattern of ammenities in Singapore based on the number of clusters selected.
-
-tm_mouse_coordinates()
 
 ```{r}
 
