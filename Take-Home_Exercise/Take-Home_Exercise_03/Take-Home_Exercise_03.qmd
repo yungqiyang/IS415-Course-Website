@@ -19,7 +19,6 @@ toc-location: left
 toc-depth: 4
 
 progress: true
-
 ---
 
 # Geospatial Segmentation Module
@@ -30,7 +29,7 @@ progress: true
 
 ```{r}
 
-pacman::p_load(rgdal, sfdep, tmap, sf, ggpubr, cluster, factoextra, heatmaply, corrplot, tidyverse, psych)
+pacman::p_load(rgdal, sfdep, tmap, sf, ggpubr, cluster, factoextra, heatmaply, corrplot, tidyverse, psych, shiny)
 
 ```
 
@@ -38,17 +37,40 @@ pacman::p_load(rgdal, sfdep, tmap, sf, ggpubr, cluster, factoextra, heatmaply, c
 
 ```{r}
 
-sg_sf <- st_read(dsn = "data/geospatial/Master Plan 2014", layer = "MP14_SUBZONE_WEB_PL") %>% 
+sg_sf <- st_read(dsn = "data/geospatial/MPSZ-2019", layer = "MPSZ-2019") %>% 
   st_transform(crs = 3414)
 
-summary(sg_sf)
+sg_subzone_sf <- sg_sf %>% 
+  select(starts_with("SUBZONE"))
 
-sg_sf %>%
+summary(sg_subzone_sf)
+
+sg_subzone_sf %>%
   tm_shape() +
   tm_polygons(col = "lightyellow") + 
   tm_compass(type = "rose") + 
   tm_scale_bar() + 
   tm_layout(main.title = "Singapore Planning Subzone 2019")
+
+```
+
+```{r}
+
+sg_sf$geometry <- st_geometry(sg_sf$geometry)
+
+sg_area_sf <- sg_sf %>% 
+  group_by(PLN_AREA_N) %>%
+  summarize(geometry = st_union(geometry))
+  
+
+summary(sg_area_sf)
+
+sg_area_sf %>%
+  tm_shape() +
+  tm_polygons(col = "lightyellow") + 
+  tm_compass(type = "rose") + 
+  tm_scale_bar() + 
+  tm_layout(main.title = "Singapore Planning Area 2019")
 
 ```
 
@@ -117,29 +139,30 @@ Here, we compute the number of each ammenity found in each planning subzone of S
 
 ```{r}
 
-hawker_count <- st_intersects(sg_sf, hawker_sf) %>% 
+hawker_count <- st_intersects(sg_area_sf, hawker_sf) %>% 
   lengths()
 
-mrt_count <- st_intersects(sg_sf, mrt_sf) %>% 
+mrt_count <- st_intersects(sg_area_sf, mrt_sf) %>% 
   lengths()
 
-school_count <- st_intersects(sg_sf, school_sf) %>% 
+school_count <- st_intersects(sg_area_sf, school_sf) %>% 
   lengths()
 
-supermarket_count <- st_intersects(sg_sf, supermarket_sf) %>% 
+supermarket_count <- st_intersects(sg_area_sf, supermarket_sf) %>% 
   lengths()
 
-mall_count <- st_intersects(sg_sf, mall_sf) %>% 
+mall_count <- st_intersects(sg_area_sf, mall_sf) %>% 
   lengths()
 
-ammenities_sf <- sg_sf %>% 
+ammenities_area_sf <- sg_area_sf %>% 
   bind_cols(hawker_count = hawker_count, 
             mrt_count = mrt_count, 
             school_count = school_count,
             supermarket_count = supermarket_count,
             mall_count = mall_count)
 
-ammenities_sf
+ammenities_area_sf
+
   
 ```
 
@@ -149,11 +172,10 @@ We drop the geometric properties of the ammenities *sf* object here using *st_dr
 
 ```{r}
 
-ammenities <- ammenities_sf[, c(3, 16:20)] %>% 
+ammenities_area <- ammenities_area_sf %>% 
   st_drop_geometry()
 
 ```
-
 
 ### Computing the correlation table
 
@@ -161,12 +183,10 @@ The correlational table between the ammenity counts are computed and visualised 
 
 ```{r}
 
-cluster_vars <- ammenities
+cluster_vars <- ammenities_area
   
-row.names(cluster_vars) <- cluster_vars$SUBZONE_N
-
 cluster_vars <- cluster_vars %>% 
-  select(-1)
+  column_to_rownames("PLN_AREA_N")
 
 cluster_vars.corr = cor(cluster_vars)
 
@@ -176,6 +196,7 @@ corrplot.mixed(cluster_vars.corr,
                tl.pos = "lt",
                diag = "l",
                tl.col = "black")
+
 
 ```
 
@@ -187,10 +208,10 @@ In this section, we explore the possibility and usefulness of standardising the 
 
 ```{r}
 
-ammenities.std <- cluster_vars %>% 
+ammenities_area.std <- cluster_vars %>% 
   normalize()
 
-describe(ammenities.std)
+describe(ammenities_area.std)
 
 ```
 
@@ -198,10 +219,10 @@ describe(ammenities.std)
 
 ```{r}
 
-ammenities.z <- cluster_vars %>% 
+ammenities_area.z <- cluster_vars %>% 
   scale()
 
-describe(ammenities.z)
+describe(ammenities_area.z)
 
 ```
 
@@ -209,19 +230,19 @@ describe(ammenities.z)
 
 ```{r}
 
-raw <- ammenities %>% 
+raw <- ammenities_area %>% 
   ggplot(aes(x = mrt_count)) + 
   geom_density(color="black",
                fill="light blue") +
   ggtitle("Raw values without standardisation")
 
-min_max <- as.data.frame(ammenities.std) %>% 
+min_max <- as.data.frame(ammenities_area.std) %>% 
   ggplot(aes(x = mrt_count)) + 
   geom_density(color="black",
                fill="light blue") +
   ggtitle("Min-Max Standardisation")
 
-z_score <- as.data.frame(ammenities.z) %>% 
+z_score <- as.data.frame(ammenities_area.z) %>% 
   ggplot(aes(x=mrt_count)) +
   geom_density(color="black",
                fill="light blue") +
@@ -242,8 +263,8 @@ In this section, we conduct an analysis into the clustering options that we have
 ```{r}
 
 proxmat <- dist(cluster_vars, method = 'euclidean')
-
 glimpse(proxmat)
+
 
 ```
 
@@ -252,8 +273,8 @@ glimpse(proxmat)
 ```{r}
 
 hclust_ward <- hclust(proxmat, method = 'ward.D')
-
 plot(hclust_ward, cex = 0.6)
+
 
 ```
 
@@ -287,6 +308,7 @@ gap_stat <- clusGap(cluster_vars,
 print(gap_stat, method = "firstmax")
 
 ```
+
 #### Visualising the local optimal number of clusters determined using Gap statistics
 
 After computation of the Gap-statistics, we can visualise the results via the *fviz_gap_stat()* function. From the graph drawn, we could use either 8 or 10 clusters in our algorithm as they are quite similar in effectiveness in capturing the clustering patterns of ammenity options across Singapore. Lesser clusters like 7 or 5 might be possible but not optimal. For the rest of this analysis, 8 shall be used as it is more parsimonious than 10 whilst having an indistinguishable Gap statistic.
@@ -310,7 +332,7 @@ Here we will produce the cluster dendrogram with each cluster highlighted based 
 plot(hclust_ward, cex = 0.6)
 
 rect.hclust(hclust_ward, 
-            k = 8, 
+            k = 10, 
             border = 2:5)
 
 ```
@@ -321,7 +343,7 @@ Like above, the following UI will demonstrate how the clustering mechanism works
 
 ```{r}
 
-ammenities_mat <- data.matrix(ammenities)
+ammenities_mat <- data.matrix(ammenities_area)
 
 heatmaply(normalize(ammenities_mat),
           Colv = NA,
@@ -344,9 +366,9 @@ heatmaply(normalize(ammenities_mat),
 
 ```{r}
 
-groups <- as.factor(cutree(hclust_ward, k = 8))
+groups <- as.factor(cutree(hclust_ward, k = 10))
 
-ammenities_sf_cluster <- cbind(ammenities_sf, as.matrix(groups)) %>%
+ammenities_sf_cluster <- cbind(ammenities_area_sf, as.matrix(groups)) %>%
   rename(`CLUSTER`=`as.matrix.groups.`)
 
 ```
@@ -355,12 +377,20 @@ ammenities_sf_cluster <- cbind(ammenities_sf, as.matrix(groups)) %>%
 
 Lastly, this section will give the user a geographical visualisation of the clustering pattern of ammenities in Singapore based on the number of clusters selected.
 
+tm_mouse_coordinates()
+
 ```{r}
 
-qtm(ammenities_sf_cluster, "CLUSTER") + 
-  tm_layout(main.title = "Ammenity Clusters of Singapore") + 
-  tm_compass(type = "rose") +
-  tm_scale_bar()
+tmap_mode("view")
+
+tmap_options(main.title = "Ammenity Clusters of Singapore", check.and.fix = TRUE)
+
+tm_shape(ammenities_sf_cluster) +
+  tm_polygons("CLUSTER", alpha = 0.3) + 
+tm_basemap("OpenStreetMap") +
+tm_scale_bar() +
+tm_mouse_coordinates()
+
+tmap_mode("plot")
 
 ```
-

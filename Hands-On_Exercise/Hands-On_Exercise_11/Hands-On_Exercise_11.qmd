@@ -26,9 +26,8 @@ progress: true
 
 ```{r}
 
-pacman::p_load(tmap, sf, DT, stplanr, sp,
-               performance, reshape2,
-               ggpubr, tidyverse)
+pacman::p_load(tmap, sf, sp, spdep, Matrix, spflow, performance,
+               stplanr, reshape2, knitr, tidyverse, DT, ggpubr)
 
 ```
 
